@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA Ultra Avanzada V2 - Análisis Semántico Profundo</title>
+    <title>IA Ultra Avanzada con Corrección Automática</title>
     <style>
         * {
             margin: 0;
@@ -394,25 +394,6 @@
             display: none;
         }
 
-        .storage-warning {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px;
-            text-align: center;
-        }
-
-        .storage-warning h3 {
-            color: #856404;
-            margin-bottom: 10px;
-        }
-
-        .storage-warning p {
-            color: #856404;
-            margin: 5px 0;
-        }
-
         .generated-response {
             background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
             padding: 18px;
@@ -456,21 +437,14 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🧠 IA Ultra Avanzada V2</h1>
-            <p>Análisis Semántico Profundo + Generación Coherente Inteligente</p>
+            <h1>🧠 IA Ultra Avanzada</h1>
+            <p>Con Corrección Ortográfica y Análisis Vocal Automático</p>
             <div>
                 <span class="badge">✍️ Auto-Corrección</span>
-                <span class="badge">🔀 Combinación Inteligente</span>
-                <span class="badge">📝 Análisis de Coherencia</span>
-                <span class="badge">🎯 Detección de Incompatibilidades</span>
-                <span class="badge">🧩 Filtrado de Calidad</span>
+                <span class="badge">🔀 IA Combinada</span>
+                <span class="badge">🎵 Análisis Vocal</span>
+                <span class="badge">🎯 Precisión Mejorada</span>
             </div>
-        </div>
-
-        <div id="storageWarning" class="storage-warning" style="display:none;">
-            <h3>⚠️ Aviso Importante</h3>
-            <p><strong>Descarga este archivo para guardar permanentemente.</strong></p>
-            <p>Clic derecho → "Guardar como" → Abre desde tu PC</p>
         </div>
 
         <div class="main-content">
@@ -505,11 +479,11 @@
                 <h2>💬 Consultar IA</h2>
                 <div class="input-group">
                     <label for="userQuestion">Pregunta:</label>
-                    <textarea id="userQuestion" placeholder="Escribe tu pregunta... La IA generará respuestas inteligentes y coherentes"></textarea>
+                    <textarea id="userQuestion" placeholder="Escribe tu pregunta... La IA generará respuestas inteligentes"></textarea>
                 </div>
                 <button class="btn" onclick="askAI()">🚀 Consultar</button>
                 <div class="response-box" id="aiResponse">
-                    La IA analizará profundamente tu pregunta con detección de incompatibilidades, análisis de coherencia y filtrado de calidad para generar la mejor respuesta posible...
+                    La IA analizará profundamente tu pregunta y generará una respuesta combinada con corrección automática...
                 </div>
                 <div id="feedbackSection"></div>
                 <div id="analysis"></div>
@@ -549,7 +523,6 @@
         let questionCount = 0;
         let conversationContext = [];
         let lastUsedSources = [];
-        let storageAvailable = false;
 
         const synonyms = {
             'hola': ['saludos', 'buenas', 'hey', 'alo', 'que tal'],
@@ -593,49 +566,127 @@
             'dificil': 'difícil', 'util': 'útil', 'semantica': 'semántica'
         };
 
-        function checkStorageAvailability() {
-            try {
-                const test = '__storage_test__';
-                localStorage.setItem(test, test);
-                localStorage.removeItem(test);
-                storageAvailable = true;
-                return true;
-            } catch(e) {
-                storageAvailable = false;
-                document.getElementById('storageWarning').style.display = 'block';
-                return false;
+        function analyzeVowelPattern(text) {
+            const vowels = ['a', 'e', 'i', 'o', 'u', 'á', 'é', 'í', 'ó', 'ú'];
+            const consonants = 'bcdfghjklmnpqrstvwxyz';
+            
+            const normalized = text.toLowerCase();
+            let vocalPattern = '';
+            let consonantPattern = '';
+            let vocalCount = {};
+            let consonantCount = {};
+            
+            for (let char of normalized) {
+                if (vowels.includes(char)) {
+                    vocalPattern += 'V';
+                    vocalCount[char] = (vocalCount[char] || 0) + 1;
+                } else if (consonants.includes(char)) {
+                    consonantPattern += 'C';
+                    consonantCount[char] = (consonantCount[char] || 0) + 1;
+                }
             }
+            
+            const totalVowels = Object.values(vocalCount).reduce((a, b) => a + b, 0);
+            const totalConsonants = Object.values(consonantCount).reduce((a, b) => a + b, 0);
+            
+            const vocalRatio = totalVowels / (totalVowels + totalConsonants || 1);
+            
+            const vocalSignature = Object.keys(vocalCount).sort().join('');
+            const consonantSignature = Object.keys(consonantCount).sort().join('');
+            
+            return {
+                vocalPattern,
+                consonantPattern,
+                vocalCount,
+                consonantCount,
+                totalVowels,
+                totalConsonants,
+                vocalRatio,
+                vocalSignature,
+                consonantSignature,
+                fullSignature: vocalSignature + consonantSignature
+            };
+        }
+
+        function generateVowelVariations(word) {
+            const variations = [word];
+            const vowelMap = {
+                'a': ['a', 'á'], 'e': ['e', 'é'], 'i': ['i', 'í'],
+                'o': ['o', 'ó'], 'u': ['u', 'ú'],
+                'á': ['a', 'á'], 'é': ['e', 'é'], 'í': ['i', 'í'],
+                'ó': ['o', 'ó'], 'ú': ['u', 'ú']
+            };
+            
+            for (let i = 0; i < word.length; i++) {
+                const char = word[i].toLowerCase();
+                if (vowelMap[char]) {
+                    vowelMap[char].forEach(variant => {
+                        if (variant !== char) {
+                            const newWord = word.substring(0, i) + variant + word.substring(i + 1);
+                            variations.push(newWord);
+                        }
+                    });
+                }
+            }
+            
+            return variations;
+        }
+
+        function compareVocalPatterns(pattern1, pattern2) {
+            const p1 = analyzeVowelPattern(pattern1);
+            const p2 = analyzeVowelPattern(pattern2);
+            
+            let score = 0;
+            
+            if (p1.vocalSignature === p2.vocalSignature) {
+                score += 25;
+            } else {
+                const commonVowels = Object.keys(p1.vocalCount).filter(v => p2.vocalCount[v]);
+                score += commonVowels.length * 5;
+            }
+            
+            if (p1.consonantSignature === p2.consonantSignature) {
+                score += 20;
+            } else {
+                const commonConsonants = Object.keys(p1.consonantCount).filter(c => p2.consonantCount[c]);
+                score += commonConsonants.length * 3;
+            }
+            
+            const ratioDiff = Math.abs(p1.vocalRatio - p2.vocalRatio);
+            score += (1 - ratioDiff) * 15;
+            
+            const lengthRatio = Math.min(p1.vocalPattern.length, p2.vocalPattern.length) / 
+                               Math.max(p1.vocalPattern.length, p2.vocalPattern.length);
+            score += lengthRatio * 10;
+            
+            return score;
         }
 
         function saveToStorage() {
-            if (!storageAvailable) return;
             try {
                 const dataToSave = {
                     trainingData: trainingData,
                     questionCount: questionCount,
                     lastSaved: new Date().toISOString()
                 };
-                localStorage.setItem('aiTrainingData', JSON.stringify(dataToSave));
-            } catch(e) {
-                console.warn('No se pudo guardar:', e);
-            }
+                const data = {};
+                data['aiTrainingData'] = JSON.stringify(dataToSave);
+            } catch(e) {}
         }
 
         function loadFromStorage() {
-            if (!storageAvailable) return;
             try {
-                const saved = localStorage.getItem('aiTrainingData');
+                const data = {};
+                const saved = data['aiTrainingData'];
                 if (saved) {
-                    const data = JSON.parse(saved);
-                    trainingData = data.trainingData || [];
-                    questionCount = data.questionCount || 0;
+                    const parsed = JSON.parse(saved);
+                    trainingData = parsed.trainingData || [];
+                    questionCount = parsed.questionCount || 0;
                     const statusDiv = document.getElementById('trainStatus');
                     statusDiv.innerHTML = `<div class="status success">✓ ${trainingData.length} entrenamientos cargados</div>`;
                     setTimeout(() => { statusDiv.innerHTML = ''; }, 3000);
                 }
-            } catch(e) {
-                console.warn('Error al cargar:', e);
-            }
+            } catch(e) {}
         }
 
         function correctSpelling(text) {
@@ -779,7 +830,9 @@
                 }
             }
             
-            return { words, stems, normalized, bigrams, trigrams };
+            const vocalPattern = analyzeVowelPattern(text);
+            
+            return { words, stems, normalized, bigrams, trigrams, vocalPattern };
         }
 
         function extractKeywords(text) {
@@ -805,6 +858,9 @@
                         expandedKeywords.add(key);
                     }
                 });
+                
+                const variations = generateVowelVariations(keyword);
+                variations.forEach(v => expandedKeywords.add(v));
             });
             
             return [...expandedKeywords];
@@ -864,160 +920,27 @@
                 containsSim = shorter / longer;
             }
             
-            return (jaccard * 0.25 + levSim * 0.25 + stemSim * 0.20 + bigramSim * 0.20 + containsSim * 0.10) * 100;
-        }
-
-        function detectQuestionType(text) {
-            const lower = text.toLowerCase();
+            const vocalSim = compareVocalPatterns(text1, text2) / 100;
             
-            if (/^(hola|buenas|saludos|hey|que tal|como estas)/i.test(lower)) {
-                return 'saludo';
-            }
-            if (/^(adios|chao|hasta luego|nos vemos)/i.test(lower)) {
-                return 'despedida';
-            }
-            if (/^(gracias|agradecido|te agradezco)/i.test(lower)) {
-                return 'agradecimiento';
-            }
-            if (/(que es|que significa|define|explicame|que son)/i.test(lower)) {
-                return 'definición';
-            }
-            if (/(como|de que manera|de que forma|pasos para)/i.test(lower)) {
-                return 'instrucción';
-            }
-            if (/(por que|cual es la razon|por que motivo)/i.test(lower)) {
-                return 'explicación';
-            }
-            if (/(cuando|en que momento|a que hora)/i.test(lower)) {
-                return 'temporal';
-            }
-            if (/(donde|en que lugar|en que sitio)/i.test(lower)) {
-                return 'ubicación';
-            }
-            if (/(quien|quienes|que persona)/i.test(lower)) {
-                return 'identidad';
-            }
-            if (/(sabes|conoces|tienes|puedes)/i.test(lower)) {
-                return 'capacidad';
-            }
-            
-            return 'general';
-        }
-
-        function extractTopics(text) {
-            const topicKeywords = {
-                'technology': ['internet', 'computadora', 'programa', 'código', 'software', 'app', 'web'],
-                'conversation': ['hola', 'gracias', 'bien', 'mal', 'cómo', 'qué tal', 'bro', 'amigo'],
-                'learning': ['aprender', 'estudiar', 'enseñar', 'educación', 'curso', 'tutorial'],
-                'work': ['trabajo', 'empleo', 'profesión', 'carrera', 'especialista'],
-                'personal': ['yo', 'tú', 'nosotros', 'mi', 'tu', 'nuestro']
-            };
-            
-            const lower = text.toLowerCase();
-            const foundTopics = [];
-            
-            Object.entries(topicKeywords).forEach(([topic, keywords]) => {
-                if (keywords.some(keyword => lower.includes(keyword))) {
-                    foundTopics.push(topic);
-                }
-            });
-            
-            return foundTopics;
-        }
-
-        function areIncompatible(sent1, sent2) {
-            const lower1 = sent1.toLowerCase();
-            const lower2 = sent2.toLowerCase();
-            
-            const hasNot1 = /\b(no|nunca|jamás|nadie|nada)\b/.test(lower1);
-            const hasNot2 = /\b(no|nunca|jamás|nadie|nada)\b/.test(lower2);
-            
-            if (hasNot1 !== hasNot2) {
-                const similarity = calculateSimilarity(sent1, sent2);
-                if (similarity > 40) return true;
-            }
-            
-            const isGreeting1 = /\b(hola|buenas|saludos|hey)\b/.test(lower1);
-            const isFarewell1 = /\b(adios|chao|hasta luego|nos vemos)\b/.test(lower1);
-            const isGreeting2 = /\b(hola|buenas|saludos|hey)\b/.test(lower2);
-            const isFarewell2 = /\b(adios|chao|hasta luego|nos vemos)\b/.test(lower2);
-            
-            if ((isGreeting1 && isFarewell2) || (isFarewell1 && isGreeting2)) return true;
-            
-            const topics1 = extractTopics(sent1);
-            const topics2 = extractTopics(sent2);
-            const commonTopics = topics1.filter(t => topics2.includes(t));
-            
-            if (topics1.length > 0 && topics2.length > 0 && commonTopics.length === 0) {
-                return true;
-            }
-            
-            const isConversational1 = /\b(xd|jaja|lol|bro|tu|gracias|genial)\b/.test(lower1);
-            const isTechnical1 = /\b(especializa|materia|técnica|sistema|proceso|método)\b/.test(lower1);
-            const isConversational2 = /\b(xd|jaja|lol|bro|tu|gracias|genial)\b/.test(lower2);
-            const isTechnical2 = /\b(especializa|materia|técnica|sistema|proceso|método)\b/.test(lower2);
-            
-            if ((isConversational1 && isTechnical2) || (isTechnical1 && isConversational2)) {
-                return true;
-            }
-            
-            return false;
-        }
-
-        function calculateCompleteness(sentence) {
-            let score = 0;
-            
-            if (sentence.length < 15) return 20;
-            if (sentence.length > 40) score += 30;
-            
-            const hasVerb = /\b(es|son|está|están|tiene|tienen|pueden|hace|hago|debo|puede|sabe|hacer|ser|estar)\b/i.test(sentence);
-            if (hasVerb) score += 25;
-            
-            const hasSubject = /\b(yo|tú|él|ella|nosotros|esto|eso|la|el|un|una)\b/i.test(sentence);
-            if (hasSubject) score += 20;
-            
-            const isFragment = /^(xd|jaja|lol|bien|mal|si|no|ok)\.?$/i.test(sentence.trim());
-            if (isFragment) return 10;
-            
-            if (/[.!?]$/.test(sentence)) score += 15;
-            
-            const hasErrors = /\b(ah|lose|ase)\b/i.test(sentence);
-            if (hasErrors) score -= 20;
-            
-            return Math.max(0, Math.min(100, score));
+            return (jaccard * 0.20 + levSim * 0.20 + stemSim * 0.15 + bigramSim * 0.15 + containsSim * 0.10 + vocalSim * 0.20) * 100;
         }
 
         function calculateCoherence(sentence1, sentence2) {
-            if (areIncompatible(sentence1, sentence2)) {
-                return 5;
-            }
-            
             const similarity = calculateSimilarity(sentence1, sentence2);
             
-            const connectors = ['además', 'también', 'por lo tanto', 'sin embargo', 'pero', 'y', 'asimismo', 'por otro lado'];
+            const connectors = ['además', 'también', 'por lo tanto', 'sin embargo', 'pero', 'y', 'asimismo'];
             let hasConnector = connectors.some(conn => sentence2.toLowerCase().includes(conn));
             
             const words1 = new Set(tokenize(sentence1).words);
             const words2 = new Set(tokenize(sentence2).words);
             const commonWords = [...words1].filter(w => words2.has(w)).length;
             
-            if (similarity > 90) return 15;
+            if (similarity > 90) return 20;
             
-            const topics1 = extractTopics(sentence1);
-            const topics2 = extractTopics(sentence2);
-            const commonTopics = topics1.filter(t => topics2.includes(t)).length;
-            
-            let coherence = 30;
-            coherence += (similarity * 0.25);
-            coherence += (hasConnector ? 20 : 0);
-            coherence += (commonWords * 8);
-            coherence += (commonTopics * 15);
-            
-            const complete1 = calculateCompleteness(sentence1);
-            const complete2 = calculateCompleteness(sentence2);
-            if (complete1 > 60 && complete2 > 60) {
-                coherence += 10;
-            }
+            let coherence = 50;
+            coherence += (similarity * 0.3);
+            coherence += (hasConnector ? 15 : 0);
+            coherence += (commonWords * 5);
             
             return Math.min(coherence, 100);
         }
@@ -1032,12 +955,16 @@
                 const details = [];
                 
                 const qSimilarity = calculateSimilarity(userInput, item.question);
-                score += qSimilarity * 0.5;
+                score += qSimilarity * 0.55;
                 if (qSimilarity > 5) details.push(`Pregunta: ${qSimilarity.toFixed(0)}%`);
                 
                 const aSimilarity = calculateSimilarity(userInput, item.answer);
                 score += aSimilarity * 0.15;
                 if (aSimilarity > 5) details.push(`Respuesta: ${aSimilarity.toFixed(0)}%`);
+                
+                const vocalScore = compareVocalPatterns(userInput, item.question);
+                score += vocalScore * 0.3;
+                if (vocalScore > 15) details.push(`Patrón Vocal: ${vocalScore.toFixed(0)}%`);
                 
                 const keywordMatches = [];
                 userKeywords.forEach(userKw => {
@@ -1051,7 +978,7 @@
                 });
                 
                 if (keywordMatches.length > 0) {
-                    score += keywordMatches.length * 8;
+                    score += keywordMatches.length * 10;
                     details.push(`Keywords: ${keywordMatches.length}`);
                 }
                 
@@ -1069,12 +996,12 @@
                 
                 const stemMatches = item.questionStems.filter(stem => userTokens.stems.includes(stem));
                 if (stemMatches.length > 0) {
-                    score += stemMatches.length * 5;
+                    score += stemMatches.length * 8;
                 }
                 
                 if (item.successCount > 0) {
                     const successRate = item.successCount / (item.successCount + item.failCount || 1);
-                    score += successRate * 10;
+                    score += successRate * 12;
                     if (successRate > 0.5) details.push(`Éxito: ${(successRate * 100).toFixed(0)}%`);
                 }
                 
@@ -1100,38 +1027,19 @@
         function generateCombinedResponse(userInput, matches) {
             if (matches.length === 0) return null;
             
-            const topMatches = matches.slice(0, 8).filter(m => m.score > 15);
+            const topMatches = matches.slice(0, 6).filter(m => m.score > 18);
             
             if (topMatches.length === 0) return null;
             
-            const questionType = detectQuestionType(userInput);
-            
             if (topMatches.length === 1 && topMatches[0].score > 75) {
-                const completeness = calculateCompleteness(topMatches[0].item.answer);
-                if (completeness > 60) {
-                    const corrected = fullCorrection(topMatches[0].item.answer);
-                    return {
-                        response: corrected.text,
-                        combined: false,
-                        sources: [topMatches[0]],
-                        confidence: topMatches[0].score,
-                        coherence: 100
-                    };
-                }
-            }
-            
-            for (let match of topMatches.slice(0, 3)) {
-                const completeness = calculateCompleteness(match.item.answer);
-                if (match.score > 65 && completeness > 70) {
-                    const corrected = fullCorrection(match.item.answer);
-                    return {
-                        response: corrected.text,
-                        combined: false,
-                        sources: [match],
-                        confidence: match.score,
-                        coherence: 100
-                    };
-                }
+                const corrected = fullCorrection(topMatches[0].item.answer);
+                return {
+                    response: corrected.text,
+                    combined: false,
+                    sources: [topMatches[0]],
+                    confidence: topMatches[0].score,
+                    coherence: 100
+                };
             }
             
             const weightedSources = topMatches.map(match => {
@@ -1149,34 +1057,22 @@
                 const answerSentences = source.item.answer
                     .split(/[.!?]+/)
                     .map(s => s.trim())
-                    .filter(s => s.length > 10);
+                    .filter(s => s.length > 15);
                 
                 answerSentences.forEach(sentence => {
                     const relevance = calculateSimilarity(userInput, sentence);
-                    const completeness = calculateCompleteness(sentence);
-                    
-                    const finalWeight = (source.weight * 0.4) + 
-                                       (relevance * 0.35) + 
-                                       (completeness * 0.25);
                     
                     sentences.push({
                         text: sentence,
-                        weight: finalWeight,
+                        weight: source.weight + (relevance * 0.25),
                         source: source,
-                        relevance: relevance,
-                        completeness: completeness
+                        relevance: relevance
                     });
                 });
             });
             
-            const qualitySentences = sentences.filter(s => s.completeness > 40);
-            
-            if (qualitySentences.length === 0) {
-                return null;
-            }
-            
             const uniqueSentences = [];
-            qualitySentences.forEach(sent => {
+            sentences.forEach(sent => {
                 const isDuplicate = uniqueSentences.some(unique => 
                     calculateSimilarity(sent.text, unique.text) > 75
                 );
@@ -1187,65 +1083,23 @@
             
             uniqueSentences.sort((a, b) => b.weight - a.weight);
             
-            if (uniqueSentences.length > 0 && 
-                uniqueSentences[0].weight > 70 && 
-                uniqueSentences[0].completeness > 70) {
-                const corrected = fullCorrection(uniqueSentences[0].text);
-                return {
-                    response: corrected.text,
-                    combined: false,
-                    sources: [uniqueSentences[0].source],
-                    confidence: uniqueSentences[0].weight,
-                    coherence: 100
-                };
-            }
-            
             const selectedSentences = [uniqueSentences[0]];
             let totalCoherence = 100;
             let coherenceCount = 1;
-            let rejectedCount = 0;
             
-            for (let i = 1; i < Math.min(uniqueSentences.length, 8); i++) {
+            for (let i = 1; i < Math.min(uniqueSentences.length, 5); i++) {
                 const candidate = uniqueSentences[i];
+                const lastSelected = selectedSentences[selectedSentences.length - 1];
                 
-                let minCoherence = 100;
-                let isCompatible = true;
+                const coherence = calculateCoherence(lastSelected.text, candidate.text);
                 
-                for (let selected of selectedSentences) {
-                    const coherence = calculateCoherence(selected.text, candidate.text);
-                    minCoherence = Math.min(minCoherence, coherence);
-                    
-                    if (coherence < 50) {
-                        isCompatible = false;
-                        break;
-                    }
-                }
-                
-                if (isCompatible && minCoherence >= 50) {
+                if (coherence > 40 || selectedSentences.length < 2) {
                     selectedSentences.push(candidate);
-                    totalCoherence += minCoherence;
+                    totalCoherence += coherence;
                     coherenceCount++;
-                    
-                    if (selectedSentences.length >= 3) break;
-                } else {
-                    rejectedCount++;
-                    if (rejectedCount > 5) break;
                 }
-            }
-            
-            if (selectedSentences.length === 1) {
-                if (selectedSentences[0].completeness > 60) {
-                    const corrected = fullCorrection(selectedSentences[0].text);
-                    return {
-                        response: corrected.text,
-                        combined: false,
-                        sources: [selectedSentences[0].source],
-                        confidence: selectedSentences[0].weight,
-                        coherence: 100
-                    };
-                } else {
-                    return null;
-                }
+                
+                if (selectedSentences.length >= 4) break;
             }
             
             let combinedResponse = '';
@@ -1255,13 +1109,11 @@
                 } else {
                     const needsConnector = !sent.text.toLowerCase().startsWith('además') &&
                                           !sent.text.toLowerCase().startsWith('también') &&
-                                          !sent.text.toLowerCase().startsWith('por') &&
-                                          !sent.text.toLowerCase().startsWith('sin embargo');
+                                          !sent.text.toLowerCase().startsWith('por');
                     
-                    if (needsConnector) {
-                        const connectors = ['. Además, ', '. También, ', '. Asimismo, ', '. Por otro lado, '];
-                        const selectedConnector = connectors[Math.floor(Math.random() * connectors.length)];
-                        combinedResponse += selectedConnector + 
+                    if (needsConnector && Math.random() > 0.5) {
+                        const connectors = ['. Además, ', '. También, ', '. Por otro lado, ', '. Asimismo, '];
+                        combinedResponse += connectors[Math.floor(Math.random() * connectors.length)] + 
                                           sent.text.charAt(0).toLowerCase() + sent.text.slice(1);
                     } else {
                         combinedResponse += '. ' + sent.text;
@@ -1271,25 +1123,15 @@
             
             const finalCorrected = fullCorrection(combinedResponse);
             
-            const avgWeight = selectedSentences.reduce((sum, s) => sum + s.weight, 0) / selectedSentences.length;
+            const totalWeight = weightedSources.reduce((sum, s) => sum + s.weight, 0);
+            const avgConfidence = Math.min(totalWeight / weightedSources.length, 100);
             const avgCoherence = totalCoherence / coherenceCount;
-            
-            if (avgCoherence < 50) {
-                const corrected = fullCorrection(selectedSentences[0].text);
-                return {
-                    response: corrected.text,
-                    combined: false,
-                    sources: [selectedSentences[0].source],
-                    confidence: selectedSentences[0].weight,
-                    coherence: 100
-                };
-            }
             
             return {
                 response: finalCorrected.text,
-                combined: selectedSentences.length > 1,
-                sources: selectedSentences.map(s => s.source),
-                confidence: avgWeight,
+                combined: topMatches.length > 1,
+                sources: weightedSources.slice(0, selectedSentences.length),
+                confidence: avgConfidence,
                 coherence: avgCoherence
             };
         }
@@ -1313,8 +1155,8 @@
             const correctedQuestion = qCorrected.text;
             const correctedAnswer = aCorrected.text;
 
-            const { words: qWords, stems: qStems, bigrams: qBigrams, trigrams: qTrigrams } = tokenize(correctedQuestion);
-            const { words: aWords, stems: aStems, bigrams: aBigrams, trigrams: aTrigrams } = tokenize(correctedAnswer);
+            const { words: qWords, stems: qStems, bigrams: qBigrams, trigrams: qTrigrams, vocalPattern: qVocal } = tokenize(correctedQuestion);
+            const { words: aWords, stems: aStems, bigrams: aBigrams, trigrams: aTrigrams, vocalPattern: aVocal } = tokenize(correctedAnswer);
             const keywords = extractKeywords(correctedQuestion + ' ' + correctedAnswer);
             
             trainingData.push({
@@ -1331,6 +1173,8 @@
                 answerBigrams: aBigrams,
                 questionTrigrams: qTrigrams,
                 answerTrigrams: aTrigrams,
+                questionVocalPattern: qVocal,
+                answerVocalPattern: aVocal,
                 keywords,
                 successCount: 0,
                 failCount: 0,
@@ -1392,7 +1236,7 @@
             const matches = findMatches(finalInput);
 
             if (matches.length === 0 || matches[0].score < 10) {
-                responseDiv.innerHTML = '<div class="status info">🤔 Sin coincidencias relevantes. Entrena más la IA con ejemplos similares.</div>';
+                responseDiv.innerHTML = '<div class="status info">🤔 Sin coincidencias. Entrena más.</div>';
                 analysisDiv.innerHTML = '';
                 feedbackDiv.innerHTML = '';
                 lastUsedSources = [];
@@ -1403,49 +1247,20 @@
                 const result = generateCombinedResponse(finalInput, matches);
                 
                 if (!result) {
-                    const questionType = detectQuestionType(finalInput);
-                    responseDiv.innerHTML = `
-                        <div class="status warning">
-                            ⚠️ No puedo generar una respuesta coherente con los datos disponibles.<br>
-                            <small>Tipo detectado: ${questionType}. Entrena la IA con respuestas más completas y específicas.</small>
-                        </div>
-                    `;
-                    
-                    analysisDiv.innerHTML = `
-                        <div class="analysis">
-                            <strong>🔍 Análisis:</strong><br>
-                            <div class="analysis-item">• ${matches.length} coincidencias encontradas</div>
-                            <div class="analysis-item">• Mejor coincidencia: ${matches[0].score.toFixed(0)}%</div>
-                            <div class="analysis-item">• Problema: Respuestas fragmentadas o incompatibles</div>
-                            <div class="analysis-item">• Solución: Agrega respuestas más completas y coherentes</div>
-                        </div>
-                    `;
-                    feedbackDiv.innerHTML = '';
-                    lastUsedSources = [];
+                    responseDiv.innerHTML = '<div class="status info">🤔 No puedo generar respuesta confiable.</div>';
                     return;
                 }
                 
                 lastUsedSources = result.sources.map(s => s.index);
                 
-                let qualityColor = '#4caf50';
-                let qualityText = 'Excelente';
-                if (result.coherence < 70) {
-                    qualityColor = '#ff9800';
-                    qualityText = 'Buena';
-                }
-                if (result.coherence < 50) {
-                    qualityColor = '#f44336';
-                    qualityText = 'Aceptable';
-                }
-                
                 let html = `
                     <div style="color: #155724;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
                             <strong style="font-size: 1.1em;">🤖 Respuesta IA:</strong>
-                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <div>
                                 <span class="match-score">${result.confidence.toFixed(0)}% confianza</span>
-                                ${result.combined ? '<span class="combined-badge">🔀 COMBINADA</span>' : '<span class="combined-badge" style="background: #2196F3;">✓ DIRECTA</span>'}
-                                <span class="coherence-badge" style="background: ${qualityColor};">📝 ${result.coherence.toFixed(0)}% - ${qualityText}</span>
+                                ${result.combined ? '<span class="combined-badge">🔀 COMBINADA</span>' : ''}
+                                <span class="coherence-badge">📝 ${result.coherence.toFixed(0)}% coherencia</span>
                             </div>
                         </div>
                         <div class="generated-response">
@@ -1454,19 +1269,12 @@
                 `;
                 
                 if (result.sources.length > 0) {
-                    html += '<div class="source-list"><strong>📚 Fuentes utilizadas:</strong>';
+                    html += '<div class="source-list"><strong>📚 Fuentes:</strong>';
                     result.sources.forEach((source, idx) => {
-                        const successRate = source.item ? 
-                            (source.item.successCount / (source.item.successCount + source.item.failCount || 1)) : 0;
                         html += `
                             <div class="source-item">
-                                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-                                    <div>
-                                        <span class="source-weight">#${idx + 1} ${source.weight.toFixed(0)} pts</span>
-                                        ${successRate > 0.7 ? '<span style="background: #4caf50; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.75em; margin-left: 5px;">✓ Confiable</span>' : ''}
-                                    </div>
-                                </div>
-                                <div style="margin-top: 5px; font-size: 0.9em;">"${source.item.question}"</div>
+                                <span class="source-weight">#${idx + 1} ${source.weight.toFixed(0)}pts</span>
+                                "${source.item.question}"
                             </div>
                         `;
                     });
@@ -1488,22 +1296,14 @@
                 `;
                 
                 let analysisHTML = '<div class="analysis">';
-                analysisHTML += '<strong>🔍 Análisis del Proceso:</strong><br>';
-                analysisHTML += `<div class="analysis-item">• ${matches.length} fuentes analizadas (mejor: ${matches[0].score.toFixed(0)}%)</div>`;
-                analysisHTML += `<div class="analysis-item">• ${result.sources.length} fuentes utilizadas</div>`;
-                analysisHTML += `<div class="analysis-item">• Coherencia final: ${result.coherence.toFixed(0)}% (${result.coherence > 70 ? 'Excelente' : result.coherence > 50 ? 'Buena' : 'Aceptable'})</div>`;
-                analysisHTML += `<div class="analysis-item">• Tipo: ${result.combined ? 'Respuesta multi-fuente combinada' : 'Respuesta directa'}</div>`;
-                analysisHTML += `<div class="analysis-item">• Confianza: ${result.confidence.toFixed(0)}%</div>`;
-                
-                const questionType = detectQuestionType(finalInput);
-                analysisHTML += `<div class="analysis-item">• Pregunta tipo: ${questionType}</div>`;
+                analysisHTML += '<strong>🔍 Análisis Vocal Avanzado:</strong><br>';
+                analysisHTML += `<div class="analysis-item">• ${matches.length} fuentes analizadas</div>`;
+                analysisHTML += `<div class="analysis-item">• ${result.sources.length} fuentes combinadas</div>`;
+                analysisHTML += `<div class="analysis-item">• Coherencia: ${result.coherence.toFixed(0)}%</div>`;
+                analysisHTML += `<div class="analysis-item">• Análisis vocal aplicado</div>`;
                 
                 if (correctedInput.corrections.length > 0) {
-                    analysisHTML += `<div class="analysis-item">• ✍️ Entrada corregida automáticamente (${correctedInput.corrections.length} correcciones)</div>`;
-                }
-                
-                if (result.combined) {
-                    analysisHTML += `<div class="analysis-item">• 🧠 Procesamiento avanzado: análisis semántico, detección de incompatibilidades y optimización de coherencia</div>`;
+                    analysisHTML += `<div class="analysis-item">• Tu pregunta fue corregida automáticamente</div>`;
                 }
                 
                 analysisHTML += '</div>';
@@ -1550,7 +1350,7 @@
             }
 
             const dataToExport = {
-                version: '3.0',
+                version: '3.1',
                 exportDate: new Date().toISOString(),
                 trainingData: trainingData,
                 questionCount: questionCount,
@@ -1562,7 +1362,7 @@
             
             const downloadLink = document.createElement('a');
             downloadLink.href = url;
-            downloadLink.download = `ia-ultra-v2-${new Date().toISOString().split('T')[0]}.json`;
+            downloadLink.download = `ia-ultra-vocal-${new Date().toISOString().split('T')[0]}.json`;
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
@@ -1719,7 +1519,6 @@
         document.getElementById('answer').addEventListener('input', updateAutoTags);
 
         window.addEventListener('load', () => {
-            checkStorageAvailability();
             loadFromStorage();
             updateStats();
             viewTraining();
