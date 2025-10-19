@@ -489,6 +489,8 @@
             margin: 10px 0;
             border-left: 4px solid #9c27b0;
             animation: pulse 2s infinite;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
         @keyframes pulse {
@@ -503,6 +505,29 @@
             border-radius: 6px;
             font-size: 0.9em;
             color: #4a148c;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 0.9em;
+            color: #666;
         }
 
         @media (max-width: 768px) {
@@ -536,6 +561,7 @@
                 <span class="badge">🎯 Precisión Mejorada</span>
                 <span class="badge">💾 Auto-Guardado</span>
                 <span class="badge">🧠 Pensamiento Profundo</span>
+                <span class="badge">📝 Lógica Abecedario</span>
             </div>
         </div>
 
@@ -578,6 +604,10 @@
                     <div>
                         <div class="toggle-label">🧠 Modo Pensamiento Profundo</div>
                         <div class="toggle-description">Análisis detallado y respuestas más precisas</div>
+                    </div>
+                    <div style="margin-left: auto; display: flex; flex-direction: column; align-items: flex-end;">
+                        <label for="thinkingTime" style="font-size: 0.9em; color: #666; text-align: right;">Tiempo (s):</label>
+                        <input type="number" id="thinkingTime" placeholder="3" min="1" max="30" value="" style="width: 60px; text-align: center;">
                     </div>
                 </div>
 
@@ -645,8 +675,16 @@
             'programar': ['programacion', 'codificar', 'codigo', 'desarrollar'],
             'javascript': ['js', 'ecmascript'],
             'python': ['py'],
-            'aprender': ['estudiar', 'ensenar', 'educacion']
+            'aprender': ['estudiar', 'ensenar', 'educacion'],
+            'sabes': ['conoces', 'sabes sobre', 'conocimiento'],
+            'saber': ['conocer', 'informacion', 'datos']
         };
+
+        // Nuevos diccionarios para clasificar tipos de entrada
+        const greetings = ['hola', 'buenas', 'hey', 'alo', 'que tal', 'saludos', 'buen dia', 'buenas tardes', 'buenas noches'];
+        const farewells = ['adios', 'chao', 'hasta luego', 'nos vemos', 'bye'];
+        const insults = ['idiota', 'tonto', 'imbecil', 'estupido', 'pendejo', 'bro mal', 'insulto', 'malo'];
+        const thanks = ['gracias', 'thank you', 'agradecido'];
 
         const spellingCorrections = {
             'q': 'que', 'xq': 'porque', 'pq': 'porque', 'xk': 'porque',
@@ -667,132 +705,681 @@
             'cuando': 'cuándo', 'quien': 'quién', 'cuanto': 'cuánto',
             'mas': 'más', 'si': 'sí', 'tu': 'tú', 'mi': 'mí',
             'te': 'té', 'el': 'él', 'solo': 'sólo',
-            'esta': 'está', 'estas': 'estás', 'este': 'este',
-            'razon': 'razón', 'acion': 'ación', 'informacion': 'información',
+            'esta': 'está', 'estas': 'estás', 'este': 'esté',
+            'razon': 'razón', 'acion': 'acción', 'informacion': 'información',
             'codigo': 'código', 'tambien': 'también', 'ahi': 'ahí',
             'dia': 'día', 'despues': 'después', 'facil': 'fácil',
             'dificil': 'difícil', 'util': 'útil', 'semantica': 'semántica'
         };
+
+        // Nueva función para clasificar el tipo de entrada
+        function classifyInput(text) {
+            const normalized = normalizeText(text);
+            const words = normalized.split(/\s+/);
+
+            // Verificar si es pregunta
+            if (text.includes('?') || words.some(w => w.startsWith('que') || w.startsWith('como') || w.startsWith('cuando') || w.startsWith('donde') || w.startsWith('cual'))) {
+                return { type: 'question', length: words.length };
+            }
+
+            // Saludo
+            if (greetings.some(g => words.includes(g) || normalized.includes(g))) {
+                return { type: 'greeting', length: 1 }; // Corto por defecto
+            }
+
+            // Despedida
+            if (farewells.some(f => words.includes(f) || normalized.includes(f))) {
+                return { type: 'farewell', length: 1 };
+            }
+
+            // Insulto
+            if (insults.some(i => words.includes(i) || normalized.includes(i))) {
+                return { type: 'insult', length: 2 }; // Corto y witty
+            }
+
+            // Agradecimiento
+            if (thanks.some(t => words.includes(t) || normalized.includes(t))) {
+                return { type: 'thanks', length: 1 };
+            }
+
+            // Por defecto, tratar como pregunta o statement
+            return { type: 'statement', length: words.length };
+        }
 
         function toggleDeepThinking() {
             deepThinkingMode = document.getElementById('deepThinkingToggle').checked;
             saveToStorage();
         }
 
-        function showThinkingProcess(steps) {
+        // Mejorada: Análisis de abecedario completo (letras + lógica Grok-like)
+        function analyzeAlphabetPattern(text) {
+            const alphabet = 'abcdefghijklmnopqrstuvwxyzáéíóúñ';
+            const normalized = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            let letterCount = {};
+            let pattern = '';
+
+            for (let char of normalized) {
+                if (alphabet.includes(char)) {
+                    pattern += char;
+                    letterCount[char] = (letterCount[char] || 0) + 1;
+                }
+            }
+
+            const totalLetters = Object.values(letterCount).reduce((a, b) => a + b, 0);
+            const letterRatio = totalLetters / normalized.length || 0;
+
+            // Lógica simple Grok-like: Detectar patrones repetidos o raros
+            const repeated = Object.entries(letterCount).filter(([k, v]) => v > 3).map(([k]) => k).join('');
+            const rare = Object.entries(letterCount).filter(([k, v]) => v === 1).length;
+
+            return {
+                letterPattern: pattern,
+                letterCount,
+                totalLetters,
+                letterRatio,
+                repeatedLetters: repeated,
+                rareLetters: rare,
+                logicalInsight: rare > 5 ? 'Texto creativo con vocabulario variado' : 'Estilo directo y repetitivo'
+            };
+        }
+
+        // Generación de variaciones con abecedario completo (mutaciones lógicas)
+        function generateAlphabetVariations(word) {
+            const variations = [word];
+            const alphabetMap = {}; // Mapa simple para swaps lógicos (e.g., b->v para errores comunes)
+            alphabetMap['b'] = ['v', 'p']; // Ejemplos de confusiones fonéticas
+            alphabetMap['c'] = ['k', 's'];
+            alphabetMap['g'] = ['j'];
+            // ... agregar más si se quiere, pero mantener simple
+
+            for (let i = 0; i < word.length; i++) {
+                const char = word[i].toLowerCase();
+                if (alphabetMap[char]) {
+                    alphabetMap[char].forEach(variant => {
+                        const newWord = word.substring(0, i) + variant + word.substring(i + 1);
+                        variations.push(newWord);
+                    });
+                }
+            }
+
+            return variations;
+        }
+
+        // Comparación mejorada con abecedario
+        function compareAlphabetPatterns(pattern1, pattern2) {
+            const p1 = analyzeAlphabetPattern(pattern1);
+            const p2 = analyzeAlphabetPattern(pattern2);
+
+            let score = 0;
+
+            // Coincidencias de letras comunes
+            const commonLetters = Object.keys(p1.letterCount).filter(l => p2.letterCount[l]);
+            score += commonLetters.length * 4;
+
+            // Patrones repetidos similares
+            if (p1.repeatedLetters.includes(p2.repeatedLetters[0])) score += 15;
+
+            // Ratio similar
+            const ratioDiff = Math.abs(p1.letterRatio - p2.letterRatio);
+            score += (1 - ratioDiff) * 20;
+
+            // Insights lógicos coincidentes (simple)
+            if (p1.logicalInsight.includes(p2.logicalInsight.split(' ')[0])) score += 10;
+
+            return score;
+        }
+
+        // Función mejorada para steps de pensamiento profundo (más lógica, abecedario, Grok-like)
+        function generateDynamicStep(userInput, elapsedTime, totalTime, matches, inputClass) {
+            const progress = (elapsedTime / totalTime) * 100;
+            const depth = Math.floor(progress / 20);
+            const dbSize = trainingData.length;
+            const alphaAnalysis = analyzeAlphabetPattern(userInput);
+            const userType = inputClass.type;
+            const userLen = inputClass.length;
+
+            let step = '';
+            if (elapsedTime < 1000) {
+                step = `Clasificando entrada: "${userType}" (longitud: ${userLen} palabras). Iniciando tokenización abecedario.`;
+            } else if (elapsedTime < 2000) {
+                step = `Análisis alfabético: Letras repetidas "${alphaAnalysis.repeatedLetters}", raras: ${alphaAnalysis.rareLetters}. Insight: ${alphaAnalysis.logicalInsight}.`;
+            } else if (elapsedTime < 3000) {
+                step = `Buscando en ${dbSize} entradas. Matches iniciales: ${matches.length}. Ajustando por tipo ${userType}.`;
+            } else if (elapsedTime < 4000) {
+                step = `Lógica Grok: ¿${userType === 'question' ? 'Respuesta detallada?' : userType === 'insult' ? 'Contraataque witty?' : 'Respuesta amigable?'}. Cruzando contextos.`;
+            } else if (elapsedTime < 5000) {
+                step = `Profundizando abecedario: Generando variaciones lógicas para keywords. Ej: "${generateAlphabetVariations(extractKeywords(userInput)[0] || 'base')[1]}".`;
+            } else if (elapsedTime < 6000) {
+                step = `Evaluando longitud respuesta: ${userLen < 5 ? 'Corta' : 'Larga'}. Integrando sinónimos y patrones fonéticos.`;
+            } else if (elapsedTime < 7000) {
+                step = `Cadena lógica: Conectando matches con ${conversationContext.length} contextos previos. Detectando contradicciones.`;
+            } else if (elapsedTime < 8000) {
+                step = `Análisis de sentido: ¿Coherente con entrenamiento? Ajustando pesos (confianza: ${Math.round(Math.random()*50 + 50)}%).`;
+            } else {
+                step = `Sintetizando como Grok: Respuesta adaptada a ${userType}, con humor si insulto. Confianza: ${Math.min(95 + depth*5, 100)}%.`;
+            }
+
+            return step;
+        }
+
+        function showThinkingProcess(userInput, totalTime, matches, inputClass) {
             const thinkingDiv = document.getElementById('thinkingProcess');
             if (!deepThinkingMode) {
                 thinkingDiv.style.display = 'none';
                 return;
             }
 
-            let html = '<div class="thinking-indicator"><strong>🧠 Procesando...</strong>';
-            steps.forEach(step => {
-                html += `<div class="thinking-step">• ${step}</div>`;
-            });
+            let html = '<div class="thinking-indicator"><strong>🧠 Pensando Profundamente (Grok-Style)...</strong><div id="dynamicSteps"></div>';
+            html += '<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>';
+            html += '<div class="progress-text" id="progressText">Iniciando análisis lógico...</div>';
             html += '</div>';
             thinkingDiv.innerHTML = html;
             thinkingDiv.style.display = 'block';
 
+            const dynamicSteps = document.getElementById('dynamicSteps');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            let elapsed = 0;
+            let stepCount = 0;
+
+            const interval = setInterval(() => {
+                elapsed += 500;
+                const progress = Math.min((elapsed / totalTime) * 100, 100);
+                progressFill.style.width = progress + '%';
+
+                const remaining = Math.max(0, Math.ceil((totalTime - elapsed) / 1000));
+                progressText.textContent = `${progress.toFixed(0)}% - ${remaining}s restantes | Tipo: ${inputClass.type}`;
+
+                if (elapsed % 1500 < 500) { // Más frecuente para más profundidad
+                    const newStep = generateDynamicStep(userInput, elapsed, totalTime, matches, inputClass);
+                    const stepEl = document.createElement('div');
+                    stepEl.className = 'thinking-step';
+                    stepEl.textContent = `• ${newStep}`;
+                    dynamicSteps.appendChild(stepEl);
+                    stepCount++;
+                }
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    progressText.textContent = '¡Lógica completa! Generando respuesta adaptada...';
+                    dynamicSteps.innerHTML += `<div class="thinking-step">• Respuesta final: Sensata, lógica y personalizada.</div>`;
+                }
+            }, 500);
+
             setTimeout(() => {
                 thinkingDiv.style.display = 'none';
-            }, 3000);
+            }, totalTime + 1000);
         }
 
-        function analyzeVowelPattern(text) {
-            const vowels = ['a', 'e', 'i', 'o', 'u', 'á', 'é', 'í', 'ó', 'ú'];
-            const consonants = 'bcdfghjklmnpqrstvwxyz';
+        function calculateSimilarity(text1, text2) {
+            const tokens1 = tokenize(text1);
+            const tokens2 = tokenize(text2);
             
-            const normalized = text.toLowerCase();
-            let vocalPattern = '';
-            let consonantPattern = '';
-            let vocalCount = {};
-            let consonantCount = {};
+            const set1 = new Set(tokens1.words);
+            const set2 = new Set(tokens2.words);
+            const intersection = new Set([...set1].filter(x => set2.has(x)));
+            const union = new Set([...set1, ...set2]);
+            const jaccard = union.size === 0 ? 0 : intersection.size / union.size;
             
-            for (let char of normalized) {
-                if (vowels.includes(char)) {
-                    vocalPattern += 'V';
-                    vocalCount[char] = (vocalCount[char] || 0) + 1;
-                } else if (consonants.includes(char)) {
-                    consonantPattern += 'C';
-                    consonantCount[char] = (consonantCount[char] || 0) + 1;
-                }
+            const levSim = levenshtein(tokens1.normalized, tokens2.normalized);
+            
+            const stemSet1 = new Set(tokens1.stems);
+            const stemSet2 = new Set(tokens2.stems);
+            const stemIntersection = new Set([...stemSet1].filter(x => stemSet2.has(x)));
+            const stemUnion = new Set([...stemSet1, ...stemSet2]);
+            const stemSim = stemUnion.size === 0 ? 0 : stemIntersection.size / stemUnion.size;
+            
+            const bigramSet1 = new Set(tokens1.bigrams);
+            const bigramSet2 = new Set(tokens2.bigrams);
+            const bigramIntersection = new Set([...bigramSet1].filter(x => bigramSet2.has(x)));
+            const bigramUnion = new Set([...bigramSet1, ...bigramSet2]);
+            const bigramSim = bigramUnion.size === 0 ? 0 : bigramIntersection.size / bigramUnion.size;
+            
+            let containsSim = 0;
+            if (tokens1.normalized.includes(tokens2.normalized) || tokens2.normalized.includes(tokens1.normalized)) {
+                const shorter = Math.min(tokens1.normalized.length, tokens2.normalized.length);
+                const longer = Math.max(tokens1.normalized.length, tokens2.normalized.length);
+                containsSim = shorter / longer;
             }
             
-            const totalVowels = Object.values(vocalCount).reduce((a, b) => a + b, 0);
-            const totalConsonants = Object.values(consonantCount).reduce((a, b) => a + b, 0);
+            const vocalSim = compareVocalPatterns(text1, text2) / 100;
+            const alphaSim = compareAlphabetPatterns(text1, text2) / 100; // Nueva: abecedario
             
-            const vocalRatio = totalVowels / (totalVowels + totalConsonants || 1);
-            
-            const vocalSignature = Object.keys(vocalCount).sort().join('');
-            const consonantSignature = Object.keys(consonantCount).sort().join('');
-            
-            return {
-                vocalPattern,
-                consonantPattern,
-                vocalCount,
-                consonantCount,
-                totalVowels,
-                totalConsonants,
-                vocalRatio,
-                vocalSignature,
-                consonantSignature,
-                fullSignature: vocalSignature + consonantSignature
-            };
+            return (jaccard * 0.20 + levSim * 0.20 + stemSim * 0.15 + bigramSim * 0.15 + containsSim * 0.10 + vocalSim * 0.10 + alphaSim * 0.10) * 100;
         }
 
-        function generateVowelVariations(word) {
-            const variations = [word];
-            const vowelMap = {
-                'a': ['a', 'á'], 'e': ['e', 'é'], 'i': ['i', 'í'],
-                'o': ['o', 'ó'], 'u': ['u', 'ú'],
-                'á': ['a', 'á'], 'é': ['e', 'é'], 'í': ['i', 'í'],
-                'ó': ['o', 'ó'], 'ú': ['u', 'ú']
-            };
+        // Mejorada: Considera tipo de input para longitud
+        function determineResponseLength(userInput, topMatches, inputClass) {
+            const inputLength = inputClass.length || userInput.split(/\s+/).length;
+            const userType = inputClass.type;
             
-            for (let i = 0; i < word.length; i++) {
-                const char = word[i].toLowerCase();
-                if (vowelMap[char]) {
-                    vowelMap[char].forEach(variant => {
-                        if (variant !== char) {
-                            const newWord = word.substring(0, i) + variant + word.substring(i + 1);
-                            variations.push(newWord);
+            // Ajustes por tipo
+            if (userType === 'greeting' || userType === 'thanks' || userType === 'farewell') {
+                return 'short';
+            }
+            if (userType === 'insult') {
+                return 'short'; // Witty y breve
+            }
+            
+            const isSimpleQuery = /^(que es|quien es|cual es|donde esta|cuando|como se)/i.test(userInput);
+            
+            const hasDirectAnswer = topMatches.length > 0 && topMatches[0].score > 85;
+            
+            if (isSimpleQuery || inputLength < 5) {
+                return 'short';
+            }
+            
+            if (hasDirectAnswer && topMatches[0].item.answer.split(/\s+/).length < 30) {
+                return 'short';
+            }
+            
+            if (inputLength > 15 || userInput.includes('explica') || userInput.includes('detalla')) {
+                return 'long';
+            }
+            
+            return 'medium';
+        }
+
+        // En selectBestSentences, agregar ajuste por tipo (e.g., para insultos, priorizar witty)
+        function selectBestSentences(sentences, userInput, targetLength, inputClass) {
+            let maxSentences;
+            if (targetLength === 'short') maxSentences = 1; // Más corto para greetings/insults
+            else if (targetLength === 'medium') maxSentences = 2;
+            else maxSentences = 4;
+
+            // Ajuste por tipo: Para insultos, boost witty (simple keyword)
+            sentences.forEach(sent => {
+                sent.semanticScore = calculateSemanticRelevance(userInput, sent.text);
+                let typeBoost = 0;
+                if (inputClass.type === 'insult' && sent.text.toLowerCase().includes('humor') || sent.text.toLowerCase().includes('witty') || sent.text.toLowerCase().includes('gracioso')) {
+                    typeBoost = 20;
+                } else if (inputClass.type === 'greeting' && sent.text.toLowerCase().includes('amigable')) {
+                    typeBoost = 15;
+                }
+                sent.finalScore = (sent.weight * 0.3) + (sent.semanticScore * 0.6) + typeBoost * 0.1;
+            });
+
+            sentences.sort((a, b) => b.finalScore - a.finalScore);
+
+            const selected = [];
+            const usedConcepts = new Set();
+
+            for (let sent of sentences) {
+                if (selected.length >= maxSentences) break;
+
+                const sentWords = new Set(tokenize(sent.text).words);
+                const isDuplicate = [...usedConcepts].filter(w => sentWords.has(w)).length > 2;
+
+                if (!isDuplicate || selected.length === 0) {
+                    selected.push(sent);
+                    sentWords.forEach(w => usedConcepts.add(w));
+                }
+            }
+
+            return selected;
+        }
+
+        // En generateCombinedResponse: Pasar inputClass, ajustar connectors por tipo
+        function generateCombinedResponse(userInput, matches, inputClass) {
+            if (matches.length === 0) return null;
+            
+            const timeInput = document.getElementById('thinkingTime').value;
+            const totalTime = timeInput && !isNaN(timeInput) ? parseInt(timeInput) * 1000 : 4000; // Aumentado para más profundidad
+            
+            if (deepThinkingMode) {
+                showThinkingProcess(userInput, totalTime, matches, inputClass);
+            }
+
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const minScore = deepThinkingMode ? 25 : 20; // Más permisivo
+                    const topMatches = matches.slice(0, 8).filter(m => m.score > minScore); // Más matches para variedad
+                    
+                    if (topMatches.length === 0) {
+                        // Fallback por tipo
+                        let fallback = '';
+                        switch (inputClass.type) {
+                            case 'greeting': fallback = '¡Hola! ¿En qué puedo ayudarte hoy?'; break;
+                            case 'farewell': fallback = '¡Hasta luego! Cuídate.'; break;
+                            case 'insult': fallback = '¡Oye, bro! Si eso es lo mejor que tienes, practica más. 😏 ¿Qué tal si charlamos de verdad?'; break;
+                            case 'thanks': fallback = '¡De nada! Siempre un placer.'; break;
+                            default: fallback = 'Interesante... Cuéntame más para entender mejor.';
+                        }
+                        resolve({
+                            response: fallback,
+                            combined: false,
+                            sources: [],
+                            confidence: 70,
+                            coherence: 90,
+                            inputType: inputClass.type
+                        });
+                        return;
+                    }
+                    
+                    const responseLength = determineResponseLength(userInput, topMatches, inputClass);
+                    
+                    if (topMatches.length === 1 && topMatches[0].score > 90) {
+                        const corrected = fullCorrection(topMatches[0].item.answer);
+                        resolve({
+                            response: corrected.text,
+                            combined: false,
+                            sources: [topMatches[0]],
+                            confidence: topMatches[0].score,
+                            coherence: 100,
+                            inputType: inputClass.type
+                        });
+                        return;
+                    }
+                    
+                    const weightedSources = topMatches.map(match => {
+                        const successRate = match.item.successCount / 
+                            (match.item.successCount + match.item.failCount || 1);
+                        const weight = (match.score * 0.7) + (successRate * 100 * 0.3);
+                        
+                        return { ...match, weight, successRate };
+                    });
+                    
+                    weightedSources.sort((a, b) => b.weight - a.weight);
+                    
+                    const sentences = [];
+                    weightedSources.forEach(source => {
+                        const answerSentences = source.item.answer
+                            .split(/[.!?]+/)
+                            .map(s => s.trim())
+                            .filter(s => s.length > 5 && s.split(/\s+/).length >= 1); // Más flexible para cortos
+                        
+                        answerSentences.forEach(sentence => {
+                            const relevance = calculateSemanticRelevance(userInput, sentence);
+                            
+                            sentences.push({
+                                text: sentence,
+                                weight: source.weight,
+                                source: source,
+                                relevance: relevance
+                            });
+                        });
+                    });
+                    
+                    const uniqueSentences = [];
+                    sentences.forEach(sent => {
+                        const isDuplicate = uniqueSentences.some(unique => 
+                            calculateSimilarity(sent.text, unique.text) > 85
+                        );
+                        if (!isDuplicate && sent.text.length > 5) {
+                            uniqueSentences.push(sent);
                         }
                     });
-                }
-            }
-            
-            return variations;
+                    
+                    const selectedSentences = selectBestSentences(uniqueSentences, userInput, responseLength, inputClass);
+                    
+                    if (selectedSentences.length === 0) {
+                        resolve(null);
+                        return;
+                    }
+                    
+                    let combinedResponse = '';
+                    selectedSentences.forEach((sent, idx) => {
+                        let text = sent.text;
+                        if (idx === 0) {
+                            text = text.charAt(0).toUpperCase() + text.slice(1);
+                        } else {
+                            // Connectors adaptados por tipo
+                            let connectors;
+                            if (inputClass.type === 'insult') {
+                                connectors = ['. Pero espera, ', '. Jaja, ', '. En serio, ', '. Vamos, '];
+                            } else if (inputClass.type === 'greeting') {
+                                connectors = ['. Por cierto, ', '. Y tú, ', '. Bien, '];
+                            } else {
+                                connectors = ['. Además, ', '. También, ', '. En relación, ', '. Por lo tanto, '];
+                            }
+                            const connector = connectors[Math.floor(Math.random() * connectors.length)];
+                            text = connector + text.charAt(0).toLowerCase() + text.slice(1);
+                        }
+                        combinedResponse += text + '. ';
+                    });
+                    
+                    const finalCorrected = fullCorrection(combinedResponse.trim());
+                    
+                    const totalWeight = selectedSentences.reduce((sum, s) => sum + s.finalScore, 0);
+                    const avgConfidence = Math.min((totalWeight / selectedSentences.length) * 1.2, 100);
+                    
+                    let totalCoherence = 0;
+                    for (let i = 1; i < selectedSentences.length; i++) {
+                        const sim = calculateSimilarity(selectedSentences[i-1].text, selectedSentences[i].text);
+                        totalCoherence += Math.min(sim * 2, 100);
+                    }
+                    const avgCoherence = selectedSentences.length > 1 ? totalCoherence / (selectedSentences.length - 1) : 100;
+                    
+                    resolve({
+                        response: finalCorrected.text,
+                        combined: topMatches.length > 1,
+                        sources: weightedSources.slice(0, selectedSentences.length),
+                        confidence: avgConfidence,
+                        coherence: avgCoherence,
+                        inputType: inputClass.type
+                    });
+                }, totalTime);
+            });
         }
 
-        function compareVocalPatterns(pattern1, pattern2) {
-            const p1 = analyzeVowelPattern(pattern1);
-            const p2 = analyzeVowelPattern(pattern2);
-            
-            let score = 0;
-            
-            if (p1.vocalSignature === p2.vocalSignature) {
-                score += 25;
-            } else {
-                const commonVowels = Object.keys(p1.vocalCount).filter(v => p2.vocalCount[v]);
-                score += commonVowels.length * 5;
+        // En askAI: Clasificar input
+        async function askAI() {
+            const userInput = document.getElementById('userQuestion').value.trim();
+            const responseDiv = document.getElementById('aiResponse');
+            const analysisDiv = document.getElementById('analysis');
+            const feedbackDiv = document.getElementById('feedbackSection');
+
+            if (!userInput) {
+                responseDiv.innerHTML = '<div class="status error">Escribe algo</div>';
+                return;
             }
-            
-            if (p1.consonantSignature === p2.consonantSignature) {
-                score += 20;
-            } else {
-                const commonConsonants = Object.keys(p1.consonantCount).filter(c => p2.consonantCount[c]);
-                score += commonConsonants.length * 3;
+
+            questionCount++;
+            saveToStorage();
+
+            if (trainingData.length === 0) {
+                responseDiv.innerHTML = '<div class="status info">⚠️ Entrena la IA primero</div>';
+                return;
             }
+
+            const correctedInput = fullCorrection(userInput);
+            const finalInput = correctedInput.text;
+            const inputClass = classifyInput(finalInput); // Nueva clasificación
+
+            const matches = findMatches(finalInput);
+
+            if (matches.length === 0 || matches[0].score < 15) {
+                // Usar fallback en generate, pero aquí mostrar
+                let fallbackMsg = `🤔 No encontré info específica para "${inputClass.type}". `;
+                if (inputClass.type === 'greeting') fallbackMsg += '¡Hola, bro! ¿Qué onda?';
+                else if (inputClass.type === 'insult') fallbackMsg += '¡Uy, qué fuerte! Pero soy IA, no me afecta. ¿Quieres charlar de verdad?';
+                else fallbackMsg += 'Entrena más datos relacionados.';
+                responseDiv.innerHTML = `<div class="status info">${fallbackMsg}</div>`;
+                analysisDiv.innerHTML = '';
+                feedbackDiv.innerHTML = '';
+                lastUsedSources = [];
+            } else {
+                const result = await generateCombinedResponse(finalInput, matches, inputClass);
+                
+                if (!result) {
+                    responseDiv.innerHTML = '<div class="status info">🤔 No puedo generar una respuesta confiable con los datos actuales.</div>';
+                    return;
+                }
+                
+                lastUsedSources = result.sources.map(s => s.index);
+                
+                let html = `
+                    <div style="color: #155724;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+                            <strong style="font-size: 1.1em;">🤖 Respuesta IA (${result.inputType}):</strong>
+                            <div>
+                                <span class="match-score">${result.confidence.toFixed(0)}% confianza</span>
+                                ${result.combined ? '<span class="combined-badge">🔀 COMBINADA</span>' : ''}
+                                <span class="coherence-badge">📝 ${result.coherence.toFixed(0)}% coherencia</span>
+                            </div>
+                        </div>
+                        <div class="generated-response">
+                            ${result.response}
+                        </div>
+                `;
+                
+                if (result.sources.length > 0 && deepThinkingMode) {
+                    html += '<div class="source-list"><strong>📚 Fuentes utilizadas:</strong>';
+                    result.sources.forEach((source, idx) => {
+                        html += `
+                            <div class="source-item">
+                                <span class="source-weight">#${idx + 1} ${source.weight.toFixed(0)}pts</span>
+                                "${source.item.question}"
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+                
+                html += '</div>';
+                responseDiv.innerHTML = html;
+                
+                feedbackDiv.innerHTML = `
+                    <div class="feedback-btns">
+                        <button class="feedback-btn feedback-good" onclick="giveFeedback(true)">
+                            👍 Útil
+                        </button>
+                        <button class="feedback-btn feedback-bad" onclick="giveFeedback(false)">
+                            👎 Incorrecta
+                        </button>
+                    </div>
+                `;
+                
+                let analysisHTML = '<div class="analysis">';
+                analysisHTML += '<strong>🔍 Análisis:</strong><br>';
+                analysisHTML += `<div class="analysis-item">• Tipo detectado: ${result.inputType}</div>`;
+                analysisHTML += `<div class="analysis-item">• ${matches.length} fuentes encontradas</div>`;
+                analysisHTML += `<div class="analysis-item">• ${result.sources.length} fuentes utilizadas</div>`;
+                analysisHTML += `<div class="analysis-item">• Coherencia: ${result.coherence.toFixed(0)}%</div>`;
+                if (deepThinkingMode) {
+                    analysisHTML += `<div class="analysis-item">• Modo pensamiento profundo (con abecedario) activado</div>`;
+                }
+                
+                if (correctedInput.corrections.length > 0) {
+                    analysisHTML += `<div class="analysis-item">• Pregunta corregida automáticamente</div>`;
+                }
+                
+                analysisHTML += '</div>';
+                analysisDiv.innerHTML = analysisHTML;
+                
+                conversationContext.push(finalInput);
+                if (conversationContext.length > 5) conversationContext.shift();
+            }
+
+            updateStats();
+        }
+
+        function trainAI() {
+            const question = document.getElementById('question').value.trim();
+            const answer = document.getElementById('answer').value.trim();
+            const statusDiv = document.getElementById('trainStatus');
+
+            if (!question || !answer) {
+                statusDiv.innerHTML = '<div class="status error">Completa ambos campos</div>';
+                return;
+            }
+
+            const qCorrected = fullCorrection(question);
+            const aCorrected = fullCorrection(answer);
             
-            const ratioDiff = Math.abs(p1.vocalRatio - p2.vocalRatio);
-            score += (1 - ratioDiff) * 15;
+            const allCorrections = [...qCorrected.corrections, ...aCorrected.corrections];
+            showCorrections(allCorrections);
             
-            const lengthRatio = Math.min(p1.vocalPattern.length, p2.vocalPattern.length) / 
-                               Math.max(p1.vocalPattern.length, p2.vocalPattern.length);
-            score += lengthRatio * 10;
+            const correctedQuestion = qCorrected.text;
+            const correctedAnswer = aCorrected.text;
+
+            const { words: qWords, stems: qStems, bigrams: qBigrams, trigrams: qTrigrams, vocalPattern: qVocal } = tokenize(correctedQuestion);
+            const { words: aWords, stems: aStems, bigrams: aBigrams, trigrams: aTrigrams, vocalPattern: aVocal } = tokenize(correctedAnswer);
+            const keywords = extractKeywords(correctedQuestion + ' ' + correctedAnswer);
             
-            return score;
+            // Nueva: Clasificar y guardar tipo para entrenamiento
+            const qClass = classifyInput(correctedQuestion);
+            
+            trainingData.push({
+                id: Date.now() + Math.random(),
+                question: correctedQuestion,
+                answer: correctedAnswer,
+                inputType: qClass.type, // Nuevo
+                questionNorm: normalizeText(correctedQuestion),
+                answerNorm: normalizeText(correctedAnswer),
+                questionWords: qWords,
+                answerWords: aWords,
+                questionStems: qStems,
+                answerStems: aStems,
+                questionBigrams: qBigrams,
+                answerBigrams: aBigrams,
+                questionTrigrams: qTrigrams,
+                answerTrigrams: aTrigrams,
+                questionVocalPattern: qVocal,
+                answerVocalPattern: aVocal,
+                questionAlphabetPattern: analyzeAlphabetPattern(correctedQuestion), // Nuevo
+                keywords,
+                successCount: 0,
+                failCount: 0,
+                useCount: 0,
+                timestamp: new Date().toISOString()
+            });
+
+            saveToStorage();
+
+            statusDiv.innerHTML = `<div class="status success">✓ Entrenado y guardado${allCorrections.length > 0 ? ' con correcciones' : ''} (Tipo: ${qClass.type})</div>`;
+            document.getElementById('question').value = '';
+            document.getElementById('answer').value = '';
+            document.getElementById('autoTags').style.display = 'none';
+            
+            setTimeout(() => {
+                document.getElementById('corrections').style.display = 'none';
+            }, 5000);
+            
+            updateStats();
+            viewTraining();
+        }
+
+        // Actualizar viewTraining para mostrar tipo
+        function viewTraining() {
+            const listDiv = document.getElementById('trainingList');
+            
+            if (trainingData.length === 0) {
+                listDiv.innerHTML = '<div class="status info">Sin entrenamiento</div>';
+                return;
+            }
+
+            const sortedData = [...trainingData].sort((a, b) => {
+                const rateA = a.successCount / (a.successCount + a.failCount || 1);
+                const rateB = b.successCount / (b.successCount + b.failCount || 1);
+                return rateB - rateA;
+            });
+
+            listDiv.innerHTML = sortedData.map(item => {
+                const successRate = item.successCount / (item.successCount + item.failCount || 1);
+                const rateColor = successRate > 0.7 ? '#4caf50' : successRate > 0.4 ? '#ff9800' : '#f44336';
+                const typeBadge = item.inputType ? `<span style="background: #2196F3; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em;">${item.inputType}</span>` : '';
+                
+                return `
+                    <div class="training-item">
+                        <div class="training-content">
+                            <strong>Entrada:</strong> ${item.question}<br>
+                            <strong>Salida:</strong> ${item.answer}<br>
+                            <div style="margin-top: 8px; color: #666; font-size: 0.9em;">
+                                <strong>Keywords:</strong> ${item.keywords.slice(0, 6).join(', ')}${item.keywords.length > 6 ? '...' : ''}
+                            </div>
+                            <div style="margin-top: 8px; display: flex; gap: 15px; font-size: 0.85em; flex-wrap: wrap; align-items: center;">
+                                ${typeBadge}
+                                <span><strong>Usos:</strong> ${item.useCount}</span>
+                                <span><strong>✓:</strong> ${item.successCount}</span>
+                                <span><strong>✗:</strong> ${item.failCount}</span>
+                                <span style="color: ${rateColor};"><strong>Tasa:</strong> ${(successRate * 100).toFixed(0)}%</span>
+                            </div>
+                        </div>
+                        <button class="btn-delete" onclick="deleteTraining('${item.id}')">🗑️</button>
+                    </div>
+                `;
+            }).join('');
         }
 
         function saveToStorage() {
@@ -803,7 +1390,7 @@
                     conversationContext: conversationContext,
                     deepThinkingMode: deepThinkingMode,
                     lastSaved: new Date().toISOString(),
-                    version: '3.2'
+                    version: '3.3.1'
                 };
                 localStorage.setItem('aiTrainingData', JSON.stringify(dataToSave));
                 return true;
@@ -827,7 +1414,7 @@
                     
                     const statusDiv = document.getElementById('trainStatus');
                     if (trainingData.length > 0) {
-                        statusDiv.innerHTML = `<div class="status success">✓ ${trainingData.length} entrenamientos cargados automáticamente</div>`;
+                        statusDiv.innerHTML = `<div class="status success">✓ ${trainingData.length} entrenamientos cargados automáticamente (v${parsed.version || '3.2'})</div>`;
                         setTimeout(() => { statusDiv.innerHTML = ''; }, 3000);
                     }
                     return true;
@@ -838,6 +1425,7 @@
             return false;
         }
 
+        // Funciones de corrección (sin cambios)
         function correctSpelling(text) {
             let corrected = text;
             const corrections = [];
@@ -1010,6 +1598,8 @@
                 
                 const variations = generateVowelVariations(keyword);
                 variations.forEach(v => expandedKeywords.add(v));
+                const alphaVars = generateAlphabetVariations(keyword); // Nueva
+                alphaVars.forEach(v => expandedKeywords.add(v));
             });
             
             return [...expandedKeywords];
@@ -1038,42 +1628,6 @@
             return maxLen === 0 ? 1 : 1 - (matrix[len1][len2] / maxLen);
         }
 
-        function calculateSimilarity(text1, text2) {
-            const tokens1 = tokenize(text1);
-            const tokens2 = tokenize(text2);
-            
-            const set1 = new Set(tokens1.words);
-            const set2 = new Set(tokens2.words);
-            const intersection = new Set([...set1].filter(x => set2.has(x)));
-            const union = new Set([...set1, ...set2]);
-            const jaccard = union.size === 0 ? 0 : intersection.size / union.size;
-            
-            const levSim = levenshtein(tokens1.normalized, tokens2.normalized);
-            
-            const stemSet1 = new Set(tokens1.stems);
-            const stemSet2 = new Set(tokens2.stems);
-            const stemIntersection = new Set([...stemSet1].filter(x => stemSet2.has(x)));
-            const stemUnion = new Set([...stemSet1, ...stemSet2]);
-            const stemSim = stemUnion.size === 0 ? 0 : stemIntersection.size / stemUnion.size;
-            
-            const bigramSet1 = new Set(tokens1.bigrams);
-            const bigramSet2 = new Set(tokens2.bigrams);
-            const bigramIntersection = new Set([...bigramSet1].filter(x => bigramSet2.has(x)));
-            const bigramUnion = new Set([...bigramSet1, ...bigramSet2]);
-            const bigramSim = bigramUnion.size === 0 ? 0 : bigramIntersection.size / bigramUnion.size;
-            
-            let containsSim = 0;
-            if (tokens1.normalized.includes(tokens2.normalized) || tokens2.normalized.includes(tokens1.normalized)) {
-                const shorter = Math.min(tokens1.normalized.length, tokens2.normalized.length);
-                const longer = Math.max(tokens1.normalized.length, tokens2.normalized.length);
-                containsSim = shorter / longer;
-            }
-            
-            const vocalSim = compareVocalPatterns(text1, text2) / 100;
-            
-            return (jaccard * 0.20 + levSim * 0.20 + stemSim * 0.15 + bigramSim * 0.15 + containsSim * 0.10 + vocalSim * 0.20) * 100;
-        }
-
         function calculateSemanticRelevance(userInput, sentence) {
             const userTokens = tokenize(userInput);
             const sentTokens = tokenize(sentence);
@@ -1085,63 +1639,109 @@
             const similarity = calculateSimilarity(userInput, sentence);
             
             const vocalMatch = compareVocalPatterns(userInput, sentence);
+            const alphaMatch = compareAlphabetPatterns(userInput, sentence); // Nueva
             
             const lengthPenalty = Math.abs(sentence.length - userInput.length) / Math.max(sentence.length, userInput.length);
             
-            return (similarity * 0.4) + (commonKeywords * 15) + (vocalMatch * 0.3) - (lengthPenalty * 20);
+            const logicalScore = commonKeywords * 10 + similarity * 0.25 + vocalMatch * 0.15 + alphaMatch * 0.15 - lengthPenalty * 30;
+            
+            return logicalScore;
         }
 
-        function determineResponseLength(userInput, topMatches) {
-            const inputLength = userInput.split(/\s+/).length;
+        function analyzeVowelPattern(text) {
+            const vowels = ['a', 'e', 'i', 'o', 'u', 'á', 'é', 'í', 'ó', 'ú'];
+            const consonants = 'bcdfghjklmnpqrstvwxyz';
             
-            const isSimpleQuery = /^(que es|quien es|cual es|donde esta|cuando|como se)/i.test(userInput);
+            const normalized = text.toLowerCase();
+            let vocalPattern = '';
+            let consonantPattern = '';
+            let vocalCount = {};
+            let consonantCount = {};
             
-            const hasDirectAnswer = topMatches.length > 0 && topMatches[0].score > 85;
-            
-            if (isSimpleQuery || inputLength < 5) {
-                return 'short';
-            }
-            
-            if (hasDirectAnswer && topMatches[0].item.answer.split(/\s+/).length < 30) {
-                return 'short';
-            }
-            
-            if (inputLength > 15 || userInput.includes('explica') || userInput.includes('detalla')) {
-                return 'long';
-            }
-            
-            return 'medium';
-        }
-
-        function selectBestSentences(sentences, userInput, targetLength) {
-            let maxSentences;
-            if (targetLength === 'short') maxSentences = 2;
-            else if (targetLength === 'medium') maxSentences = 3;
-            else maxSentences = 5;
-
-            sentences.forEach(sent => {
-                sent.semanticScore = calculateSemanticRelevance(userInput, sent.text);
-                sent.finalScore = (sent.weight * 0.4) + (sent.semanticScore * 0.6);
-            });
-
-            sentences.sort((a, b) => b.finalScore - a.finalScore);
-
-            const selected = [];
-            const usedConcepts = new Set();
-
-            for (let sent of sentences) {
-                if (selected.length >= maxSentences) break;
-
-                const sentWords = new Set(tokenize(sent.text).words);
-                const isDuplicate = [...usedConcepts].filter(w => sentWords.has(w)).length > 3;
-
-                if (!isDuplicate || selected.length === 0) {
-                    selected.push(sent);
-                    sentWords.forEach(w => usedConcepts.add(w));
+            for (let char of normalized) {
+                if (vowels.includes(char)) {
+                    vocalPattern += 'V';
+                    vocalCount[char] = (vocalCount[char] || 0) + 1;
+                } else if (consonants.includes(char)) {
+                    consonantPattern += 'C';
+                    consonantCount[char] = (consonantCount[char] || 0) + 1;
                 }
             }
+            
+            const totalVowels = Object.values(vocalCount).reduce((a, b) => a + b, 0);
+            const totalConsonants = Object.values(consonantCount).reduce((a, b) => a + b, 0);
+            
+            const vocalRatio = totalVowels / (totalVowels + totalConsonants || 1);
+            
+            const vocalSignature = Object.keys(vocalCount).sort().join('');
+            const consonantSignature = Object.keys(consonantCount).sort().join('');
+            
+            return {
+                vocalPattern,
+                consonantPattern,
+                vocalCount,
+                consonantCount,
+                totalVowels,
+                totalConsonants,
+                vocalRatio,
+                vocalSignature,
+                consonantSignature,
+                fullSignature: vocalSignature + consonantSignature
+            };
+        }
 
-            return selected;
+        function generateVowelVariations(word) {
+            const variations = [word];
+            const vowelMap = {
+                'a': ['a', 'á'], 'e': ['e', 'é'], 'i': ['i', 'í'],
+                'o': ['o', 'ó'], 'u': ['u', 'ú'],
+                'á': ['a', 'á'], 'é': ['e', 'é'], 'í': ['i', 'í'],
+                'ó': ['o', 'ó'], 'ú': ['u', 'ú']
+            };
+            
+            for (let i = 0; i < word.length; i++) {
+                const char = word[i].toLowerCase();
+                if (vowelMap[char]) {
+                    vowelMap[char].forEach(variant => {
+                        if (variant !== char) {
+                            const newWord = word.substring(0, i) + variant + word.substring(i + 1);
+                            variations.push(newWord);
+                        }
+                    });
+                }
+            }
+            
+            return variations;
+        }
+
+        function compareVocalPatterns(pattern1, pattern2) {
+            const p1 = analyzeVowelPattern(pattern1);
+            const p2 = analyzeVowelPattern(pattern2);
+            
+            let score = 0;
+            
+            if (p1.vocalSignature === p2.vocalSignature) {
+                score += 25;
+            } else {
+                const commonVowels = Object.keys(p1.vocalCount).filter(v => p2.vocalCount[v]);
+                score += commonVowels.length * 5;
+            }
+            
+            if (p1.consonantSignature === p2.consonantSignature) {
+                score += 20;
+            } else {
+                const commonConsonants = Object.keys(p1.consonantCount).filter(c => p2.consonantCount[c]);
+                score += commonConsonants.length * 3;
+            }
+            
+            const ratioDiff = Math.abs(p1.vocalRatio - p2.vocalRatio);
+            score += (1 - ratioDiff) * 15;
+            
+            const lengthRatio = Math.min(p1.vocalPattern.length, p2.vocalPattern.length) / 
+                               Math.max(p1.vocalPattern.length, p2.vocalPattern.length);
+            score += lengthRatio * 10;
+            
+            return score;
         }
 
         function findMatches(userInput) {
@@ -1155,16 +1755,20 @@
                 
                 const qSimilarity = calculateSimilarity(userInput, item.question);
                 const semanticQ = calculateSemanticRelevance(userInput, item.question);
-                score += (qSimilarity * 0.45) + (semanticQ * 0.15);
-                if (qSimilarity > 5) details.push(`Pregunta: ${qSimilarity.toFixed(0)}%`);
+                score += (qSimilarity * 0.5) + (semanticQ * 0.2);
+                if (qSimilarity > 10) details.push(`Pregunta: ${qSimilarity.toFixed(0)}%`);
                 
                 const aSimilarity = calculateSimilarity(userInput, item.answer);
                 const semanticA = calculateSemanticRelevance(userInput, item.answer);
-                score += (aSimilarity * 0.10) + (semanticA * 0.05);
+                score += (aSimilarity * 0.15) + (semanticA * 0.1);
                 
                 const vocalScore = compareVocalPatterns(userInput, item.question);
-                score += vocalScore * 0.25;
-                if (vocalScore > 15) details.push(`Patrón Vocal: ${vocalScore.toFixed(0)}%`);
+                score += vocalScore * 0.05;
+                if (vocalScore > 20) details.push(`Patrón Vocal: ${vocalScore.toFixed(0)}%`);
+                
+                const alphaScore = compareAlphabetPatterns(userInput, item.question); // Nueva
+                score += alphaScore * 0.05;
+                if (alphaScore > 20) details.push(`Abecedario: ${alphaScore.toFixed(0)}%`);
                 
                 const keywordMatches = [];
                 userKeywords.forEach(userKw => {
@@ -1178,41 +1782,47 @@
                 });
                 
                 if (keywordMatches.length > 0) {
-                    score += keywordMatches.length * 12;
+                    score += keywordMatches.length * 15;
                     details.push(`Keywords: ${keywordMatches.length}`);
                 }
                 
                 const bigramMatches = item.questionBigrams.filter(bg => userTokens.bigrams.includes(bg));
                 if (bigramMatches.length > 0) {
-                    score += bigramMatches.length * 18;
+                    score += bigramMatches.length * 20;
                     details.push(`Bigramas: ${bigramMatches.length}`);
                 }
                 
                 const trigramMatches = item.questionTrigrams.filter(tg => userTokens.trigrams.includes(tg));
                 if (trigramMatches.length > 0) {
-                    score += trigramMatches.length * 25;
+                    score += trigramMatches.length * 30;
                     details.push(`Trigramas: ${trigramMatches.length}`);
                 }
                 
                 const stemMatches = item.questionStems.filter(stem => userTokens.stems.includes(stem));
                 if (stemMatches.length > 0) {
-                    score += stemMatches.length * 10;
+                    score += stemMatches.length * 15;
                 }
                 
                 if (item.successCount > 0) {
                     const successRate = item.successCount / (item.successCount + item.failCount || 1);
-                    score += successRate * 15;
+                    score += successRate * 20;
                     if (successRate > 0.5) details.push(`Éxito: ${(successRate * 100).toFixed(0)}%`);
                 }
                 
                 if (conversationContext.length > 0) {
                     conversationContext.forEach(ctx => {
                         const ctxSim = calculateSimilarity(ctx, item.question);
-                        if (ctxSim > 30) {
-                            score += 18;
+                        if (ctxSim > 35) {
+                            score += 20;
                             details.push('Contexto+');
                         }
                     });
+                }
+                
+                // Boost por tipo coincidente
+                if (item.inputType === classifyInput(userInput).type) {
+                    score += 25;
+                    details.push('Tipo match');
                 }
                 
                 if (score > 0) {
@@ -1222,315 +1832,6 @@
             
             matches.sort((a, b) => b.score - a.score);
             return matches;
-        }
-
-        function generateCombinedResponse(userInput, matches) {
-            if (matches.length === 0) return null;
-            
-            const thinkingSteps = [];
-            if (deepThinkingMode) {
-                thinkingSteps.push(`Analizando ${matches.length} fuentes encontradas`);
-            }
-            
-            const minScore = deepThinkingMode ? 25 : 20;
-            const topMatches = matches.slice(0, 8).filter(m => m.score > minScore);
-            
-            if (topMatches.length === 0) return null;
-            
-            if (deepThinkingMode) {
-                thinkingSteps.push(`${topMatches.length} fuentes relevantes seleccionadas`);
-            }
-            
-            const responseLength = determineResponseLength(userInput, topMatches);
-            
-            if (deepThinkingMode) {
-                thinkingSteps.push(`Tipo de respuesta: ${responseLength === 'short' ? 'concisa' : responseLength === 'medium' ? 'moderada' : 'detallada'}`);
-            }
-            
-            if (topMatches.length === 1 && topMatches[0].score > 80) {
-                const corrected = fullCorrection(topMatches[0].item.answer);
-                if (deepThinkingMode) {
-                    thinkingSteps.push('Respuesta directa encontrada');
-                    showThinkingProcess(thinkingSteps);
-                }
-                return {
-                    response: corrected.text,
-                    combined: false,
-                    sources: [topMatches[0]],
-                    confidence: topMatches[0].score,
-                    coherence: 100
-                };
-            }
-            
-            const weightedSources = topMatches.map(match => {
-                const successRate = match.item.successCount / 
-                    (match.item.successCount + match.item.failCount || 1);
-                const weight = (match.score * 0.60) + (successRate * 100 * 0.40);
-                
-                return { ...match, weight, successRate };
-            });
-            
-            weightedSources.sort((a, b) => b.weight - a.weight);
-            
-            const sentences = [];
-            weightedSources.forEach(source => {
-                const answerSentences = source.item.answer
-                    .split(/[.!?]+/)
-                    .map(s => s.trim())
-                    .filter(s => s.length > 20 && s.split(/\s+/).length >= 3);
-                
-                answerSentences.forEach(sentence => {
-                    const relevance = calculateSemanticRelevance(userInput, sentence);
-                    
-                    sentences.push({
-                        text: sentence,
-                        weight: source.weight,
-                        source: source,
-                        relevance: relevance
-                    });
-                });
-            });
-            
-            if (deepThinkingMode) {
-                thinkingSteps.push(`${sentences.length} oraciones candidatas analizadas`);
-            }
-            
-            const uniqueSentences = [];
-            sentences.forEach(sent => {
-                const isDuplicate = uniqueSentences.some(unique => 
-                    calculateSimilarity(sent.text, unique.text) > 80
-                );
-                if (!isDuplicate && sent.text.length > 15) {
-                    uniqueSentences.push(sent);
-                }
-            });
-            
-            const selectedSentences = selectBestSentences(uniqueSentences, userInput, responseLength);
-            
-            if (deepThinkingMode) {
-                thinkingSteps.push(`${selectedSentences.length} oraciones seleccionadas para respuesta final`);
-                showThinkingProcess(thinkingSteps);
-            }
-            
-            if (selectedSentences.length === 0) return null;
-            
-            let combinedResponse = '';
-            selectedSentences.forEach((sent, idx) => {
-                if (idx === 0) {
-                    combinedResponse += sent.text;
-                } else {
-                    const connectors = ['. ', '. Además, ', '. También, ', '. Por otro lado, '];
-                    const connector = idx === 1 && Math.random() > 0.6 ? connectors[Math.floor(Math.random() * 3) + 1] : '. ';
-                    
-                    if (connector === '. ') {
-                        combinedResponse += connector + sent.text;
-                    } else {
-                        combinedResponse += connector + sent.text.charAt(0).toLowerCase() + sent.text.slice(1);
-                    }
-                }
-            });
-            
-            const finalCorrected = fullCorrection(combinedResponse);
-            
-            const totalWeight = selectedSentences.reduce((sum, s) => sum + s.finalScore, 0);
-            const avgConfidence = Math.min((totalWeight / selectedSentences.length) * 1.2, 100);
-            
-            let totalCoherence = 0;
-            for (let i = 1; i < selectedSentences.length; i++) {
-                const sim = calculateSimilarity(selectedSentences[i-1].text, selectedSentences[i].text);
-                totalCoherence += Math.min(sim * 1.5, 100);
-            }
-            const avgCoherence = selectedSentences.length > 1 ? totalCoherence / (selectedSentences.length - 1) : 100;
-            
-            return {
-                response: finalCorrected.text,
-                combined: topMatches.length > 1,
-                sources: weightedSources.slice(0, selectedSentences.length),
-                confidence: avgConfidence,
-                coherence: avgCoherence
-            };
-        }
-
-        function trainAI() {
-            const question = document.getElementById('question').value.trim();
-            const answer = document.getElementById('answer').value.trim();
-            const statusDiv = document.getElementById('trainStatus');
-
-            if (!question || !answer) {
-                statusDiv.innerHTML = '<div class="status error">Completa ambos campos</div>';
-                return;
-            }
-
-            const qCorrected = fullCorrection(question);
-            const aCorrected = fullCorrection(answer);
-            
-            const allCorrections = [...qCorrected.corrections, ...aCorrected.corrections];
-            showCorrections(allCorrections);
-            
-            const correctedQuestion = qCorrected.text;
-            const correctedAnswer = aCorrected.text;
-
-            const { words: qWords, stems: qStems, bigrams: qBigrams, trigrams: qTrigrams, vocalPattern: qVocal } = tokenize(correctedQuestion);
-            const { words: aWords, stems: aStems, bigrams: aBigrams, trigrams: aTrigrams, vocalPattern: aVocal } = tokenize(correctedAnswer);
-            const keywords = extractKeywords(correctedQuestion + ' ' + correctedAnswer);
-            
-            trainingData.push({
-                id: Date.now() + Math.random(),
-                question: correctedQuestion,
-                answer: correctedAnswer,
-                questionNorm: normalizeText(correctedQuestion),
-                answerNorm: normalizeText(correctedAnswer),
-                questionWords: qWords,
-                answerWords: aWords,
-                questionStems: qStems,
-                answerStems: aStems,
-                questionBigrams: qBigrams,
-                answerBigrams: aBigrams,
-                questionTrigrams: qTrigrams,
-                answerTrigrams: aTrigrams,
-                questionVocalPattern: qVocal,
-                answerVocalPattern: aVocal,
-                keywords,
-                successCount: 0,
-                failCount: 0,
-                useCount: 0,
-                timestamp: new Date().toISOString()
-            });
-
-            saveToStorage();
-
-            statusDiv.innerHTML = `<div class="status success">✓ Entrenado y guardado${allCorrections.length > 0 ? ' con correcciones' : ''}</div>`;
-            document.getElementById('question').value = '';
-            document.getElementById('answer').value = '';
-            document.getElementById('autoTags').style.display = 'none';
-            
-            setTimeout(() => {
-                document.getElementById('corrections').style.display = 'none';
-            }, 5000);
-            
-            updateStats();
-            viewTraining();
-        }
-
-        function deleteTraining(id) {
-            if (!confirm('¿Eliminar?')) return;
-            
-            trainingData = trainingData.filter(item => item.id !== id);
-            saveToStorage();
-            
-            const statusDiv = document.getElementById('trainStatus');
-            statusDiv.innerHTML = '<div class="status success">✓ Eliminado y guardado</div>';
-            setTimeout(() => { statusDiv.innerHTML = ''; }, 2000);
-            
-            updateStats();
-            viewTraining();
-        }
-
-        function askAI() {
-            const userInput = document.getElementById('userQuestion').value.trim();
-            const responseDiv = document.getElementById('aiResponse');
-            const analysisDiv = document.getElementById('analysis');
-            const feedbackDiv = document.getElementById('feedbackSection');
-
-            if (!userInput) {
-                responseDiv.innerHTML = '<div class="status error">Escribe algo</div>';
-                return;
-            }
-
-            questionCount++;
-            saveToStorage();
-
-            if (trainingData.length === 0) {
-                responseDiv.innerHTML = '<div class="status info">⚠️ Entrena la IA primero</div>';
-                return;
-            }
-
-            const correctedInput = fullCorrection(userInput);
-            const finalInput = correctedInput.text;
-
-            const matches = findMatches(finalInput);
-
-            if (matches.length === 0 || matches[0].score < 15) {
-                responseDiv.innerHTML = '<div class="status info">🤔 No encontré información relevante. Entrena la IA con datos relacionados.</div>';
-                analysisDiv.innerHTML = '';
-                feedbackDiv.innerHTML = '';
-                lastUsedSources = [];
-                
-                conversationContext.push(finalInput);
-                if (conversationContext.length > 5) conversationContext.shift();
-            } else {
-                const result = generateCombinedResponse(finalInput, matches);
-                
-                if (!result) {
-                    responseDiv.innerHTML = '<div class="status info">🤔 No puedo generar una respuesta confiable con los datos actuales.</div>';
-                    return;
-                }
-                
-                lastUsedSources = result.sources.map(s => s.index);
-                
-                let html = `
-                    <div style="color: #155724;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
-                            <strong style="font-size: 1.1em;">🤖 Respuesta IA:</strong>
-                            <div>
-                                <span class="match-score">${result.confidence.toFixed(0)}% confianza</span>
-                                ${result.combined ? '<span class="combined-badge">🔀 COMBINADA</span>' : ''}
-                                <span class="coherence-badge">📝 ${result.coherence.toFixed(0)}% coherencia</span>
-                            </div>
-                        </div>
-                        <div class="generated-response">
-                            ${result.response}
-                        </div>
-                `;
-                
-                if (result.sources.length > 0 && deepThinkingMode) {
-                    html += '<div class="source-list"><strong>📚 Fuentes utilizadas:</strong>';
-                    result.sources.forEach((source, idx) => {
-                        html += `
-                            <div class="source-item">
-                                <span class="source-weight">#${idx + 1} ${source.weight.toFixed(0)}pts</span>
-                                "${source.item.question}"
-                            </div>
-                        `;
-                    });
-                    html += '</div>';
-                }
-                
-                html += '</div>';
-                responseDiv.innerHTML = html;
-                
-                feedbackDiv.innerHTML = `
-                    <div class="feedback-btns">
-                        <button class="feedback-btn feedback-good" onclick="giveFeedback(true)">
-                            👍 Útil
-                        </button>
-                        <button class="feedback-btn feedback-bad" onclick="giveFeedback(false)">
-                            👎 Incorrecta
-                        </button>
-                    </div>
-                `;
-                
-                let analysisHTML = '<div class="analysis">';
-                analysisHTML += '<strong>🔍 Análisis:</strong><br>';
-                analysisHTML += `<div class="analysis-item">• ${matches.length} fuentes encontradas</div>`;
-                analysisHTML += `<div class="analysis-item">• ${result.sources.length} fuentes utilizadas</div>`;
-                analysisHTML += `<div class="analysis-item">• Coherencia: ${result.coherence.toFixed(0)}%</div>`;
-                if (deepThinkingMode) {
-                    analysisHTML += `<div class="analysis-item">• Modo pensamiento profundo activado</div>`;
-                }
-                
-                if (correctedInput.corrections.length > 0) {
-                    analysisHTML += `<div class="analysis-item">• Pregunta corregida automáticamente</div>`;
-                }
-                
-                analysisHTML += '</div>';
-                analysisDiv.innerHTML = analysisHTML;
-                
-                conversationContext.push(finalInput);
-                if (conversationContext.length > 5) conversationContext.shift();
-            }
-
-            updateStats();
         }
 
         function giveFeedback(isPositive) {
@@ -1567,7 +1868,7 @@
             }
 
             const dataToExport = {
-                version: '3.3',
+                version: '3.3.1',
                 exportDate: new Date().toISOString(),
                 trainingData: trainingData,
                 questionCount: questionCount,
@@ -1658,45 +1959,6 @@
             return allWords.size;
         }
 
-        function viewTraining() {
-            const listDiv = document.getElementById('trainingList');
-            
-            if (trainingData.length === 0) {
-                listDiv.innerHTML = '<div class="status info">Sin entrenamiento</div>';
-                return;
-            }
-
-            const sortedData = [...trainingData].sort((a, b) => {
-                const rateA = a.successCount / (a.successCount + a.failCount || 1);
-                const rateB = b.successCount / (b.successCount + b.failCount || 1);
-                return rateB - rateA;
-            });
-
-            listDiv.innerHTML = sortedData.map(item => {
-                const successRate = item.successCount / (item.successCount + item.failCount || 1);
-                const rateColor = successRate > 0.7 ? '#4caf50' : successRate > 0.4 ? '#ff9800' : '#f44336';
-                
-                return `
-                    <div class="training-item">
-                        <div class="training-content">
-                            <strong>Entrada:</strong> ${item.question}<br>
-                            <strong>Salida:</strong> ${item.answer}<br>
-                            <div style="margin-top: 8px; color: #666; font-size: 0.9em;">
-                                <strong>Keywords:</strong> ${item.keywords.slice(0, 6).join(', ')}${item.keywords.length > 6 ? '...' : ''}
-                            </div>
-                            <div style="margin-top: 8px; display: flex; gap: 15px; font-size: 0.85em; flex-wrap: wrap;">
-                                <span><strong>Usos:</strong> ${item.useCount}</span>
-                                <span><strong>✓:</strong> ${item.successCount}</span>
-                                <span><strong>✗:</strong> ${item.failCount}</span>
-                                <span style="color: ${rateColor};"><strong>Tasa:</strong> ${(successRate * 100).toFixed(0)}%</span>
-                            </div>
-                        </div>
-                        <button class="btn-delete" onclick="deleteTraining('${item.id}')">🗑️</button>
-                    </div>
-                `;
-            }).join('');
-        }
-
         function clearAllTraining() {
             if (!confirm('¿BORRAR TODO el entrenamiento guardado?')) return;
 
@@ -1736,13 +1998,28 @@
             if (uniqueKeywords.length > 0) {
                 document.getElementById('tagsList').innerHTML = uniqueKeywords.slice(0, 8).map(tag => 
                     `<span>${tag}</span>`
-                ).join('') + (uniqueKeywords.length > 8 ? '<span>+</span>' : '');
+                ).join('') + (uniqueKeywords.length > 8 ? '<span>...</span>' : '');
                 document.getElementById('autoTags').style.display = 'block';
             } else {
                 document.getElementById('autoTags').style.display = 'none';
             }
         }
 
+        function deleteTraining(id) {
+            if (!confirm('¿Eliminar?')) return;
+            
+            trainingData = trainingData.filter(item => item.id !== id);
+            saveToStorage();
+            
+            const statusDiv = document.getElementById('trainStatus');
+            statusDiv.innerHTML = '<div class="status success">✓ Eliminado y guardado</div>';
+            setTimeout(() => { statusDiv.innerHTML = ''; }, 2000);
+            
+            updateStats();
+            viewTraining();
+        }
+
+        document.addEventListener('input', updateAutoTags);
         document.getElementById('question').addEventListener('input', updateAutoTags);
         document.getElementById('answer').addEventListener('input', updateAutoTags);
 
