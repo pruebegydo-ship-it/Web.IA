@@ -415,6 +415,96 @@
             margin-left: 10px;
         }
 
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .toggle-label {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .toggle-description {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .thinking-indicator {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #9c27b0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .thinking-step {
+            margin: 8px 0;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: #4a148c;
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -445,6 +535,7 @@
                 <span class="badge">🎵 Análisis Vocal</span>
                 <span class="badge">🎯 Precisión Mejorada</span>
                 <span class="badge">💾 Auto-Guardado</span>
+                <span class="badge">🧠 Pensamiento Profundo</span>
             </div>
         </div>
 
@@ -478,11 +569,26 @@
 
             <div class="section">
                 <h2>💬 Consultar IA</h2>
+                
+                <div class="toggle-container">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="deepThinkingToggle" onchange="toggleDeepThinking()">
+                        <span class="slider"></span>
+                    </label>
+                    <div>
+                        <div class="toggle-label">🧠 Modo Pensamiento Profundo</div>
+                        <div class="toggle-description">Análisis detallado y respuestas más precisas</div>
+                    </div>
+                </div>
+
                 <div class="input-group">
                     <label for="userQuestion">Pregunta:</label>
                     <textarea id="userQuestion" placeholder="Escribe tu pregunta... La IA generará respuestas inteligentes"></textarea>
                 </div>
                 <button class="btn" onclick="askAI()">🚀 Consultar</button>
+                
+                <div id="thinkingProcess" style="display:none;"></div>
+                
                 <div class="response-box" id="aiResponse">
                     La IA analizará profundamente tu pregunta y generará una respuesta combinada con corrección automática...
                 </div>
@@ -524,6 +630,7 @@
         let questionCount = 0;
         let conversationContext = [];
         let lastUsedSources = [];
+        let deepThinkingMode = false;
 
         const synonyms = {
             'hola': ['saludos', 'buenas', 'hey', 'alo', 'que tal'],
@@ -566,6 +673,31 @@
             'dia': 'día', 'despues': 'después', 'facil': 'fácil',
             'dificil': 'difícil', 'util': 'útil', 'semantica': 'semántica'
         };
+
+        function toggleDeepThinking() {
+            deepThinkingMode = document.getElementById('deepThinkingToggle').checked;
+            saveToStorage();
+        }
+
+        function showThinkingProcess(steps) {
+            const thinkingDiv = document.getElementById('thinkingProcess');
+            if (!deepThinkingMode) {
+                thinkingDiv.style.display = 'none';
+                return;
+            }
+
+            let html = '<div class="thinking-indicator"><strong>🧠 Procesando...</strong>';
+            steps.forEach(step => {
+                html += `<div class="thinking-step">• ${step}</div>`;
+            });
+            html += '</div>';
+            thinkingDiv.innerHTML = html;
+            thinkingDiv.style.display = 'block';
+
+            setTimeout(() => {
+                thinkingDiv.style.display = 'none';
+            }, 3000);
+        }
 
         function analyzeVowelPattern(text) {
             const vowels = ['a', 'e', 'i', 'o', 'u', 'á', 'é', 'í', 'ó', 'ú'];
@@ -669,6 +801,7 @@
                     trainingData: trainingData,
                     questionCount: questionCount,
                     conversationContext: conversationContext,
+                    deepThinkingMode: deepThinkingMode,
                     lastSaved: new Date().toISOString(),
                     version: '3.2'
                 };
@@ -688,6 +821,9 @@
                     trainingData = parsed.trainingData || [];
                     questionCount = parsed.questionCount || 0;
                     conversationContext = parsed.conversationContext || [];
+                    deepThinkingMode = parsed.deepThinkingMode || false;
+                    
+                    document.getElementById('deepThinkingToggle').checked = deepThinkingMode;
                     
                     const statusDiv = document.getElementById('trainStatus');
                     if (trainingData.length > 0) {
@@ -938,24 +1074,74 @@
             return (jaccard * 0.20 + levSim * 0.20 + stemSim * 0.15 + bigramSim * 0.15 + containsSim * 0.10 + vocalSim * 0.20) * 100;
         }
 
-        function calculateCoherence(sentence1, sentence2) {
-            const similarity = calculateSimilarity(sentence1, sentence2);
+        function calculateSemanticRelevance(userInput, sentence) {
+            const userTokens = tokenize(userInput);
+            const sentTokens = tokenize(sentence);
             
-            const connectors = ['además', 'también', 'por lo tanto', 'sin embargo', 'pero', 'y', 'asimismo'];
-            let hasConnector = connectors.some(conn => sentence2.toLowerCase().includes(conn));
+            const commonKeywords = [...new Set(userTokens.words)].filter(w => 
+                sentTokens.words.includes(w) && w.length > 3
+            ).length;
             
-            const words1 = new Set(tokenize(sentence1).words);
-            const words2 = new Set(tokenize(sentence2).words);
-            const commonWords = [...words1].filter(w => words2.has(w)).length;
+            const similarity = calculateSimilarity(userInput, sentence);
             
-            if (similarity > 90) return 20;
+            const vocalMatch = compareVocalPatterns(userInput, sentence);
             
-            let coherence = 50;
-            coherence += (similarity * 0.3);
-            coherence += (hasConnector ? 15 : 0);
-            coherence += (commonWords * 5);
+            const lengthPenalty = Math.abs(sentence.length - userInput.length) / Math.max(sentence.length, userInput.length);
             
-            return Math.min(coherence, 100);
+            return (similarity * 0.4) + (commonKeywords * 15) + (vocalMatch * 0.3) - (lengthPenalty * 20);
+        }
+
+        function determineResponseLength(userInput, topMatches) {
+            const inputLength = userInput.split(/\s+/).length;
+            
+            const isSimpleQuery = /^(que es|quien es|cual es|donde esta|cuando|como se)/i.test(userInput);
+            
+            const hasDirectAnswer = topMatches.length > 0 && topMatches[0].score > 85;
+            
+            if (isSimpleQuery || inputLength < 5) {
+                return 'short';
+            }
+            
+            if (hasDirectAnswer && topMatches[0].item.answer.split(/\s+/).length < 30) {
+                return 'short';
+            }
+            
+            if (inputLength > 15 || userInput.includes('explica') || userInput.includes('detalla')) {
+                return 'long';
+            }
+            
+            return 'medium';
+        }
+
+        function selectBestSentences(sentences, userInput, targetLength) {
+            let maxSentences;
+            if (targetLength === 'short') maxSentences = 2;
+            else if (targetLength === 'medium') maxSentences = 3;
+            else maxSentences = 5;
+
+            sentences.forEach(sent => {
+                sent.semanticScore = calculateSemanticRelevance(userInput, sent.text);
+                sent.finalScore = (sent.weight * 0.4) + (sent.semanticScore * 0.6);
+            });
+
+            sentences.sort((a, b) => b.finalScore - a.finalScore);
+
+            const selected = [];
+            const usedConcepts = new Set();
+
+            for (let sent of sentences) {
+                if (selected.length >= maxSentences) break;
+
+                const sentWords = new Set(tokenize(sent.text).words);
+                const isDuplicate = [...usedConcepts].filter(w => sentWords.has(w)).length > 3;
+
+                if (!isDuplicate || selected.length === 0) {
+                    selected.push(sent);
+                    sentWords.forEach(w => usedConcepts.add(w));
+                }
+            }
+
+            return selected;
         }
 
         function findMatches(userInput) {
@@ -968,15 +1154,16 @@
                 const details = [];
                 
                 const qSimilarity = calculateSimilarity(userInput, item.question);
-                score += qSimilarity * 0.55;
+                const semanticQ = calculateSemanticRelevance(userInput, item.question);
+                score += (qSimilarity * 0.45) + (semanticQ * 0.15);
                 if (qSimilarity > 5) details.push(`Pregunta: ${qSimilarity.toFixed(0)}%`);
                 
                 const aSimilarity = calculateSimilarity(userInput, item.answer);
-                score += aSimilarity * 0.15;
-                if (aSimilarity > 5) details.push(`Respuesta: ${aSimilarity.toFixed(0)}%`);
+                const semanticA = calculateSemanticRelevance(userInput, item.answer);
+                score += (aSimilarity * 0.10) + (semanticA * 0.05);
                 
                 const vocalScore = compareVocalPatterns(userInput, item.question);
-                score += vocalScore * 0.3;
+                score += vocalScore * 0.25;
                 if (vocalScore > 15) details.push(`Patrón Vocal: ${vocalScore.toFixed(0)}%`);
                 
                 const keywordMatches = [];
@@ -991,30 +1178,30 @@
                 });
                 
                 if (keywordMatches.length > 0) {
-                    score += keywordMatches.length * 10;
+                    score += keywordMatches.length * 12;
                     details.push(`Keywords: ${keywordMatches.length}`);
                 }
                 
                 const bigramMatches = item.questionBigrams.filter(bg => userTokens.bigrams.includes(bg));
                 if (bigramMatches.length > 0) {
-                    score += bigramMatches.length * 15;
+                    score += bigramMatches.length * 18;
                     details.push(`Bigramas: ${bigramMatches.length}`);
                 }
                 
                 const trigramMatches = item.questionTrigrams.filter(tg => userTokens.trigrams.includes(tg));
                 if (trigramMatches.length > 0) {
-                    score += trigramMatches.length * 20;
+                    score += trigramMatches.length * 25;
                     details.push(`Trigramas: ${trigramMatches.length}`);
                 }
                 
                 const stemMatches = item.questionStems.filter(stem => userTokens.stems.includes(stem));
                 if (stemMatches.length > 0) {
-                    score += stemMatches.length * 8;
+                    score += stemMatches.length * 10;
                 }
                 
                 if (item.successCount > 0) {
                     const successRate = item.successCount / (item.successCount + item.failCount || 1);
-                    score += successRate * 12;
+                    score += successRate * 15;
                     if (successRate > 0.5) details.push(`Éxito: ${(successRate * 100).toFixed(0)}%`);
                 }
                 
@@ -1022,7 +1209,7 @@
                     conversationContext.forEach(ctx => {
                         const ctxSim = calculateSimilarity(ctx, item.question);
                         if (ctxSim > 30) {
-                            score += 15;
+                            score += 18;
                             details.push('Contexto+');
                         }
                     });
@@ -1040,12 +1227,32 @@
         function generateCombinedResponse(userInput, matches) {
             if (matches.length === 0) return null;
             
-            const topMatches = matches.slice(0, 6).filter(m => m.score > 18);
+            const thinkingSteps = [];
+            if (deepThinkingMode) {
+                thinkingSteps.push(`Analizando ${matches.length} fuentes encontradas`);
+            }
+            
+            const minScore = deepThinkingMode ? 25 : 20;
+            const topMatches = matches.slice(0, 8).filter(m => m.score > minScore);
             
             if (topMatches.length === 0) return null;
             
-            if (topMatches.length === 1 && topMatches[0].score > 75) {
+            if (deepThinkingMode) {
+                thinkingSteps.push(`${topMatches.length} fuentes relevantes seleccionadas`);
+            }
+            
+            const responseLength = determineResponseLength(userInput, topMatches);
+            
+            if (deepThinkingMode) {
+                thinkingSteps.push(`Tipo de respuesta: ${responseLength === 'short' ? 'concisa' : responseLength === 'medium' ? 'moderada' : 'detallada'}`);
+            }
+            
+            if (topMatches.length === 1 && topMatches[0].score > 80) {
                 const corrected = fullCorrection(topMatches[0].item.answer);
+                if (deepThinkingMode) {
+                    thinkingSteps.push('Respuesta directa encontrada');
+                    showThinkingProcess(thinkingSteps);
+                }
                 return {
                     response: corrected.text,
                     combined: false,
@@ -1058,7 +1265,7 @@
             const weightedSources = topMatches.map(match => {
                 const successRate = match.item.successCount / 
                     (match.item.successCount + match.item.failCount || 1);
-                const weight = (match.score * 0.65) + (successRate * 100 * 0.35);
+                const weight = (match.score * 0.60) + (successRate * 100 * 0.40);
                 
                 return { ...match, weight, successRate };
             });
@@ -1070,75 +1277,70 @@
                 const answerSentences = source.item.answer
                     .split(/[.!?]+/)
                     .map(s => s.trim())
-                    .filter(s => s.length > 15);
+                    .filter(s => s.length > 20 && s.split(/\s+/).length >= 3);
                 
                 answerSentences.forEach(sentence => {
-                    const relevance = calculateSimilarity(userInput, sentence);
+                    const relevance = calculateSemanticRelevance(userInput, sentence);
                     
                     sentences.push({
                         text: sentence,
-                        weight: source.weight + (relevance * 0.25),
+                        weight: source.weight,
                         source: source,
                         relevance: relevance
                     });
                 });
             });
             
+            if (deepThinkingMode) {
+                thinkingSteps.push(`${sentences.length} oraciones candidatas analizadas`);
+            }
+            
             const uniqueSentences = [];
             sentences.forEach(sent => {
                 const isDuplicate = uniqueSentences.some(unique => 
-                    calculateSimilarity(sent.text, unique.text) > 75
+                    calculateSimilarity(sent.text, unique.text) > 80
                 );
-                if (!isDuplicate && sent.text.length > 10) {
+                if (!isDuplicate && sent.text.length > 15) {
                     uniqueSentences.push(sent);
                 }
             });
             
-            uniqueSentences.sort((a, b) => b.weight - a.weight);
+            const selectedSentences = selectBestSentences(uniqueSentences, userInput, responseLength);
             
-            const selectedSentences = [uniqueSentences[0]];
-            let totalCoherence = 100;
-            let coherenceCount = 1;
-            
-            for (let i = 1; i < Math.min(uniqueSentences.length, 5); i++) {
-                const candidate = uniqueSentences[i];
-                const lastSelected = selectedSentences[selectedSentences.length - 1];
-                
-                const coherence = calculateCoherence(lastSelected.text, candidate.text);
-                
-                if (coherence > 40 || selectedSentences.length < 2) {
-                    selectedSentences.push(candidate);
-                    totalCoherence += coherence;
-                    coherenceCount++;
-                }
-                
-                if (selectedSentences.length >= 4) break;
+            if (deepThinkingMode) {
+                thinkingSteps.push(`${selectedSentences.length} oraciones seleccionadas para respuesta final`);
+                showThinkingProcess(thinkingSteps);
             }
+            
+            if (selectedSentences.length === 0) return null;
             
             let combinedResponse = '';
             selectedSentences.forEach((sent, idx) => {
                 if (idx === 0) {
                     combinedResponse += sent.text;
                 } else {
-                    const needsConnector = !sent.text.toLowerCase().startsWith('además') &&
-                                          !sent.text.toLowerCase().startsWith('también') &&
-                                          !sent.text.toLowerCase().startsWith('por');
+                    const connectors = ['. ', '. Además, ', '. También, ', '. Por otro lado, '];
+                    const connector = idx === 1 && Math.random() > 0.6 ? connectors[Math.floor(Math.random() * 3) + 1] : '. ';
                     
-                    if (needsConnector && Math.random() > 0.5) {
-                        const connectors = ['. Además, ', '. También, ', '. Por otro lado, ', '. Asimismo, '];
-                        combinedResponse += connectors[Math.floor(Math.random() * connectors.length)] + 
-                                          sent.text.charAt(0).toLowerCase() + sent.text.slice(1);
+                    if (connector === '. ') {
+                        combinedResponse += connector + sent.text;
                     } else {
-                        combinedResponse += '. ' + sent.text;
+                        combinedResponse += connector + sent.text.charAt(0).toLowerCase() + sent.text.slice(1);
                     }
                 }
             });
             
             const finalCorrected = fullCorrection(combinedResponse);
             
-            const totalWeight = weightedSources.reduce((sum, s) => sum + s.weight, 0);
-            const avgConfidence = Math.min(totalWeight / weightedSources.length, 100);
-            const avgCoherence = totalCoherence / coherenceCount;
+            const totalWeight = selectedSentences.reduce((sum, s) => sum + s.finalScore, 0);
+            const avgConfidence = Math.min((totalWeight / selectedSentences.length) * 1.2, 100);
+            
+            let totalCoherence = 0;
+            for (let i = 1; i < selectedSentences.length; i++) {
+                const sim = calculateSimilarity(selectedSentences[i-1].text, selectedSentences[i].text);
+                totalCoherence += Math.min(sim * 1.5, 100);
+            }
+            const avgCoherence = selectedSentences.length > 1 ? totalCoherence / (selectedSentences.length - 1) : 100;
             
             return {
                 response: finalCorrected.text,
@@ -1248,8 +1450,8 @@
 
             const matches = findMatches(finalInput);
 
-            if (matches.length === 0 || matches[0].score < 10) {
-                responseDiv.innerHTML = '<div class="status info">🤔 Sin coincidencias. Entrena más.</div>';
+            if (matches.length === 0 || matches[0].score < 15) {
+                responseDiv.innerHTML = '<div class="status info">🤔 No encontré información relevante. Entrena la IA con datos relacionados.</div>';
                 analysisDiv.innerHTML = '';
                 feedbackDiv.innerHTML = '';
                 lastUsedSources = [];
@@ -1260,7 +1462,7 @@
                 const result = generateCombinedResponse(finalInput, matches);
                 
                 if (!result) {
-                    responseDiv.innerHTML = '<div class="status info">🤔 No puedo generar respuesta confiable.</div>';
+                    responseDiv.innerHTML = '<div class="status info">🤔 No puedo generar una respuesta confiable con los datos actuales.</div>';
                     return;
                 }
                 
@@ -1281,8 +1483,8 @@
                         </div>
                 `;
                 
-                if (result.sources.length > 0) {
-                    html += '<div class="source-list"><strong>📚 Fuentes:</strong>';
+                if (result.sources.length > 0 && deepThinkingMode) {
+                    html += '<div class="source-list"><strong>📚 Fuentes utilizadas:</strong>';
                     result.sources.forEach((source, idx) => {
                         html += `
                             <div class="source-item">
@@ -1309,14 +1511,16 @@
                 `;
                 
                 let analysisHTML = '<div class="analysis">';
-                analysisHTML += '<strong>🔍 Análisis Vocal Avanzado:</strong><br>';
-                analysisHTML += `<div class="analysis-item">• ${matches.length} fuentes analizadas</div>`;
-                analysisHTML += `<div class="analysis-item">• ${result.sources.length} fuentes combinadas</div>`;
+                analysisHTML += '<strong>🔍 Análisis:</strong><br>';
+                analysisHTML += `<div class="analysis-item">• ${matches.length} fuentes encontradas</div>`;
+                analysisHTML += `<div class="analysis-item">• ${result.sources.length} fuentes utilizadas</div>`;
                 analysisHTML += `<div class="analysis-item">• Coherencia: ${result.coherence.toFixed(0)}%</div>`;
-                analysisHTML += `<div class="analysis-item">• Análisis vocal aplicado</div>`;
+                if (deepThinkingMode) {
+                    analysisHTML += `<div class="analysis-item">• Modo pensamiento profundo activado</div>`;
+                }
                 
                 if (correctedInput.corrections.length > 0) {
-                    analysisHTML += `<div class="analysis-item">• Tu pregunta fue corregida automáticamente</div>`;
+                    analysisHTML += `<div class="analysis-item">• Pregunta corregida automáticamente</div>`;
                 }
                 
                 analysisHTML += '</div>';
@@ -1363,11 +1567,12 @@
             }
 
             const dataToExport = {
-                version: '3.2',
+                version: '3.3',
                 exportDate: new Date().toISOString(),
                 trainingData: trainingData,
                 questionCount: questionCount,
-                conversationContext: conversationContext
+                conversationContext: conversationContext,
+                deepThinkingMode: deepThinkingMode
             };
 
             const dataStr = JSON.stringify(dataToExport, null, 2);
@@ -1420,6 +1625,11 @@
                     
                     if (importedData.conversationContext) {
                         conversationContext = importedData.conversationContext;
+                    }
+
+                    if (importedData.deepThinkingMode !== undefined) {
+                        deepThinkingMode = importedData.deepThinkingMode;
+                        document.getElementById('deepThinkingToggle').checked = deepThinkingMode;
                     }
                     
                     saveToStorage();
