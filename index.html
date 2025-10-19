@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA Ultra Avanzada V3 - Análisis Multinivel</title>
+    <title>IA Ultra Avanzada V2 - Análisis Semántico Profundo</title>
     <style>
         * {
             margin: 0;
@@ -45,7 +45,7 @@
             padding: 5px 15px;
             border-radius: 20px;
             margin: 5px;
-            font-size: 0.85em;
+            font-size: 0.9em;
         }
 
         .main-content {
@@ -394,6 +394,25 @@
             display: none;
         }
 
+        .storage-warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px;
+            text-align: center;
+        }
+
+        .storage-warning h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .storage-warning p {
+            color: #856404;
+            margin: 5px 0;
+        }
+
         .generated-response {
             background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
             padding: 18px;
@@ -437,16 +456,21 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🧠 IA Ultra Avanzada V3</h1>
-            <p>Análisis Multinivel: Alfabético + Fonético + Gramatical + Semántico + Lógico</p>
+            <h1>🧠 IA Ultra Avanzada V2</h1>
+            <p>Análisis Semántico Profundo + Generación Coherente Inteligente</p>
             <div>
-                <span class="badge">🔤 Análisis Alfabético</span>
-                <span class="badge">🎯 Jaro-Winkler</span>
-                <span class="badge">📖 Análisis Gramatical</span>
-                <span class="badge">🧬 N-gramas Caracteres</span>
-                <span class="badge">🔍 Validación Lógica</span>
-                <span class="badge">⚡ TF-IDF</span>
+                <span class="badge">✍️ Auto-Corrección</span>
+                <span class="badge">🔀 Combinación Inteligente</span>
+                <span class="badge">📝 Análisis de Coherencia</span>
+                <span class="badge">🎯 Detección de Incompatibilidades</span>
+                <span class="badge">🧩 Filtrado de Calidad</span>
             </div>
+        </div>
+
+        <div id="storageWarning" class="storage-warning" style="display:none;">
+            <h3>⚠️ Aviso Importante</h3>
+            <p><strong>Descarga este archivo para guardar permanentemente.</strong></p>
+            <p>Clic derecho → "Guardar como" → Abre desde tu PC</p>
         </div>
 
         <div class="main-content">
@@ -454,17 +478,17 @@
                 <h2>📚 Entrenar IA</h2>
                 <div class="input-group">
                     <label for="question">Pregunta / Entrada:</label>
-                    <textarea id="question" placeholder="Escribe aquí... (Análisis multinivel automático)"></textarea>
+                    <textarea id="question" placeholder="Escribe aquí... (La IA corregirá automáticamente)"></textarea>
                 </div>
                 <div class="input-group">
                     <label for="answer">Respuesta / Salida:</label>
-                    <textarea id="answer" placeholder="Escribe la respuesta completa y lógica..."></textarea>
+                    <textarea id="answer" placeholder="Escribe la respuesta... (Se corregirá al guardar)"></textarea>
                 </div>
                 <div id="corrections" class="correction-box" style="display:none;"></div>
                 <div id="autoTags" class="auto-tags" style="display:none;">
-                    <strong>Análisis:</strong> <span id="tagsList"></span>
+                    <strong>Palabras clave:</strong> <span id="tagsList"></span>
                 </div>
-                <button class="btn" onclick="trainAI()">✅ Entrenar IA Avanzada</button>
+                <button class="btn" onclick="trainAI()">✅ Entrenar IA (con corrección)</button>
                 <button class="btn btn-secondary" onclick="viewTraining()">Ver Entrenamiento</button>
                 
                 <div class="btn-group">
@@ -481,11 +505,11 @@
                 <h2>💬 Consultar IA</h2>
                 <div class="input-group">
                     <label for="userQuestion">Pregunta:</label>
-                    <textarea id="userQuestion" placeholder="Escribe tu pregunta... La IA usará 7 métodos avanzados para encontrar la mejor respuesta"></textarea>
+                    <textarea id="userQuestion" placeholder="Escribe tu pregunta... La IA generará respuestas inteligentes y coherentes"></textarea>
                 </div>
-                <button class="btn" onclick="askAI()">🚀 Consultar IA Avanzada</button>
+                <button class="btn" onclick="askAI()">🚀 Consultar</button>
                 <div class="response-box" id="aiResponse">
-                    La IA analizará tu pregunta con 7 métodos avanzados: alfabético, fonético, gramatical, semántico, n-gramas, TF-IDF y validación lógica...
+                    La IA analizará profundamente tu pregunta con detección de incompatibilidades, análisis de coherencia y filtrado de calidad para generar la mejor respuesta posible...
                 </div>
                 <div id="feedbackSection"></div>
                 <div id="analysis"></div>
@@ -525,22 +549,22 @@
         let questionCount = 0;
         let conversationContext = [];
         let lastUsedSources = [];
-        let idfScores = {};
+        let storageAvailable = false;
 
         const synonyms = {
-            'hola': ['saludos', 'buenas', 'hey', 'alo', 'que tal', 'hi'],
+            'hola': ['saludos', 'buenas', 'hey', 'alo', 'que tal'],
             'adios': ['chao', 'hasta luego', 'nos vemos', 'bye'],
-            'gracias': ['muchas gracias', 'agradecido', 'thanks', 'agradezco'],
-            'ayuda': ['ayudar', 'asistencia', 'soporte', 'auxilio', 'apoyo'],
-            'como': ['de que manera', 'de que forma', 'de que modo'],
-            'que': ['cual', 'cuales', 'qué'],
-            'hacer': ['realizar', 'ejecutar', 'crear', 'efectuar'],
-            'bueno': ['bien', 'excelente', 'genial', 'perfecto', 'magnifico'],
-            'malo': ['mal', 'pesimo', 'terrible', 'horrible'],
-            'programar': ['programacion', 'codificar', 'codigo', 'desarrollar', 'software'],
-            'javascript': ['js', 'ecmascript', 'node'],
-            'python': ['py', 'django', 'flask'],
-            'aprender': ['estudiar', 'ensenar', 'educacion', 'capacitar']
+            'gracias': ['muchas gracias', 'agradecido', 'thanks'],
+            'ayuda': ['ayudar', 'asistencia', 'soporte', 'auxilio'],
+            'como': ['de que manera', 'de que forma'],
+            'que': ['cual', 'cuales'],
+            'hacer': ['realizar', 'ejecutar', 'crear'],
+            'bueno': ['bien', 'excelente', 'genial', 'perfecto'],
+            'malo': ['mal', 'pesimo', 'terrible'],
+            'programar': ['programacion', 'codificar', 'codigo', 'desarrollar'],
+            'javascript': ['js', 'ecmascript'],
+            'python': ['py'],
+            'aprender': ['estudiar', 'ensenar', 'educacion']
         };
 
         const spellingCorrections = {
@@ -548,10 +572,12 @@
             'tb': 'también', 'tmb': 'también', 'bn': 'bien',
             'd': 'de', 'k': 'que', 'x': 'por', 'pa': 'para',
             'porfa': 'por favor', 'porfavor': 'por favor',
-            'ola': 'hola', 'aver': 'a ver', 'aber': 'a ver',
+            'hola': 'hola', 'ola': 'hola',
+            'aver': 'a ver', 'aber': 'a ver',
             'aslo': 'hazlo', 'ase': 'hace', 'ahy': 'ahí',
-            'komo': 'como', 'kien': 'quien',
+            'q': 'qué', 'komo': 'como', 'kien': 'quien',
             'xfa': 'por favor', 'porq': 'porque',
+            'entiendes': 'entiendes', 'bn': 'bien',
             'bro': 'hermano', 'wey': 'amigo'
         };
 
@@ -559,306 +585,164 @@
             'como': 'cómo', 'que': 'qué', 'cual': 'cuál', 'donde': 'dónde',
             'cuando': 'cuándo', 'quien': 'quién', 'cuanto': 'cuánto',
             'mas': 'más', 'si': 'sí', 'tu': 'tú', 'mi': 'mí',
-            'esta': 'está', 'estas': 'estás',
-            'razon': 'razón', 'informacion': 'información',
+            'te': 'té', 'el': 'él', 'solo': 'sólo',
+            'esta': 'está', 'estas': 'estás', 'este': 'este',
+            'razon': 'razón', 'acion': 'ación', 'informacion': 'información',
             'codigo': 'código', 'tambien': 'también', 'ahi': 'ahí',
             'dia': 'día', 'despues': 'después', 'facil': 'fácil',
-            'dificil': 'difícil', 'util': 'útil'
+            'dificil': 'difícil', 'util': 'útil', 'semantica': 'semántica'
         };
 
-        // ===== ANÁLISIS ALFABÉTICO Y FONÉTICO AVANZADO =====
-        function jaroWinkler(s1, s2) {
-            const m = s1.length;
-            const n = s2.length;
-            
-            if (m === 0) return n === 0 ? 1.0 : 0.0;
-            if (n === 0) return 0.0;
-            
-            const matchWindow = Math.floor(Math.max(m, n) / 2) - 1;
-            const s1Matches = new Array(m).fill(false);
-            const s2Matches = new Array(n).fill(false);
-            
-            let matches = 0;
-            let transpositions = 0;
-            
-            for (let i = 0; i < m; i++) {
-                const start = Math.max(0, i - matchWindow);
-                const end = Math.min(i + matchWindow + 1, n);
-                
-                for (let j = start; j < end; j++) {
-                    if (s2Matches[j]) continue;
-                    if (s1[i] !== s2[j]) continue;
-                    s1Matches[i] = true;
-                    s2Matches[j] = true;
-                    matches++;
-                    break;
+        function checkStorageAvailability() {
+            try {
+                const test = '__storage_test__';
+                localStorage.setItem(test, test);
+                localStorage.removeItem(test);
+                storageAvailable = true;
+                return true;
+            } catch(e) {
+                storageAvailable = false;
+                document.getElementById('storageWarning').style.display = 'block';
+                return false;
+            }
+        }
+
+        function saveToStorage() {
+            if (!storageAvailable) return;
+            try {
+                const dataToSave = {
+                    trainingData: trainingData,
+                    questionCount: questionCount,
+                    lastSaved: new Date().toISOString()
+                };
+                localStorage.setItem('aiTrainingData', JSON.stringify(dataToSave));
+            } catch(e) {
+                console.warn('No se pudo guardar:', e);
+            }
+        }
+
+        function loadFromStorage() {
+            if (!storageAvailable) return;
+            try {
+                const saved = localStorage.getItem('aiTrainingData');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    trainingData = data.trainingData || [];
+                    questionCount = data.questionCount || 0;
+                    const statusDiv = document.getElementById('trainStatus');
+                    statusDiv.innerHTML = `<div class="status success">✓ ${trainingData.length} entrenamientos cargados</div>`;
+                    setTimeout(() => { statusDiv.innerHTML = ''; }, 3000);
                 }
+            } catch(e) {
+                console.warn('Error al cargar:', e);
             }
-            
-            if (matches === 0) return 0.0;
-            
-            let k = 0;
-            for (let i = 0; i < m; i++) {
-                if (!s1Matches[i]) continue;
-                while (!s2Matches[k]) k++;
-                if (s1[i] !== s2[k]) transpositions++;
-                k++;
-            }
-            
-            const jaro = (matches / m + matches / n + (matches - transpositions / 2) / matches) / 3.0;
-            
-            let prefix = 0;
-            for (let i = 0; i < Math.min(m, n, 4); i++) {
-                if (s1[i] === s2[i]) prefix++;
-                else break;
-            }
-            
-            return jaro + prefix * 0.1 * (1.0 - jaro);
         }
 
-        function characterNGrams(text, n) {
-            const ngrams = [];
-            const clean = text.toLowerCase().replace(/\s+/g, '');
-            for (let i = 0; i <= clean.length - n; i++) {
-                ngrams.push(clean.substring(i, i + n));
-            }
-            return ngrams;
-        }
-
-        function characterSimilarity(text1, text2) {
-            const ngrams1_2 = new Set(characterNGrams(text1, 2));
-            const ngrams2_2 = new Set(characterNGrams(text2, 2));
-            const ngrams1_3 = new Set(characterNGrams(text1, 3));
-            const ngrams2_3 = new Set(characterNGrams(text2, 3));
-            
-            const intersection2 = new Set([...ngrams1_2].filter(x => ngrams2_2.has(x)));
-            const union2 = new Set([...ngrams1_2, ...ngrams2_2]);
-            const jaccard2 = union2.size === 0 ? 0 : intersection2.size / union2.size;
-            
-            const intersection3 = new Set([...ngrams1_3].filter(x => ngrams2_3.has(x)));
-            const union3 = new Set([...ngrams1_3, ...ngrams2_3]);
-            const jaccard3 = union3.size === 0 ? 0 : intersection3.size / union3.size;
-            
-            return (jaccard2 * 0.4 + jaccard3 * 0.6) * 100;
-        }
-
-        function phoneticMatch(word1, word2) {
-            const simplify = (w) => {
-                return w.toLowerCase()
-                    .replace(/[áàäâ]/g, 'a')
-                    .replace(/[éèëê]/g, 'e')
-                    .replace(/[íìïî]/g, 'i')
-                    .replace(/[óòöô]/g, 'o')
-                    .replace(/[úùüû]/g, 'u')
-                    .replace(/ñ/g, 'n')
-                    .replace(/[^a-z]/g, '');
-            };
-            
-            const s1 = simplify(word1);
-            const s2 = simplify(word2);
-            
-            return jaroWinkler(s1, s2);
-        }
-
-        // ===== ANÁLISIS GRAMATICAL AVANZADO =====
-        function analyzeGrammar(text) {
-            const lower = text.toLowerCase();
-            
-            const hasSubject = /\b(yo|tú|él|ella|nosotros|ellos|esto|eso|aquello|la|el|un|una|los|las)\b/i.test(text);
-            
-            const verbs = ['es', 'son', 'está', 'están', 'fue', 'fueron', 'será', 'serán',
-                          'tiene', 'tienen', 'hace', 'hacen', 'puede', 'pueden',
-                          'debe', 'deben', 'sabe', 'saben', 'quiere', 'quieren',
-                          'va', 'van', 'viene', 'vienen', 'usa', 'usan',
-                          'permite', 'permite', 'ayuda', 'ayudan'];
-            const hasVerb = verbs.some(v => new RegExp('\\b' + v + '\\b', 'i').test(lower));
-            
-            const hasComplement = /\b(con|sin|para|por|en|de|desde|hasta|sobre|bajo|entre)\b/i.test(lower);
-            
-            const hasArticle = /\b(el|la|los|las|un|una|unos|unas)\b/i.test(lower);
-            
-            const hasPunctuation = /[.!?]$/.test(text.trim());
-            
-            const isQuestion = /^(qué|cómo|cuál|dónde|cuándo|quién|por qué|para qué)/i.test(lower) || text.includes('?');
-            
-            let grammarScore = 0;
-            if (hasSubject) grammarScore += 25;
-            if (hasVerb) grammarScore += 30;
-            if (hasComplement) grammarScore += 15;
-            if (hasArticle) grammarScore += 10;
-            if (hasPunctuation) grammarScore += 15;
-            if (text.length > 20) grammarScore += 5;
-            
-            return {
-                score: grammarScore,
-                hasSubject,
-                hasVerb,
-                hasComplement,
-                isQuestion,
-                isComplete: grammarScore >= 65
-            };
-        }
-
-        function sentenceStructureScore(text) {
-            const grammar = analyzeGrammar(text);
-            const words = text.split(/\s+/).length;
-            
-            let score = grammar.score;
-            
-            if (words >= 5 && words <= 30) score += 15;
-            else if (words > 30 && words <= 50) score += 10;
-            else if (words < 5) score -= 20;
-            
-            const capsCount = (text.match(/[A-ZÁÉÍÓÚ]/g) || []).length;
-            if (capsCount > 0 && capsCount < text.length * 0.3) score += 5;
-            
-            if (!/\b(xd|jaja|lol|jeje)\b/i.test(text)) score += 10;
-            
-            return Math.min(100, Math.max(0, score));
-        }
-
-        // ===== CÁLCULO TF-IDF =====
-        function calculateIDF() {
-            const documentCount = trainingData.length;
-            const termDocCount = {};
-            
-            trainingData.forEach(item => {
-                const uniqueWords = new Set([...item.questionWords, ...item.answerWords]);
-                uniqueWords.forEach(word => {
-                    termDocCount[word] = (termDocCount[word] || 0) + 1;
-                });
-            });
-            
-            idfScores = {};
-            Object.entries(termDocCount).forEach(([term, count]) => {
-                idfScores[term] = Math.log(documentCount / count);
-            });
-        }
-
-        function calculateTFIDF(words) {
-            const tf = {};
-            words.forEach(word => {
-                tf[word] = (tf[word] || 0) + 1;
-            });
-            
-            const tfidf = {};
-            Object.entries(tf).forEach(([term, freq]) => {
-                const idf = idfScores[term] || Math.log(trainingData.length + 1);
-                tfidf[term] = freq * idf;
-            });
-            
-            return tfidf;
-        }
-
-        // ===== VALIDACIÓN LÓGICA PROFUNDA =====
-        function hasLogicalSense(text) {
-            const lower = text.toLowerCase();
-            
-            const nonsensePhrases = [
-                /\bno\s+(tengo|tiene|tienen)\s+acceso\s+ah\s+internet/i,
-                /\bno\s+digas\s+mamadas/i,
-                /\bno\s+lose\b/i,
-                /\bpues\s+no\b.*\bxd\b/i
-            ];
-            
-            if (nonsensePhrases.some(pattern => pattern.test(text))) {
-                return false;
-            }
-            
-            const grammar = analyzeGrammar(text);
-            if (!grammar.hasVerb && text.split(/\s+/).length > 3) {
-                return false;
-            }
-            
-            const fragmentPattern = /^(xd|lol|jaja|bien|mal|si|no|ok|ah|eh|oh)\.?$/i;
-            if (fragmentPattern.test(text.trim())) {
-                return false;
-            }
-            
-            const words = text.split(/\s+/);
-            if (words.length < 4 && !grammar.isComplete) {
-                return false;
-            }
-            
-            return true;
-        }
-
-        function detectContradiction(text1, text2) {
-            const lower1 = text1.toLowerCase();
-            const lower2 = text2.toLowerCase();
-            
-            const negWords = ['no', 'nunca', 'jamás', 'nadie', 'nada', 'ningún', 'ninguno'];
-            const hasNeg1 = negWords.some(w => new RegExp('\\b' + w + '\\b').test(lower1));
-            const hasNeg2 = negWords.some(w => new RegExp('\\b' + w + '\\b').test(lower2));
-            
-            if (hasNeg1 !== hasNeg2) {
-                const commonWords = tokenize(text1).words.filter(w => 
-                    tokenize(text2).words.includes(w)
-                ).length;
-                
-                if (commonWords >= 2) {
-                    return true;
-                }
-            }
-            
-            const opposite = {
-                'bueno': 'malo', 'bien': 'mal', 'si': 'no', 'puede': 'no puede',
-                'tiene': 'no tiene', 'sabe': 'no sabe', 'hace': 'no hace'
-            };
-            
-            for (const [pos, neg] of Object.entries(opposite)) {
-                if ((lower1.includes(pos) && lower2.includes(neg)) ||
-                    (lower1.includes(neg) && lower2.includes(pos))) {
-                    return true;
-                }
-            }
-            
-            return false;
-        }
-
-        // ===== CORRECCIÓN ORTOGRÁFICA =====
-        function fullCorrection(text) {
-            if (!text || text.trim() === '') return { text: '', corrections: [] };
-            
-            let result = text;
+        function correctSpelling(text) {
+            let corrected = text;
             const corrections = [];
             
             const words = text.split(/\s+/);
+            
             words.forEach(word => {
                 const cleanWord = word.toLowerCase().replace(/[.,!?;:]/g, '');
+                
                 if (spellingCorrections[cleanWord]) {
                     const replacement = spellingCorrections[cleanWord];
-                    result = result.replace(new RegExp('\\b' + word + '\\b', 'gi'), replacement);
+                    corrected = corrected.replace(new RegExp('\\b' + word + '\\b', 'gi'), replacement);
                     corrections.push({ before: word, after: replacement });
                 }
             });
             
-            const isQuestion = result.includes('?') || /^(como|que|cual|donde|cuando|quien|cuanto)/i.test(result);
+            return { text: corrected, corrections };
+        }
+
+        function addAccents(text) {
+            let corrected = text;
+            const corrections = [];
+            
+            const isQuestion = text.includes('?') || 
+                              /^(como|que|cual|donde|cuando|quien|cuanto)/i.test(text);
+            
             if (isQuestion) {
                 Object.entries(accentCorrections).forEach(([without, with_]) => {
                     const regex = new RegExp('\\b' + without + '\\b', 'gi');
-                    if (regex.test(result)) {
-                        result = result.replace(regex, with_);
+                    if (regex.test(corrected)) {
+                        corrected = corrected.replace(regex, with_);
                         corrections.push({ before: without, after: with_ });
                     }
                 });
             }
             
-            result = result.trim();
-            if (!/[.!?]$/.test(result)) {
-                result += '.';
-                corrections.push({ before: 'sin punto', after: 'con punto' });
-            }
-            
-            if (result.length > 0 && result[0] !== result[0].toUpperCase()) {
-                result = result.charAt(0).toUpperCase() + result.slice(1);
-                corrections.push({ before: 'minúscula', after: 'Mayúscula' });
-            }
-            
-            return { text: result, corrections };
+            return { text: corrected, corrections };
         }
 
-        // ===== TOKENIZACIÓN =====
+        function addPunctuation(text) {
+            let corrected = text.trim();
+            const corrections = [];
+            
+            if (!/[.!?]$/.test(corrected)) {
+                corrections.push({ before: 'sin punto final', after: 'con punto final' });
+                corrected += '.';
+            }
+            
+            if (corrected.length > 0 && corrected[0] !== corrected[0].toUpperCase()) {
+                corrections.push({ before: 'minúscula inicial', after: 'mayúscula inicial' });
+                corrected = corrected.charAt(0).toUpperCase() + corrected.slice(1);
+            }
+            
+            corrected = corrected.replace(/\.([a-záéíóúñ])/gi, '. $1');
+            corrected = corrected.replace(/,([a-záéíóúñ])/gi, ', $1');
+            
+            corrected = corrected.replace(/\.\s+([a-záéíóúñ])/g, (match, letter) => {
+                return '. ' + letter.toUpperCase();
+            });
+            
+            return { text: corrected, corrections };
+        }
+
+        function fullCorrection(text) {
+            if (!text || text.trim() === '') return { text: '', corrections: [] };
+            
+            let allCorrections = [];
+            
+            const spelling = correctSpelling(text);
+            let result = spelling.text;
+            allCorrections = allCorrections.concat(spelling.corrections);
+            
+            const accents = addAccents(result);
+            result = accents.text;
+            allCorrections = allCorrections.concat(accents.corrections);
+            
+            const punctuation = addPunctuation(result);
+            result = punctuation.text;
+            allCorrections = allCorrections.concat(punctuation.corrections);
+            
+            return { text: result, corrections: allCorrections };
+        }
+
+        function showCorrections(corrections) {
+            const corrDiv = document.getElementById('corrections');
+            
+            if (corrections.length === 0) {
+                corrDiv.style.display = 'none';
+                return;
+            }
+            
+            let html = '<h4>✍️ Correcciones aplicadas:</h4>';
+            corrections.forEach(corr => {
+                html += `
+                    <div class="correction-item">
+                        <span class="before">${corr.before}</span> → 
+                        <span class="after">${corr.after}</span>
+                    </div>
+                `;
+            });
+            
+            corrDiv.innerHTML = html;
+            corrDiv.style.display = 'block';
+        }
+
         function normalizeText(text) {
             return text.toLowerCase()
                 .normalize("NFD")
@@ -916,159 +800,296 @@
                 if (synonyms[keyword]) {
                     synonyms[keyword].forEach(syn => expandedKeywords.add(syn));
                 }
+                Object.entries(synonyms).forEach(([key, syns]) => {
+                    if (syns.includes(keyword)) {
+                        expandedKeywords.add(key);
+                    }
+                });
             });
             
             return [...expandedKeywords];
         }
 
-        // ===== SIMILARIDAD MULTINIVEL AVANZADA =====
-        function advancedSimilarity(text1, text2) {
+        function levenshtein(str1, str2) {
+            const len1 = str1.length;
+            const len2 = str2.length;
+            const matrix = Array(len1 + 1).fill(null).map(() => Array(len2 + 1).fill(0));
+
+            for (let i = 0; i <= len1; i++) matrix[i][0] = i;
+            for (let j = 0; j <= len2; j++) matrix[0][j] = j;
+
+            for (let i = 1; i <= len1; i++) {
+                for (let j = 1; j <= len2; j++) {
+                    const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j] + 1,
+                        matrix[i][j - 1] + 1,
+                        matrix[i - 1][j - 1] + cost
+                    );
+                }
+            }
+
+            const maxLen = Math.max(len1, len2);
+            return maxLen === 0 ? 1 : 1 - (matrix[len1][len2] / maxLen);
+        }
+
+        function calculateSimilarity(text1, text2) {
             const tokens1 = tokenize(text1);
             const tokens2 = tokenize(text2);
             
-            // 1. Similitud de palabras (Jaccard)
             const set1 = new Set(tokens1.words);
             const set2 = new Set(tokens2.words);
             const intersection = new Set([...set1].filter(x => set2.has(x)));
             const union = new Set([...set1, ...set2]);
             const jaccard = union.size === 0 ? 0 : intersection.size / union.size;
             
-            // 2. Jaro-Winkler alfabético
-            const jw = jaroWinkler(tokens1.normalized, tokens2.normalized);
+            const levSim = levenshtein(tokens1.normalized, tokens2.normalized);
             
-            // 3. Similitud de caracteres (n-gramas)
-            const charSim = characterSimilarity(text1, text2) / 100;
-            
-            // 4. Similitud de stems
             const stemSet1 = new Set(tokens1.stems);
             const stemSet2 = new Set(tokens2.stems);
-            const stemInter = new Set([...stemSet1].filter(x => stemSet2.has(x)));
+            const stemIntersection = new Set([...stemSet1].filter(x => stemSet2.has(x)));
             const stemUnion = new Set([...stemSet1, ...stemSet2]);
-            const stemSim = stemUnion.size === 0 ? 0 : stemInter.size / stemUnion.size;
+            const stemSim = stemUnion.size === 0 ? 0 : stemIntersection.size / stemUnion.size;
             
-            // 5. Similitud de bigramas
-            const biSet1 = new Set(tokens1.bigrams);
-            const biSet2 = new Set(tokens2.bigrams);
-            const biInter = new Set([...biSet1].filter(x => biSet2.has(x)));
-            const biUnion = new Set([...biSet1, ...biSet2]);
-            const biSim = biUnion.size === 0 ? 0 : biInter.size / biUnion.size;
+            const bigramSet1 = new Set(tokens1.bigrams);
+            const bigramSet2 = new Set(tokens2.bigrams);
+            const bigramIntersection = new Set([...bigramSet1].filter(x => bigramSet2.has(x)));
+            const bigramUnion = new Set([...bigramSet1, ...bigramSet2]);
+            const bigramSim = bigramUnion.size === 0 ? 0 : bigramIntersection.size / bigramUnion.size;
             
-            // 6. Similitud fonética
-            let phoneticSim = 0;
-            if (tokens1.words.length > 0 && tokens2.words.length > 0) {
-                let totalPhonetic = 0;
-                let count = 0;
-                tokens1.words.forEach(w1 => {
-                    tokens2.words.forEach(w2 => {
-                        totalPhonetic += phoneticMatch(w1, w2);
-                        count++;
-                    });
-                });
-                phoneticSim = count > 0 ? totalPhonetic / count : 0;
-            }
-            
-            // 7. Contención (substring)
             let containsSim = 0;
-            if (tokens1.normalized.includes(tokens2.normalized) || 
-                tokens2.normalized.includes(tokens1.normalized)) {
+            if (tokens1.normalized.includes(tokens2.normalized) || tokens2.normalized.includes(tokens1.normalized)) {
                 const shorter = Math.min(tokens1.normalized.length, tokens2.normalized.length);
                 const longer = Math.max(tokens1.normalized.length, tokens2.normalized.length);
                 containsSim = shorter / longer;
             }
             
-            // Pesos optimizados para precisión
-            const finalScore = (
-                jaccard * 0.20 +
-                jw * 0.20 +
-                charSim * 0.15 +
-                stemSim * 0.15 +
-                biSim * 0.15 +
-                phoneticSim * 0.10 +
-                containsSim * 0.05
-            ) * 100;
-            
-            return finalScore;
+            return (jaccard * 0.25 + levSim * 0.25 + stemSim * 0.20 + bigramSim * 0.20 + containsSim * 0.10) * 100;
         }
 
-        // ===== BÚSQUEDA Y MATCHING AVANZADO =====
-        function findBestMatches(userInput) {
-            calculateIDF();
+        function detectQuestionType(text) {
+            const lower = text.toLowerCase();
             
+            if (/^(hola|buenas|saludos|hey|que tal|como estas)/i.test(lower)) {
+                return 'saludo';
+            }
+            if (/^(adios|chao|hasta luego|nos vemos)/i.test(lower)) {
+                return 'despedida';
+            }
+            if (/^(gracias|agradecido|te agradezco)/i.test(lower)) {
+                return 'agradecimiento';
+            }
+            if (/(que es|que significa|define|explicame|que son)/i.test(lower)) {
+                return 'definición';
+            }
+            if (/(como|de que manera|de que forma|pasos para)/i.test(lower)) {
+                return 'instrucción';
+            }
+            if (/(por que|cual es la razon|por que motivo)/i.test(lower)) {
+                return 'explicación';
+            }
+            if (/(cuando|en que momento|a que hora)/i.test(lower)) {
+                return 'temporal';
+            }
+            if (/(donde|en que lugar|en que sitio)/i.test(lower)) {
+                return 'ubicación';
+            }
+            if (/(quien|quienes|que persona)/i.test(lower)) {
+                return 'identidad';
+            }
+            if (/(sabes|conoces|tienes|puedes)/i.test(lower)) {
+                return 'capacidad';
+            }
+            
+            return 'general';
+        }
+
+        function extractTopics(text) {
+            const topicKeywords = {
+                'technology': ['internet', 'computadora', 'programa', 'código', 'software', 'app', 'web'],
+                'conversation': ['hola', 'gracias', 'bien', 'mal', 'cómo', 'qué tal', 'bro', 'amigo'],
+                'learning': ['aprender', 'estudiar', 'enseñar', 'educación', 'curso', 'tutorial'],
+                'work': ['trabajo', 'empleo', 'profesión', 'carrera', 'especialista'],
+                'personal': ['yo', 'tú', 'nosotros', 'mi', 'tu', 'nuestro']
+            };
+            
+            const lower = text.toLowerCase();
+            const foundTopics = [];
+            
+            Object.entries(topicKeywords).forEach(([topic, keywords]) => {
+                if (keywords.some(keyword => lower.includes(keyword))) {
+                    foundTopics.push(topic);
+                }
+            });
+            
+            return foundTopics;
+        }
+
+        function areIncompatible(sent1, sent2) {
+            const lower1 = sent1.toLowerCase();
+            const lower2 = sent2.toLowerCase();
+            
+            const hasNot1 = /\b(no|nunca|jamás|nadie|nada)\b/.test(lower1);
+            const hasNot2 = /\b(no|nunca|jamás|nadie|nada)\b/.test(lower2);
+            
+            if (hasNot1 !== hasNot2) {
+                const similarity = calculateSimilarity(sent1, sent2);
+                if (similarity > 40) return true;
+            }
+            
+            const isGreeting1 = /\b(hola|buenas|saludos|hey)\b/.test(lower1);
+            const isFarewell1 = /\b(adios|chao|hasta luego|nos vemos)\b/.test(lower1);
+            const isGreeting2 = /\b(hola|buenas|saludos|hey)\b/.test(lower2);
+            const isFarewell2 = /\b(adios|chao|hasta luego|nos vemos)\b/.test(lower2);
+            
+            if ((isGreeting1 && isFarewell2) || (isFarewell1 && isGreeting2)) return true;
+            
+            const topics1 = extractTopics(sent1);
+            const topics2 = extractTopics(sent2);
+            const commonTopics = topics1.filter(t => topics2.includes(t));
+            
+            if (topics1.length > 0 && topics2.length > 0 && commonTopics.length === 0) {
+                return true;
+            }
+            
+            const isConversational1 = /\b(xd|jaja|lol|bro|tu|gracias|genial)\b/.test(lower1);
+            const isTechnical1 = /\b(especializa|materia|técnica|sistema|proceso|método)\b/.test(lower1);
+            const isConversational2 = /\b(xd|jaja|lol|bro|tu|gracias|genial)\b/.test(lower2);
+            const isTechnical2 = /\b(especializa|materia|técnica|sistema|proceso|método)\b/.test(lower2);
+            
+            if ((isConversational1 && isTechnical2) || (isTechnical1 && isConversational2)) {
+                return true;
+            }
+            
+            return false;
+        }
+
+        function calculateCompleteness(sentence) {
+            let score = 0;
+            
+            if (sentence.length < 15) return 20;
+            if (sentence.length > 40) score += 30;
+            
+            const hasVerb = /\b(es|son|está|están|tiene|tienen|pueden|hace|hago|debo|puede|sabe|hacer|ser|estar)\b/i.test(sentence);
+            if (hasVerb) score += 25;
+            
+            const hasSubject = /\b(yo|tú|él|ella|nosotros|esto|eso|la|el|un|una)\b/i.test(sentence);
+            if (hasSubject) score += 20;
+            
+            const isFragment = /^(xd|jaja|lol|bien|mal|si|no|ok)\.?$/i.test(sentence.trim());
+            if (isFragment) return 10;
+            
+            if (/[.!?]$/.test(sentence)) score += 15;
+            
+            const hasErrors = /\b(ah|lose|ase)\b/i.test(sentence);
+            if (hasErrors) score -= 20;
+            
+            return Math.max(0, Math.min(100, score));
+        }
+
+        function calculateCoherence(sentence1, sentence2) {
+            if (areIncompatible(sentence1, sentence2)) {
+                return 5;
+            }
+            
+            const similarity = calculateSimilarity(sentence1, sentence2);
+            
+            const connectors = ['además', 'también', 'por lo tanto', 'sin embargo', 'pero', 'y', 'asimismo', 'por otro lado'];
+            let hasConnector = connectors.some(conn => sentence2.toLowerCase().includes(conn));
+            
+            const words1 = new Set(tokenize(sentence1).words);
+            const words2 = new Set(tokenize(sentence2).words);
+            const commonWords = [...words1].filter(w => words2.has(w)).length;
+            
+            if (similarity > 90) return 15;
+            
+            const topics1 = extractTopics(sentence1);
+            const topics2 = extractTopics(sentence2);
+            const commonTopics = topics1.filter(t => topics2.includes(t)).length;
+            
+            let coherence = 30;
+            coherence += (similarity * 0.25);
+            coherence += (hasConnector ? 20 : 0);
+            coherence += (commonWords * 8);
+            coherence += (commonTopics * 15);
+            
+            const complete1 = calculateCompleteness(sentence1);
+            const complete2 = calculateCompleteness(sentence2);
+            if (complete1 > 60 && complete2 > 60) {
+                coherence += 10;
+            }
+            
+            return Math.min(coherence, 100);
+        }
+
+        function findMatches(userInput) {
             const matches = [];
             const userTokens = tokenize(userInput);
             const userKeywords = extractKeywords(userInput);
-            const userTFIDF = calculateTFIDF(userTokens.words);
             
             trainingData.forEach((item, index) => {
                 let score = 0;
-                const analysis = {};
+                const details = [];
                 
-                // 1. Similitud avanzada pregunta
-                const qSim = advancedSimilarity(userInput, item.question);
-                score += qSim * 0.50;
-                analysis.qSim = qSim;
+                const qSimilarity = calculateSimilarity(userInput, item.question);
+                score += qSimilarity * 0.5;
+                if (qSimilarity > 5) details.push(`Pregunta: ${qSimilarity.toFixed(0)}%`);
                 
-                // 2. Similitud respuesta
-                const aSim = advancedSimilarity(userInput, item.answer);
-                score += aSim * 0.10;
-                analysis.aSim = aSim;
+                const aSimilarity = calculateSimilarity(userInput, item.answer);
+                score += aSimilarity * 0.15;
+                if (aSimilarity > 5) details.push(`Respuesta: ${aSimilarity.toFixed(0)}%`);
                 
-                // 3. Keywords con TF-IDF
-                let keywordScore = 0;
-                userKeywords.forEach(uk => {
-                    if (item.keywords.includes(uk)) {
-                        const weight = userTFIDF[uk] || 1;
-                        keywordScore += weight * 3;
-                    }
+                const keywordMatches = [];
+                userKeywords.forEach(userKw => {
+                    item.keywords.forEach(itemKw => {
+                        if (userKw === itemKw || 
+                            (synonyms[userKw] && synonyms[userKw].includes(itemKw)) ||
+                            (synonyms[itemKw] && synonyms[itemKw].includes(userKw))) {
+                            keywordMatches.push(itemKw);
+                        }
+                    });
                 });
-                score += Math.min(keywordScore, 20);
-                analysis.keywords = keywordScore;
                 
-                // 4. Bigramas
-                const biMatches = item.questionBigrams.filter(bg => 
-                    userTokens.bigrams.includes(bg)
-                ).length;
-                score += biMatches * 8;
-                analysis.bigrams = biMatches;
-                
-                // 5. Trigramas (más peso)
-                const triMatches = item.questionTrigrams.filter(tg => 
-                    userTokens.trigrams.includes(tg)
-                ).length;
-                score += triMatches * 15;
-                analysis.trigrams = triMatches;
-                
-                // 6. Estructura gramatical similar
-                const userGrammar = analyzeGrammar(userInput);
-                const itemGrammar = analyzeGrammar(item.question);
-                if (userGrammar.isQuestion === itemGrammar.isQuestion) {
-                    score += 5;
+                if (keywordMatches.length > 0) {
+                    score += keywordMatches.length * 8;
+                    details.push(`Keywords: ${keywordMatches.length}`);
                 }
                 
-                // 7. Historial de éxito
+                const bigramMatches = item.questionBigrams.filter(bg => userTokens.bigrams.includes(bg));
+                if (bigramMatches.length > 0) {
+                    score += bigramMatches.length * 15;
+                    details.push(`Bigramas: ${bigramMatches.length}`);
+                }
+                
+                const trigramMatches = item.questionTrigrams.filter(tg => userTokens.trigrams.includes(tg));
+                if (trigramMatches.length > 0) {
+                    score += trigramMatches.length * 20;
+                    details.push(`Trigramas: ${trigramMatches.length}`);
+                }
+                
+                const stemMatches = item.questionStems.filter(stem => userTokens.stems.includes(stem));
+                if (stemMatches.length > 0) {
+                    score += stemMatches.length * 5;
+                }
+                
                 if (item.successCount > 0) {
                     const successRate = item.successCount / (item.successCount + item.failCount || 1);
-                    score += successRate * 15;
-                    analysis.success = successRate;
+                    score += successRate * 10;
+                    if (successRate > 0.5) details.push(`Éxito: ${(successRate * 100).toFixed(0)}%`);
                 }
                 
-                // 8. Contexto conversacional
                 if (conversationContext.length > 0) {
                     conversationContext.forEach(ctx => {
-                        const ctxSim = advancedSimilarity(ctx, item.question);
-                        if (ctxSim > 40) {
-                            score += 10;
+                        const ctxSim = calculateSimilarity(ctx, item.question);
+                        if (ctxSim > 30) {
+                            score += 15;
+                            details.push('Contexto+');
                         }
                     });
                 }
                 
-                if (score > 5) {
-                    matches.push({ 
-                        item, 
-                        index, 
-                        score: Math.min(score, 100),
-                        analysis
-                    });
+                if (score > 0) {
+                    matches.push({ item, index, score: Math.min(score, 100), details });
                 }
             });
             
@@ -1076,182 +1097,203 @@
             return matches;
         }
 
-        // ===== GENERACIÓN DE RESPUESTA INTELIGENTE =====
-        function generateSmartResponse(userInput, matches) {
+        function generateCombinedResponse(userInput, matches) {
             if (matches.length === 0) return null;
             
-            const topMatches = matches.slice(0, 10).filter(m => m.score > 20);
+            const topMatches = matches.slice(0, 8).filter(m => m.score > 15);
+            
             if (topMatches.length === 0) return null;
             
-            // Buscar respuesta perfecta
-            for (let match of topMatches.slice(0, 3)) {
-                if (match.score > 70) {
-                    const structScore = sentenceStructureScore(match.item.answer);
-                    const hasLogic = hasLogicalSense(match.item.answer);
-                    
-                    if (structScore > 70 && hasLogic) {
-                        const corrected = fullCorrection(match.item.answer);
-                        return {
-                            response: corrected.text,
-                            combined: false,
-                            sources: [match],
-                            confidence: match.score,
-                            coherence: 100,
-                            logic: 100
-                        };
-                    }
+            const questionType = detectQuestionType(userInput);
+            
+            if (topMatches.length === 1 && topMatches[0].score > 75) {
+                const completeness = calculateCompleteness(topMatches[0].item.answer);
+                if (completeness > 60) {
+                    const corrected = fullCorrection(topMatches[0].item.answer);
+                    return {
+                        response: corrected.text,
+                        combined: false,
+                        sources: [topMatches[0]],
+                        confidence: topMatches[0].score,
+                        coherence: 100
+                    };
                 }
             }
             
-            // Análisis profundo de oraciones
+            for (let match of topMatches.slice(0, 3)) {
+                const completeness = calculateCompleteness(match.item.answer);
+                if (match.score > 65 && completeness > 70) {
+                    const corrected = fullCorrection(match.item.answer);
+                    return {
+                        response: corrected.text,
+                        combined: false,
+                        sources: [match],
+                        confidence: match.score,
+                        coherence: 100
+                    };
+                }
+            }
+            
+            const weightedSources = topMatches.map(match => {
+                const successRate = match.item.successCount / 
+                    (match.item.successCount + match.item.failCount || 1);
+                const weight = (match.score * 0.65) + (successRate * 100 * 0.35);
+                
+                return { ...match, weight, successRate };
+            });
+            
+            weightedSources.sort((a, b) => b.weight - a.weight);
+            
             const sentences = [];
-            topMatches.forEach(match => {
-                const answerSents = match.item.answer
+            weightedSources.forEach(source => {
+                const answerSentences = source.item.answer
                     .split(/[.!?]+/)
                     .map(s => s.trim())
-                    .filter(s => s.length > 8);
+                    .filter(s => s.length > 10);
                 
-                answerSents.forEach(sent => {
-                    const relevance = advancedSimilarity(userInput, sent);
-                    const structure = sentenceStructureScore(sent);
-                    const logic = hasLogicalSense(sent) ? 100 : 0;
-                    const grammar = analyzeGrammar(sent);
+                answerSentences.forEach(sentence => {
+                    const relevance = calculateSimilarity(userInput, sentence);
+                    const completeness = calculateCompleteness(sentence);
                     
-                    if (logic > 0 && structure > 50) {
-                        const weight = (
-                            match.score * 0.30 +
-                            relevance * 0.25 +
-                            structure * 0.20 +
-                            logic * 0.15 +
-                            grammar.score * 0.10
-                        );
-                        
-                        sentences.push({
-                            text: sent,
-                            weight: weight,
-                            source: match,
-                            relevance: relevance,
-                            structure: structure,
-                            logic: logic,
-                            grammar: grammar
-                        });
-                    }
+                    const finalWeight = (source.weight * 0.4) + 
+                                       (relevance * 0.35) + 
+                                       (completeness * 0.25);
+                    
+                    sentences.push({
+                        text: sentence,
+                        weight: finalWeight,
+                        source: source,
+                        relevance: relevance,
+                        completeness: completeness
+                    });
                 });
             });
             
-            if (sentences.length === 0) return null;
+            const qualitySentences = sentences.filter(s => s.completeness > 40);
             
-            // Eliminar duplicados
-            const unique = [];
-            sentences.forEach(sent => {
-                const isDup = unique.some(u => advancedSimilarity(sent.text, u.text) > 80);
-                if (!isDup) unique.push(sent);
+            if (qualitySentences.length === 0) {
+                return null;
+            }
+            
+            const uniqueSentences = [];
+            qualitySentences.forEach(sent => {
+                const isDuplicate = uniqueSentences.some(unique => 
+                    calculateSimilarity(sent.text, unique.text) > 75
+                );
+                if (!isDuplicate && sent.text.length > 10) {
+                    uniqueSentences.push(sent);
+                }
             });
             
-            unique.sort((a, b) => b.weight - a.weight);
+            uniqueSentences.sort((a, b) => b.weight - a.weight);
             
-            // Si la mejor es excelente, usarla
-            if (unique[0].weight > 75 && unique[0].structure > 70) {
-                const corrected = fullCorrection(unique[0].text);
+            if (uniqueSentences.length > 0 && 
+                uniqueSentences[0].weight > 70 && 
+                uniqueSentences[0].completeness > 70) {
+                const corrected = fullCorrection(uniqueSentences[0].text);
                 return {
                     response: corrected.text,
                     combined: false,
-                    sources: [unique[0].source],
-                    confidence: unique[0].weight,
-                    coherence: 100,
-                    logic: unique[0].logic
+                    sources: [uniqueSentences[0].source],
+                    confidence: uniqueSentences[0].weight,
+                    coherence: 100
                 };
             }
             
-            // Combinar inteligentemente
-            const selected = [unique[0]];
+            const selectedSentences = [uniqueSentences[0]];
             let totalCoherence = 100;
-            let totalLogic = unique[0].logic;
+            let coherenceCount = 1;
+            let rejectedCount = 0;
             
-            for (let i = 1; i < Math.min(unique.length, 6); i++) {
-                const candidate = unique[i];
+            for (let i = 1; i < Math.min(uniqueSentences.length, 8); i++) {
+                const candidate = uniqueSentences[i];
                 
-                let compatible = true;
                 let minCoherence = 100;
+                let isCompatible = true;
                 
-                for (let sel of selected) {
-                    // Verificar contradicción
-                    if (detectContradiction(sel.text, candidate.text)) {
-                        compatible = false;
-                        break;
-                    }
+                for (let selected of selectedSentences) {
+                    const coherence = calculateCoherence(selected.text, candidate.text);
+                    minCoherence = Math.min(minCoherence, coherence);
                     
-                    // Calcular coherencia
-                    const cohScore = advancedSimilarity(sel.text, candidate.text);
-                    minCoherence = Math.min(minCoherence, cohScore);
-                    
-                    if (cohScore < 35) {
-                        compatible = false;
+                    if (coherence < 50) {
+                        isCompatible = false;
                         break;
                     }
                 }
                 
-                if (compatible && minCoherence >= 35 && candidate.logic > 0) {
-                    selected.push(candidate);
+                if (isCompatible && minCoherence >= 50) {
+                    selectedSentences.push(candidate);
                     totalCoherence += minCoherence;
-                    totalLogic += candidate.logic;
+                    coherenceCount++;
                     
-                    if (selected.length >= 3) break;
+                    if (selectedSentences.length >= 3) break;
+                } else {
+                    rejectedCount++;
+                    if (rejectedCount > 5) break;
                 }
             }
             
-            if (selected.length === 1) {
-                const corrected = fullCorrection(selected[0].text);
-                return {
-                    response: corrected.text,
-                    combined: false,
-                    sources: [selected[0].source],
-                    confidence: selected[0].weight,
-                    coherence: 100,
-                    logic: selected[0].logic
-                };
+            if (selectedSentences.length === 1) {
+                if (selectedSentences[0].completeness > 60) {
+                    const corrected = fullCorrection(selectedSentences[0].text);
+                    return {
+                        response: corrected.text,
+                        combined: false,
+                        sources: [selectedSentences[0].source],
+                        confidence: selectedSentences[0].weight,
+                        coherence: 100
+                    };
+                } else {
+                    return null;
+                }
             }
             
-            // Combinar con conectores
-            let combined = '';
-            selected.forEach((sent, idx) => {
+            let combinedResponse = '';
+            selectedSentences.forEach((sent, idx) => {
                 if (idx === 0) {
-                    combined += sent.text;
+                    combinedResponse += sent.text;
                 } else {
-                    const connectors = ['. Además, ', '. También, ', '. Por otro lado, ', '. Asimismo, '];
-                    const conn = connectors[Math.floor(Math.random() * connectors.length)];
-                    combined += conn + sent.text.charAt(0).toLowerCase() + sent.text.slice(1);
+                    const needsConnector = !sent.text.toLowerCase().startsWith('además') &&
+                                          !sent.text.toLowerCase().startsWith('también') &&
+                                          !sent.text.toLowerCase().startsWith('por') &&
+                                          !sent.text.toLowerCase().startsWith('sin embargo');
+                    
+                    if (needsConnector) {
+                        const connectors = ['. Además, ', '. También, ', '. Asimismo, ', '. Por otro lado, '];
+                        const selectedConnector = connectors[Math.floor(Math.random() * connectors.length)];
+                        combinedResponse += selectedConnector + 
+                                          sent.text.charAt(0).toLowerCase() + sent.text.slice(1);
+                    } else {
+                        combinedResponse += '. ' + sent.text;
+                    }
                 }
             });
             
-            const final = fullCorrection(combined);
-            const avgCoherence = totalCoherence / (selected.length + 1);
-            const avgLogic = totalLogic / selected.length;
-            const avgWeight = selected.reduce((s, x) => s + x.weight, 0) / selected.length;
+            const finalCorrected = fullCorrection(combinedResponse);
             
-            if (avgCoherence < 40 || avgLogic < 50) {
-                const corrected = fullCorrection(selected[0].text);
+            const avgWeight = selectedSentences.reduce((sum, s) => sum + s.weight, 0) / selectedSentences.length;
+            const avgCoherence = totalCoherence / coherenceCount;
+            
+            if (avgCoherence < 50) {
+                const corrected = fullCorrection(selectedSentences[0].text);
                 return {
                     response: corrected.text,
                     combined: false,
-                    sources: [selected[0].source],
-                    confidence: selected[0].weight,
-                    coherence: 100,
-                    logic: selected[0].logic
+                    sources: [selectedSentences[0].source],
+                    confidence: selectedSentences[0].weight,
+                    coherence: 100
                 };
             }
             
             return {
-                response: final.text,
-                combined: true,
-                sources: selected.map(s => s.source),
+                response: finalCorrected.text,
+                combined: selectedSentences.length > 1,
+                sources: selectedSentences.map(s => s.source),
                 confidence: avgWeight,
-                coherence: avgCoherence,
-                logic: avgLogic
+                coherence: avgCoherence
             };
         }
 
-        // ===== FUNCIONES DE INTERFAZ =====
         function trainAI() {
             const question = document.getElementById('question').value.trim();
             const answer = document.getElementById('answer').value.trim();
@@ -1264,6 +1306,9 @@
 
             const qCorrected = fullCorrection(question);
             const aCorrected = fullCorrection(answer);
+            
+            const allCorrections = [...qCorrected.corrections, ...aCorrected.corrections];
+            showCorrections(allCorrections);
             
             const correctedQuestion = qCorrected.text;
             const correctedAnswer = aCorrected.text;
@@ -1293,16 +1338,30 @@
                 timestamp: new Date().toISOString()
             });
 
-            try {
-                localStorage.setItem('aiTrainingData', JSON.stringify({
-                    trainingData: trainingData,
-                    questionCount: questionCount
-                }));
-            } catch(e) {}
+            saveToStorage();
 
-            statusDiv.innerHTML = '<div class="status success">✓ Entrenamiento completado con análisis multinivel</div>';
+            statusDiv.innerHTML = `<div class="status success">✓ Entrenado${allCorrections.length > 0 ? ' y corregido' : ''}</div>`;
             document.getElementById('question').value = '';
             document.getElementById('answer').value = '';
+            document.getElementById('autoTags').style.display = 'none';
+            
+            setTimeout(() => {
+                document.getElementById('corrections').style.display = 'none';
+            }, 5000);
+            
+            updateStats();
+            viewTraining();
+        }
+
+        function deleteTraining(id) {
+            if (!confirm('¿Eliminar?')) return;
+            
+            trainingData = trainingData.filter(item => item.id !== id);
+            saveToStorage();
+            
+            const statusDiv = document.getElementById('trainStatus');
+            statusDiv.innerHTML = '<div class="status success">✓ Eliminado</div>';
+            setTimeout(() => { statusDiv.innerHTML = ''; }, 2000);
             
             updateStats();
             viewTraining();
@@ -1315,99 +1374,145 @@
             const feedbackDiv = document.getElementById('feedbackSection');
 
             if (!userInput) {
-                responseDiv.innerHTML = '<div class="status error">Escribe una pregunta</div>';
+                responseDiv.innerHTML = '<div class="status error">Escribe algo</div>';
                 return;
             }
 
             questionCount++;
+            saveToStorage();
 
             if (trainingData.length === 0) {
-                responseDiv.innerHTML = '<div class="status info">⚠️ Primero entrena la IA</div>';
+                responseDiv.innerHTML = '<div class="status info">⚠️ Entrena la IA primero</div>';
                 return;
             }
 
-            const corrected = fullCorrection(userInput);
-            const matches = findBestMatches(corrected.text);
+            const correctedInput = fullCorrection(userInput);
+            const finalInput = correctedInput.text;
 
-            if (matches.length === 0 || matches[0].score < 15) {
-                responseDiv.innerHTML = '<div class="status warning">🤔 No encontré información relevante. Entrena más la IA.</div>';
+            const matches = findMatches(finalInput);
+
+            if (matches.length === 0 || matches[0].score < 10) {
+                responseDiv.innerHTML = '<div class="status info">🤔 Sin coincidencias relevantes. Entrena más la IA con ejemplos similares.</div>';
                 analysisDiv.innerHTML = '';
                 feedbackDiv.innerHTML = '';
-                return;
-            }
-
-            const result = generateSmartResponse(corrected.text, matches);
-            
-            if (!result) {
-                responseDiv.innerHTML = '<div class="status warning">⚠️ No pude generar una respuesta lógica y coherente.</div>';
-                analysisDiv.innerHTML = `
-                    <div class="analysis">
-                        <strong>🔍 Análisis:</strong><br>
-                        <div class="analysis-item">• ${matches.length} fuentes encontradas</div>
-                        <div class="analysis-item">• Mejor coincidencia: ${matches[0].score.toFixed(0)}%</div>
-                        <div class="analysis-item">• Problema: No se pudo validar lógica y coherencia</div>
-                    </div>
-                `;
-                return;
-            }
-
-            lastUsedSources = result.sources.map(s => s.index);
-            
-            let qualityColor = result.logic > 80 ? '#4caf50' : result.logic > 50 ? '#ff9800' : '#f44336';
-            
-            let html = `
-                <div style="color: #155724;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                        <strong style="font-size: 1.1em;">🤖 Respuesta IA:</strong>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <span class="match-score">${result.confidence.toFixed(0)}% precisión</span>
-                            ${result.combined ? '<span class="combined-badge">🔀 COMBINADA</span>' : '<span class="combined-badge" style="background: #2196F3;">✓ DIRECTA</span>'}
-                            <span class="coherence-badge" style="background: ${qualityColor};">🧠 ${result.logic.toFixed(0)}% lógica</span>
-                        </div>
-                    </div>
-                    <div class="generated-response">
-                        ${result.response}
-                    </div>
-            `;
-            
-            if (result.sources.length > 0) {
-                html += '<div class="source-list"><strong>📚 Fuentes:</strong>';
-                result.sources.forEach((source, idx) => {
-                    html += `
-                        <div class="source-item">
-                            <span class="source-weight">#${idx + 1} ${source.score.toFixed(0)}%</span>
-                            "${source.item.question}"
+                lastUsedSources = [];
+                
+                conversationContext.push(finalInput);
+                if (conversationContext.length > 5) conversationContext.shift();
+            } else {
+                const result = generateCombinedResponse(finalInput, matches);
+                
+                if (!result) {
+                    const questionType = detectQuestionType(finalInput);
+                    responseDiv.innerHTML = `
+                        <div class="status warning">
+                            ⚠️ No puedo generar una respuesta coherente con los datos disponibles.<br>
+                            <small>Tipo detectado: ${questionType}. Entrena la IA con respuestas más completas y específicas.</small>
                         </div>
                     `;
-                });
+                    
+                    analysisDiv.innerHTML = `
+                        <div class="analysis">
+                            <strong>🔍 Análisis:</strong><br>
+                            <div class="analysis-item">• ${matches.length} coincidencias encontradas</div>
+                            <div class="analysis-item">• Mejor coincidencia: ${matches[0].score.toFixed(0)}%</div>
+                            <div class="analysis-item">• Problema: Respuestas fragmentadas o incompatibles</div>
+                            <div class="analysis-item">• Solución: Agrega respuestas más completas y coherentes</div>
+                        </div>
+                    `;
+                    feedbackDiv.innerHTML = '';
+                    lastUsedSources = [];
+                    return;
+                }
+                
+                lastUsedSources = result.sources.map(s => s.index);
+                
+                let qualityColor = '#4caf50';
+                let qualityText = 'Excelente';
+                if (result.coherence < 70) {
+                    qualityColor = '#ff9800';
+                    qualityText = 'Buena';
+                }
+                if (result.coherence < 50) {
+                    qualityColor = '#f44336';
+                    qualityText = 'Aceptable';
+                }
+                
+                let html = `
+                    <div style="color: #155724;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                            <strong style="font-size: 1.1em;">🤖 Respuesta IA:</strong>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <span class="match-score">${result.confidence.toFixed(0)}% confianza</span>
+                                ${result.combined ? '<span class="combined-badge">🔀 COMBINADA</span>' : '<span class="combined-badge" style="background: #2196F3;">✓ DIRECTA</span>'}
+                                <span class="coherence-badge" style="background: ${qualityColor};">📝 ${result.coherence.toFixed(0)}% - ${qualityText}</span>
+                            </div>
+                        </div>
+                        <div class="generated-response">
+                            ${result.response}
+                        </div>
+                `;
+                
+                if (result.sources.length > 0) {
+                    html += '<div class="source-list"><strong>📚 Fuentes utilizadas:</strong>';
+                    result.sources.forEach((source, idx) => {
+                        const successRate = source.item ? 
+                            (source.item.successCount / (source.item.successCount + source.item.failCount || 1)) : 0;
+                        html += `
+                            <div class="source-item">
+                                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                                    <div>
+                                        <span class="source-weight">#${idx + 1} ${source.weight.toFixed(0)} pts</span>
+                                        ${successRate > 0.7 ? '<span style="background: #4caf50; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.75em; margin-left: 5px;">✓ Confiable</span>' : ''}
+                                    </div>
+                                </div>
+                                <div style="margin-top: 5px; font-size: 0.9em;">"${source.item.question}"</div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+                
                 html += '</div>';
+                responseDiv.innerHTML = html;
+                
+                feedbackDiv.innerHTML = `
+                    <div class="feedback-btns">
+                        <button class="feedback-btn feedback-good" onclick="giveFeedback(true)">
+                            👍 Útil
+                        </button>
+                        <button class="feedback-btn feedback-bad" onclick="giveFeedback(false)">
+                            👎 Incorrecta
+                        </button>
+                    </div>
+                `;
+                
+                let analysisHTML = '<div class="analysis">';
+                analysisHTML += '<strong>🔍 Análisis del Proceso:</strong><br>';
+                analysisHTML += `<div class="analysis-item">• ${matches.length} fuentes analizadas (mejor: ${matches[0].score.toFixed(0)}%)</div>`;
+                analysisHTML += `<div class="analysis-item">• ${result.sources.length} fuentes utilizadas</div>`;
+                analysisHTML += `<div class="analysis-item">• Coherencia final: ${result.coherence.toFixed(0)}% (${result.coherence > 70 ? 'Excelente' : result.coherence > 50 ? 'Buena' : 'Aceptable'})</div>`;
+                analysisHTML += `<div class="analysis-item">• Tipo: ${result.combined ? 'Respuesta multi-fuente combinada' : 'Respuesta directa'}</div>`;
+                analysisHTML += `<div class="analysis-item">• Confianza: ${result.confidence.toFixed(0)}%</div>`;
+                
+                const questionType = detectQuestionType(finalInput);
+                analysisHTML += `<div class="analysis-item">• Pregunta tipo: ${questionType}</div>`;
+                
+                if (correctedInput.corrections.length > 0) {
+                    analysisHTML += `<div class="analysis-item">• ✍️ Entrada corregida automáticamente (${correctedInput.corrections.length} correcciones)</div>`;
+                }
+                
+                if (result.combined) {
+                    analysisHTML += `<div class="analysis-item">• 🧠 Procesamiento avanzado: análisis semántico, detección de incompatibilidades y optimización de coherencia</div>`;
+                }
+                
+                analysisHTML += '</div>';
+                analysisDiv.innerHTML = analysisHTML;
+                
+                conversationContext.push(finalInput);
+                if (conversationContext.length > 5) conversationContext.shift();
             }
-            
-            html += '</div>';
-            responseDiv.innerHTML = html;
-            
-            feedbackDiv.innerHTML = `
-                <div class="feedback-btns">
-                    <button class="feedback-btn feedback-good" onclick="giveFeedback(true)">👍 Útil</button>
-                    <button class="feedback-btn feedback-bad" onclick="giveFeedback(false)">👎 Incorrecta</button>
-                </div>
-            `;
-            
-            analysisDiv.innerHTML = `
-                <div class="analysis">
-                    <strong>🔬 Análisis Multinivel:</strong><br>
-                    <div class="analysis-item">• ${matches.length} fuentes analizadas</div>
-                    <div class="analysis-item">• ${result.sources.length} fuentes usadas</div>
-                    <div class="analysis-item">• Precisión: ${result.confidence.toFixed(0)}%</div>
-                    <div class="analysis-item">• Coherencia: ${result.coherence.toFixed(0)}%</div>
-                    <div class="analysis-item">• Validación lógica: ${result.logic.toFixed(0)}%</div>
-                    <div class="analysis-item">• Métodos: Alfabético, Jaro-Winkler, N-gramas, TF-IDF, Gramatical, Fonético, Lógico</div>
-                </div>
-            `;
-            
-            conversationContext.push(corrected.text);
-            if (conversationContext.length > 5) conversationContext.shift();
-            
+
             updateStats();
         }
 
@@ -1425,129 +1530,197 @@
                 }
             });
             
-            try {
-                localStorage.setItem('aiTrainingData', JSON.stringify({
-                    trainingData: trainingData,
-                    questionCount: questionCount
-                }));
-            } catch(e) {}
+            saveToStorage();
             
             document.getElementById('feedbackSection').innerHTML = `
                 <div class="status success">
-                    ${isPositive ? '✓ ¡Gracias! Mejorando IA' : '✓ Registrado, ajustando algoritmo'}
+                    ${isPositive ? '✓ ¡Gracias! IA mejorada' : '✓ Registrado, ajustando pesos'}
                 </div>
             `;
-        }
-
-        function deleteTraining(id) {
-            if (!confirm('¿Eliminar?')) return;
-            trainingData = trainingData.filter(item => item.id !== id);
-            try {
-                localStorage.setItem('aiTrainingData', JSON.stringify({
-                    trainingData: trainingData,
-                    questionCount: questionCount
-                }));
-            } catch(e) {}
             updateStats();
             viewTraining();
         }
 
         function downloadTraining() {
+            const statusDiv = document.getElementById('trainStatus');
+            
             if (trainingData.length === 0) {
-                alert('No hay datos para descargar');
+                statusDiv.innerHTML = '<div class="status error">Sin datos</div>';
                 return;
             }
-            const data = JSON.stringify({
-                version: '3.0-advanced',
+
+            const dataToExport = {
+                version: '3.0',
+                exportDate: new Date().toISOString(),
                 trainingData: trainingData,
-                questionCount: questionCount
-            }, null, 2);
-            const blob = new Blob([data], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `ia-v3-${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
+                questionCount: questionCount,
+            };
+
+            const dataStr = JSON.stringify(dataToExport, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = `ia-ultra-v2-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
             URL.revokeObjectURL(url);
+
+            statusDiv.innerHTML = '<div class="status success">✓ Descargado</div>';
+            setTimeout(() => { statusDiv.innerHTML = ''; }, 3000);
         }
 
         function loadTraining(event) {
             const file = event.target.files[0];
+            const statusDiv = document.getElementById('trainStatus');
+            
             if (!file) return;
+
             const reader = new FileReader();
+            
             reader.onload = function(e) {
                 try {
-                    const data = JSON.parse(e.target.result);
-                    trainingData = data.trainingData || [];
-                    questionCount = data.questionCount || 0;
-                    try {
-                        localStorage.setItem('aiTrainingData', JSON.stringify({
-                            trainingData: trainingData,
-                            questionCount: questionCount
-                        }));
-                    } catch(err) {}
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (!importedData.trainingData) {
+                        throw new Error('Formato inválido');
+                    }
+
+                    const loadedCount = importedData.trainingData.length;
+                    
+                    if (trainingData.length > 0) {
+                        if (confirm(`Tienes ${trainingData.length}.\n\nOK=Reemplazar\nCancel=Agregar`)) {
+                            trainingData = importedData.trainingData;
+                        } else {
+                            trainingData = [...trainingData, ...importedData.trainingData];
+                        }
+                    } else {
+                        trainingData = importedData.trainingData;
+                    }
+                    
+                    if (importedData.questionCount) {
+                        questionCount = importedData.questionCount;
+                    }
+                    
+                    saveToStorage();
+                    
+                    statusDiv.innerHTML = `<div class="status success">✓ ${loadedCount} cargados</div>`;
                     updateStats();
                     viewTraining();
-                    alert(`✓ ${trainingData.length} entrenamientos cargados`);
-                } catch(error) {
-                    alert('Error al cargar archivo');
+                    
+                    setTimeout(() => { statusDiv.innerHTML = ''; }, 3000);
+                    
+                } catch (error) {
+                    statusDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
                 }
             };
+            
             reader.readAsText(file);
+            event.target.value = '';
         }
 
-        function clearAllTraining() {
-            if (!confirm('¿Borrar todo el entrenamiento?')) return;
-            trainingData = [];
-            questionCount = 0;
-            conversationContext = [];
-            try {
-                localStorage.removeItem('aiTrainingData');
-            } catch(e) {}
-            updateStats();
-            viewTraining();
-        }
-
-        function viewTraining() {
-            const listDiv = document.getElementById('trainingList');
-            if (trainingData.length === 0) {
-                listDiv.innerHTML = '<div class="status info">Sin datos de entrenamiento</div>';
-                return;
-            }
-            listDiv.innerHTML = trainingData.map(item => `
-                <div class="training-item">
-                    <div class="training-content">
-                        <strong>P:</strong> ${item.question}<br>
-                        <strong>R:</strong> ${item.answer}<br>
-                        <small style="color: #666;">Usos: ${item.useCount} | ✓${item.successCount} ✗${item.failCount}</small>
-                    </div>
-                    <button class="btn-delete" onclick="deleteTraining('${item.id}')">🗑️</button>
-                </div>
-            `).join('');
-        }
-
-        function updateStats() {
-            document.getElementById('totalTraining').textContent = trainingData.length;
-            document.getElementById('totalQuestions').textContent = questionCount;
+        function calculateTotalWords() {
             const allWords = new Set();
             trainingData.forEach(item => {
                 item.questionWords.forEach(w => allWords.add(w));
                 item.answerWords.forEach(w => allWords.add(w));
             });
-            document.getElementById('totalWords').textContent = allWords.size;
+            return allWords.size;
+        }
+
+        function viewTraining() {
+            const listDiv = document.getElementById('trainingList');
+            
+            if (trainingData.length === 0) {
+                listDiv.innerHTML = '<div class="status info">Sin entrenamiento</div>';
+                return;
+            }
+
+            const sortedData = [...trainingData].sort((a, b) => {
+                const rateA = a.successCount / (a.successCount + a.failCount || 1);
+                const rateB = b.successCount / (b.successCount + b.failCount || 1);
+                return rateB - rateA;
+            });
+
+            listDiv.innerHTML = sortedData.map(item => {
+                const successRate = item.successCount / (item.successCount + item.failCount || 1);
+                const rateColor = successRate > 0.7 ? '#4caf50' : successRate > 0.4 ? '#ff9800' : '#f44336';
+                
+                return `
+                    <div class="training-item">
+                        <div class="training-content">
+                            <strong>Entrada:</strong> ${item.question}<br>
+                            <strong>Salida:</strong> ${item.answer}<br>
+                            <div style="margin-top: 8px; color: #666; font-size: 0.9em;">
+                                <strong>Keywords:</strong> ${item.keywords.slice(0, 6).join(', ')}${item.keywords.length > 6 ? '...' : ''}
+                            </div>
+                            <div style="margin-top: 8px; display: flex; gap: 15px; font-size: 0.85em; flex-wrap: wrap;">
+                                <span><strong>Usos:</strong> ${item.useCount}</span>
+                                <span><strong>✓:</strong> ${item.successCount}</span>
+                                <span><strong>✗:</strong> ${item.failCount}</span>
+                                <span style="color: ${rateColor};"><strong>Tasa:</strong> ${(successRate * 100).toFixed(0)}%</span>
+                            </div>
+                        </div>
+                        <button class="btn-delete" onclick="deleteTraining('${item.id}')">🗑️</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function clearAllTraining() {
+            if (!confirm('¿BORRAR TODO?')) return;
+
+            trainingData = [];
+            questionCount = 0;
+            conversationContext = [];
+            lastUsedSources = [];
+            
+            saveToStorage();
+            
+            document.getElementById('trainStatus').innerHTML = '<div class="status success">✓ Limpio</div>';
+            updateStats();
+            viewTraining();
+        }
+
+        function updateStats() {
+            document.getElementById('totalTraining').textContent = trainingData.length;
+            document.getElementById('totalQuestions').textContent = questionCount;
+            document.getElementById('totalWords').textContent = calculateTotalWords();
+            
             const size = new Blob([JSON.stringify(trainingData)]).size;
             document.getElementById('dbSize').textContent = (size / 1024).toFixed(2) + ' KB';
         }
 
+        function updateAutoTags() {
+            const question = document.getElementById('question').value.trim();
+            const answer = document.getElementById('answer').value.trim();
+            
+            if (!question && !answer) {
+                document.getElementById('autoTags').style.display = 'none';
+                return;
+            }
+            
+            const keywords = extractKeywords(question + ' ' + answer);
+            const uniqueKeywords = [...new Set(keywords)];
+            
+            if (uniqueKeywords.length > 0) {
+                document.getElementById('tagsList').innerHTML = uniqueKeywords.slice(0, 8).map(tag => 
+                    `<span>${tag}</span>`
+                ).join('') + (uniqueKeywords.length > 8 ? '<span>+</span>' : '');
+                document.getElementById('autoTags').style.display = 'block';
+            } else {
+                document.getElementById('autoTags').style.display = 'none';
+            }
+        }
+
+        document.getElementById('question').addEventListener('input', updateAutoTags);
+        document.getElementById('answer').addEventListener('input', updateAutoTags);
+
         window.addEventListener('load', () => {
-            try {
-                const saved = localStorage.getItem('aiTrainingData');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    trainingData = data.trainingData || [];
-                    questionCount = data.questionCount || 0;
-                }
-            } catch(e) {}
+            checkStorageAvailability();
+            loadFromStorage();
             updateStats();
             viewTraining();
         });
