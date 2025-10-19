@@ -444,6 +444,7 @@
                 <span class="badge">🔀 IA Combinada</span>
                 <span class="badge">🎵 Análisis Vocal</span>
                 <span class="badge">🎯 Precisión Mejorada</span>
+                <span class="badge">💾 Auto-Guardado</span>
             </div>
         </div>
 
@@ -667,26 +668,38 @@
                 const dataToSave = {
                     trainingData: trainingData,
                     questionCount: questionCount,
-                    lastSaved: new Date().toISOString()
+                    conversationContext: conversationContext,
+                    lastSaved: new Date().toISOString(),
+                    version: '3.2'
                 };
-                const data = {};
-                data['aiTrainingData'] = JSON.stringify(dataToSave);
-            } catch(e) {}
+                localStorage.setItem('aiTrainingData', JSON.stringify(dataToSave));
+                return true;
+            } catch(e) {
+                console.error('Error guardando datos:', e);
+                return false;
+            }
         }
 
         function loadFromStorage() {
             try {
-                const data = {};
-                const saved = data['aiTrainingData'];
+                const saved = localStorage.getItem('aiTrainingData');
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     trainingData = parsed.trainingData || [];
                     questionCount = parsed.questionCount || 0;
+                    conversationContext = parsed.conversationContext || [];
+                    
                     const statusDiv = document.getElementById('trainStatus');
-                    statusDiv.innerHTML = `<div class="status success">✓ ${trainingData.length} entrenamientos cargados</div>`;
-                    setTimeout(() => { statusDiv.innerHTML = ''; }, 3000);
+                    if (trainingData.length > 0) {
+                        statusDiv.innerHTML = `<div class="status success">✓ ${trainingData.length} entrenamientos cargados automáticamente</div>`;
+                        setTimeout(() => { statusDiv.innerHTML = ''; }, 3000);
+                    }
+                    return true;
                 }
-            } catch(e) {}
+            } catch(e) {
+                console.error('Error cargando datos:', e);
+            }
+            return false;
         }
 
         function correctSpelling(text) {
@@ -1184,7 +1197,7 @@
 
             saveToStorage();
 
-            statusDiv.innerHTML = `<div class="status success">✓ Entrenado${allCorrections.length > 0 ? ' y corregido' : ''}</div>`;
+            statusDiv.innerHTML = `<div class="status success">✓ Entrenado y guardado${allCorrections.length > 0 ? ' con correcciones' : ''}</div>`;
             document.getElementById('question').value = '';
             document.getElementById('answer').value = '';
             document.getElementById('autoTags').style.display = 'none';
@@ -1204,7 +1217,7 @@
             saveToStorage();
             
             const statusDiv = document.getElementById('trainStatus');
-            statusDiv.innerHTML = '<div class="status success">✓ Eliminado</div>';
+            statusDiv.innerHTML = '<div class="status success">✓ Eliminado y guardado</div>';
             setTimeout(() => { statusDiv.innerHTML = ''; }, 2000);
             
             updateStats();
@@ -1334,7 +1347,7 @@
             
             document.getElementById('feedbackSection').innerHTML = `
                 <div class="status success">
-                    ${isPositive ? '✓ ¡Gracias! IA mejorada' : '✓ Registrado, ajustando pesos'}
+                    ${isPositive ? '✓ ¡Gracias! IA mejorada y guardada' : '✓ Registrado y guardado, ajustando pesos'}
                 </div>
             `;
             updateStats();
@@ -1350,10 +1363,11 @@
             }
 
             const dataToExport = {
-                version: '3.1',
+                version: '3.2',
                 exportDate: new Date().toISOString(),
                 trainingData: trainingData,
                 questionCount: questionCount,
+                conversationContext: conversationContext
             };
 
             const dataStr = JSON.stringify(dataToExport, null, 2);
@@ -1391,7 +1405,7 @@
                     const loadedCount = importedData.trainingData.length;
                     
                     if (trainingData.length > 0) {
-                        if (confirm(`Tienes ${trainingData.length}.\n\nOK=Reemplazar\nCancel=Agregar`)) {
+                        if (confirm(`Tienes ${trainingData.length} entrenamientos guardados.\n\nOK = Reemplazar todo\nCancelar = Agregar al existente`)) {
                             trainingData = importedData.trainingData;
                         } else {
                             trainingData = [...trainingData, ...importedData.trainingData];
@@ -1404,13 +1418,17 @@
                         questionCount = importedData.questionCount;
                     }
                     
+                    if (importedData.conversationContext) {
+                        conversationContext = importedData.conversationContext;
+                    }
+                    
                     saveToStorage();
                     
-                    statusDiv.innerHTML = `<div class="status success">✓ ${loadedCount} cargados</div>`;
+                    statusDiv.innerHTML = `<div class="status success">✓ ${loadedCount} entrenamientos cargados y guardados automáticamente</div>`;
                     updateStats();
                     viewTraining();
                     
-                    setTimeout(() => { statusDiv.innerHTML = ''; }, 3000);
+                    setTimeout(() => { statusDiv.innerHTML = ''; }, 4000);
                     
                 } catch (error) {
                     statusDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
@@ -1470,7 +1488,7 @@
         }
 
         function clearAllTraining() {
-            if (!confirm('¿BORRAR TODO?')) return;
+            if (!confirm('¿BORRAR TODO el entrenamiento guardado?')) return;
 
             trainingData = [];
             questionCount = 0;
@@ -1479,7 +1497,7 @@
             
             saveToStorage();
             
-            document.getElementById('trainStatus').innerHTML = '<div class="status success">✓ Limpio</div>';
+            document.getElementById('trainStatus').innerHTML = '<div class="status success">✓ Todo borrado y guardado</div>';
             updateStats();
             viewTraining();
         }
