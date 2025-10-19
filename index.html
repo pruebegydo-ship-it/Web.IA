@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA Ultra Avanzada con Corrección Automática</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 0.9em;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #2196F3 0%, #0d8bf2 100%);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .btn-delete:hover {
+            background: #d32f2f;
+            transform: scale(1.05);
+        }
+
+        .response-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #667eea;
+            min-height: 150px;
+            margin-top: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .training-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .training-content {
+            flex: 1;
+        }
+
+        .training-item strong {
+            color: #667eea;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-card .number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-card .label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .analysis {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 4px solid #2196F3;
+        }
+
+        .analysis-item {
+            margin: 5px 0;
+            color: #0d47a1;
+        }
+
+        .match-score {
+            display: inline-block;
+            background: #4caf50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .combined-badge {
+            display: inline-block;
+            background: #ff9800;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .source-list {
+            background: #f0f4f8;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-size: 0.9em;
+        }
+
+        .source-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+        }
+
+        .source-weight {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .auto-tags {
+            background: #f0f8ff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .auto-tags span {
+            display: inline-block;
+            background: #e1f5fe;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin: 2px;
+            font-size: 0.8em;
+        }
+
+        .correction-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .correction-box h4 {
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        .correction-item {
+            background: white;
+            padding: 6px 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 3px solid #ff9800;
+        }
+
+        .correction-item .before {
+            text-decoration: line-through;
+            color: #d32f2f;
+        }
+
+        .correction-item .after {
+            color: #388e3c;
+            font-weight: bold;
+        }
+
+        .feedback-btns {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .feedback-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .feedback-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .feedback-good {
+            background: #4caf50;
+            color: white;
+        }
+
+        .feedback-bad {
+            background: #f44336;
+            color: white;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .storage-warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px;
+            text-align: center;
+        }
+
+        .storage-warning h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .storage-warning p {
+            color: #856404;
+            margin: 5px 0;
+        }
+
+        .generated-response {
+            background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+            padding: 18px;
+            border-radius: 10px;
+            margin: 12px 0;
+            border-left: 4px solid #4caf50;
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        .coherence-badge {
+            display: inline-block;
+            background: #9c27b0;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .btn-group {
+                grid-template-columns: 1fr;
+            }
+
+            .training-item {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 IA Ultra Avanzada</h1>
+            <p>Con Corrección Ortográfica y Generación Inteligente</p>
+            <div>
+                <span class="badge">✍️ Auto-Corrección</span>
+                <span class="badge">🔀 IA Combinada</span>
+                <span class="badge">📝 Coherencia</span>
+                <span class="badge">🎯 Análisis Profundo</span>
+            </div>
+        </div>
+
+        <div id="storageWarning" class="storage-warning" style="display:none;">
+            <h3>⚠️ Aviso Importante</h3>
+            <p><strong>Descarga este archivo para guardar permanentemente.</strong></p>
+            <p>Clic derecho → "Guardar como" → Abre desde tu PC</p>
+        </div>
+
+        <div class="main-content">
+            <div class="section">
+                <h2>📚 Entrenar IA</h2>
+                <div class="input-group">
+                    <label for="question">Pregunta / Entrada:</label>
+                    <textarea id="question" placeholder="Escribe aquí... (La IA corregirá automáticamente)"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="answer">Respuesta / Salida:</label>
+                    <textarea id="answer" placeholder="Escribe la respuesta... (Se corregirá al guardar)"></textarea>
+                </div>
+                <div id="corrections" class="correction-box" style="display:none;"></div>
+                <div id="autoTags" class="auto-tags" style="display:none;">
+                    <strong>Palabras clave:</strong> <span id="tagsList"></span>
+                </div>
+                <button class="btn" onclick="trainAI()">✅ Entrenar IA (con corrección)</button>
+                <button class="btn btn-secondary" onclick="viewTraining()">Ver Entrenamiento</button>
+                
+                <div class="btn-group">
+                    <button class="btn btn-success" onclick="downloadTraining()">📥 Descargar</button>
+                    <button class="btn btn-info" onclick="document.getElementById('fileInput').click()">📤 Cargar</button>
+                </div>
+                <input type="file" id="fileInput" accept=".json" onchange="loadTraining(event)">
+                
+                <button class="btn btn-danger" onclick="clearAllTraining()">🗑️ Borrar Todo</button>
+                <div id="trainStatus"></div>
+            </div>
+
+            <div class="section">
+                <h2>💬 Consultar IA</h2>
+                <div class="input-group">
+                    <label for="userQuestion">Pregunta:</label>
+                    <textarea id="userQuestion" placeholder="Escribe tu pregunta... La IA generará respuestas inteligentes"></textarea>
+                </div>
+                <button class="btn" onclick="askAI()">🚀 Consultar</button>
+                <div class="response-box" id="aiResponse">
+                    La IA analizará profundamente tu pregunta y generará una respuesta combinada con corrección automática...
+                </div>
+                <div id="feedbackSection"></div>
+                <div id="analysis"></div>
+            </div>
+
+            <div class="section" style="grid-column: 1 / -1;">
+                <h2>📊 Estadísticas</h2>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="number" id="totalTraining">0</div>
+                        <div class="label">Entrenamientos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="totalWords">0</div>
+                        <div class="label">Palabras Únicas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="totalQuestions">0</div>
+                        <div class="label">Consultas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="dbSize">0 KB</div>
+                        <div class="label">Tamaño BD</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" style="grid-column: 1 / -1;">
+                <h2>📝 Base de Conocimiento</h2>
+                <div id="trainingList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let trainingData = [];
+        let questionCount = 0;
+        let conversationContext = [];
+        let lastUsedSources = [];
+        let storageAvailable = false;
+
+        const synonyms = {
+            'hola': ['saludos', 'buenas', 'hey', 'alo', 'que tal'],
+            'adios': ['chao', 'hasta luego', 'nos vemos', 'bye'],
+            'gracias': ['muchas gracias', 'agradecido', 'thanks'],
+            'ayuda': ['ayudar', 'asistencia', 'soporte', 'auxilio'],
+            'como': ['de que manera', 'de que forma'],
+            'que': ['cual', 'cuales'],
+            'hacer': ['realizar', 'ejecutar', 'crear'],
+            'bueno': ['bien', 'excelente', 'genial', 'perfecto'],
+            'malo': ['mal', 'pesimo', 'terrible'],
+            'programar': ['programacion', 'codificar', 'codigo', 'desarrollar'],
+            'javascript': ['js', 'ecmascript'],
+            'python': ['py'],
+            'aprender': ['estudiar', 'ensenar', 'educacion']
+        };
+
+        // Diccionario de correcciones ortográficas comunes
+        const spellingCorrections = {
+            'q': 'que', 'xq': 'porque', 'pq': 'porque', 'xk': 'porque',
+            'tb': 'también', 'tmb': 'también', 'bn': 'bien',
+            'd': 'de', 'k': 'que', 'x': 'por', 'pa': 'para',
+            'porfa': 'por favor', 'porfavor': 'por favor',
+            'hola': 'hola', 'ola': 'hola',
+            'aver': 'a ver', 'aber': 'a ver',
+            'aslo': 'hazlo', 'ase': 'hace', 'ahy': 'ahí',
+            'q': 'qué', 'komo': 'como', 'kien': 'quien',
+            'xfa': 'por favor', 'porq': 'porque',
+            'entiendes': 'entiendes', 'bn': 'bien',
+            'bro': 'hermano', 'wey': 'amigo'
+        };
+
+        // Palabras que necesitan tilde
+        const accentCorrections = {
+            'como': 'cómo', 'que': 'qué', 'cual': 'cuál', 'donde': 'dónde',
+            'cuando': 'cuándo', 'quien': 'quién', 'cuanto': 'cuánto',
+            'mas': 'más', 'si': 'sí', 'tu': 'tú', 'mi': 'mí',
+            'te': 'té', 'el': 'él', 'solo': 'sólo',
+            'esta': 'está', 'estas': 'estás', 'este': 'este',
+            'razon': 'razón', 'acion': 'ación', 'informacion': 'información',
+            'codigo': 'código', 'tambien': 'también', 'ahi': 'ahí',
+            'dia': 'día', 'despues': 'después', 'facil': 'fácil',
+            'dificil': 'difícil', 'util': 'útil', 'semantica': 'semántica'
+        };
+
+        function checkStorageAvailability() {
+            try {
+                const test = '__storage_test__';
+                localStorage.setItem(test, test);
+                localStorage.removeItem(test);
+                storageAvailable = true;
+                return true;
+            } catch(e) {
+                storageAvailable = false;
+                document.getElementById('storageWarning').style.display = 'block';
+                return false;
+            }
+        }
+
+        function saveToStorage() {
+            if (!storageAvailable) return;
+            try {
+                const dataToSave = {
+                    trainingData: trainingData,
+                    questionCount: questionCount,
+                    lastSaved: new Date().toISOString()
+                };
+                localStorage.setItem('aiTrainingData', JSON.stringify(dataToSave));
+            } catch(e) {
+                console.warn('No se pudo guardar:', e);
+            }
+        }
+
+        function loadFromStorage() {
+            if (!storageAvailable) return;
+            try {
+                const saved = localStorage.getItem('aiTrainingData');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    trainingData = data.trainingData || [];
+                    questionCount = data.questionCount || 0;
+                    const statusDiv = document.getElementById('trainStatus');
+                    statusDiv.innerHTML = `<div class="status success">✓ ${trainingData.length} entrenamientos cargados</div>`;
+                    setTimeout(() => { statusDiv.innerHTML = ''; }, 3000);
+                }
+            } catch(e) {
+                console.warn('Error al cargar:', e);
+            }
+        }
+
+        // SISTEMA DE CORRECCIÓN ORTOGRÁFICA AVANZADO
+        function correctSpelling(text) {
+            let corrected = text;
+            const corrections = [];
+            
+            // Dividir en palabras
+            const words = text.split(/\s+/);
+            
+            words.forEach(word => {
+                const cleanWord = word.toLowerCase().replace(/[.,!?;:]/g, '');
+                
+                // Corrección de abreviaturas y errores comunes
+                if (spellingCorrections[cleanWord]) {
+                    const replacement = spellingCorrections[cleanWord];
+                    corrected = corrected.replace(new RegExp('\\b' + word + '\\b', 'gi'), replacement);
+                    corrections.push({ before: word, after: replacement });
+                }
+            });
+            
+            return { text: corrected, corrections };
+        }
+
+        function addAccents(text) {
+            let corrected = text;
+            const corrections = [];
+            
+            // Detectar preguntas para agregar tildes
+            const isQuestion = text.includes('?') || 
+                              /^(como|que|cual|donde|cuando|quien|cuanto)/i.test(text);
+            
+            if (isQuestion) {
+                Object.entries(accentCorrections).forEach(([without, with_]) => {
+                    const regex = new RegExp('\\b' + without + '\\b', 'gi');
+                    if (regex.test(corrected)) {
+                        corrected = corrected.replace(regex, with_);
+                        corrections.push({ before: without, after: with_ });
+                    }
+                });
+            }
+            
+            return { text: corrected, corrections };
+        }
+
+        function addPunctuation(text) {
+            let corrected = text.trim();
+            const corrections = [];
+            
+            // Agregar punto final si no existe
+            if (!/[.!?]$/.test(corrected)) {
+                corrections.push({ before: 'sin punto final', after: 'con punto final' });
+                corrected += '.';
+            }
+            
+            // Capitalizar primera letra
+            if (corrected.length > 0 && corrected[0] !== corrected[0].toUpperCase()) {
+                corrections.push({ before: 'minúscula inicial', after: 'mayúscula inicial' });
+                corrected = corrected.charAt(0).toUpperCase() + corrected.slice(1);
+            }
+            
+            // Agregar espacio después de puntos
+            corrected = corrected.replace(/\.([a-záéíóúñ])/gi, '. $1');
+            corrected = corrected.replace(/,([a-záéíóúñ])/gi, ', $1');
+            
+            // Capitalizar después de punto
+            corrected = corrected.replace(/\.\s+([a-záéíóúñ])/g, (match, letter) => {
+                return '. ' + letter.toUpperCase();
+            });
+            
+            return { text: corrected, corrections };
+        }
+
+        function fullCorrection(text) {
+            if (!text || text.trim() === '') return { text: '', corrections: [] };
+            
+            let allCorrections = [];
+            
+            // 1. Corrección ortográfica
+            const spelling = correctSpelling(text);
+            let result = spelling.text;
+            allCorrections = allCorrections.concat(spelling.corrections);
+            
+            // 2. Agregar tildes
+            const accents = addAccents(result);
+            result = accents.text;
+            allCorrections = allCorrections.concat(accents.corrections);
+            
+            // 3. Puntuación
+            const punctuation = addPunctuation(result);
+            result = punctuation.text;
+            allCorrections = allCorrections.concat(punctuation.corrections);
+            
+            return { text: result, corrections: allCorrections };
+        }
+
+        function showCorrections(corrections) {
+            const corrDiv = document.getElementById('corrections');
+            
+            if (corrections.length === 0) {
+                corrDiv.style.display = 'none';
+                return;
+            }
+            
+            let html = '<h4>✍️ Correcciones aplicadas:</h4>';
+            corrections.forEach(corr => {
+                html += `
+                    <div class="correction-item">
+                        <span class="before">${corr.before}</span> → 
+                        <span class="after">${corr.after}</span>
+                    </div>
+                `;
+            });
+            
+            corrDiv.innerHTML = html;
+            corrDiv.style.display = 'block';
+        }
+
+        function normalizeText(text) {
+            return text.toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^\w\s]/g, " ")
+                .replace(/\s+/g, " ")
+                .trim();
+        }
+
+        function stem(word) {
+            const suffixes = ['ando', 'iendo', 'mente', 'ación', 'ador', 'ante', 'ancia', 'encia', 
+                            'ible', 'able', 'ismo', 'ista', 'oso', 'osa', 'ivo', 'iva',
+                            'ar', 'er', 'ir', 'ado', 'ido', 'es', 'as', 'os', 's'];
+            
+            for (let suffix of suffixes) {
+                if (word.length > suffix.length + 3 && word.endsWith(suffix)) {
+                    return word.slice(0, -suffix.length);
+                }
+            }
+            return word;
+        }
+
+        function tokenize(text) {
+            const normalized = normalizeText(text);
+            const words = normalized.split(/\s+/).filter(w => w.length > 0);
+            const stems = words.map(w => stem(w));
+            
+            const bigrams = [];
+            const trigrams = [];
+            for (let i = 0; i < words.length - 1; i++) {
+                bigrams.push(words[i] + ' ' + words[i + 1]);
+                if (i < words.length - 2) {
+                    trigrams.push(words[i] + ' ' + words[i + 1] + ' ' + words[i + 2]);
+                }
+            }
+            
+            return { words, stems, normalized, bigrams, trigrams };
+        }
+
+        function extractKeywords(text) {
+            const { words } = tokenize(text);
+            
+            const commonWords = new Set([
+                'que', 'qué', 'como', 'cómo', 'para', 'por', 'con', 'de', 'en', 'la', 'el', 'los', 'las',
+                'un', 'una', 'unos', 'unas', 'y', 'o', 'pero', 'si', 'no', 'es', 'son', 'soy', 'eres',
+                'esta', 'este', 'estos', 'estas', 'al', 'del', 'lo', 'le', 'se', 'te', 'me', 'nos', 'os',
+                'su', 'sus', 'mi', 'mis', 'tu', 'tus', 'a', 'ante', 'bajo', 'desde', 'entre', 'hacia',
+                'hasta', 'según', 'sin', 'sobre', 'tras', 'ser', 'estar', 'hay', 'tener'
+            ]);
+            
+            const keywords = words.filter(word => word.length > 2 && !commonWords.has(word));
+            
+            const expandedKeywords = new Set(keywords);
+            keywords.forEach(keyword => {
+                if (synonyms[keyword]) {
+                    synonyms[keyword].forEach(syn => expandedKeywords.add(syn));
+                }
+                Object.entries(synonyms).forEach(([key, syns]) => {
+                    if (syns.includes(keyword)) {
+                        expandedKeywords.add(key);
+                    }
+                });
+            });
+            
+            return [...expandedKeywords];
+        }
+
+        function levenshtein(str1, str2) {
+            const len1 = str1.length;
+            const len2 = str2.length;
+            const matrix = Array(len1 + 1).fill(null).map(() => Array(len2 + 1).fill(0));
+
+            for (let i = 0; i <= len1; i++) matrix[i][0] = i;
+            for (let j = 0; j <= len2; j++) matrix[0][j] = j;
+
+            for (let i = 1; i <= len1; i++) {
+                for (let j = 1; j <= len2; j++) {
+                    const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j] + 1,
+                        matrix[i][j - 1] + 1,
+                        matrix[i - 1][j - 1] + cost
+                    );
+                }
+            }
+
+            const maxLen = Math.max(len1, len2);
+            return maxLen === 0 ? 1 : 1 - (matrix[len1][len2] / maxLen);
+        }
+
+        function calculateSimilarity(text1, text2) {
+            const tokens1 = tokenize(text1);
+            const tokens2 = tokenize(text2);
+            
+            const set1 = new Set(tokens1.words);
+            const set2 = new Set(tokens2.words);
+            const intersection = new Set([...set1].filter(x => set2.has(x)));
+            const union = new Set([...set1, ...set2]);
+            const jaccard = union.size === 0 ? 0 : intersection.size / union.size;
+            
+            const levSim = levenshtein(tokens1.normalized, tokens2.normalized);
+            
+            const stemSet1 = new Set(tokens1.stems);
+            const stemSet2 = new Set(tokens2.stems);
+            const stemIntersection = new Set([...stemSet1].filter(x => stemSet2.has(x)));
+            const stemUnion = new Set([...stemSet1, ...stemSet2]);
+            const stemSim = stemUnion.size === 0 ? 0 : stemIntersection.size / stemUnion.size;
+            
+            const bigramSet1 = new Set(tokens1.bigrams);
+            const bigramSet2 = new Set(tokens2.bigrams);
+            const bigramIntersection = new Set([...bigramSet1].filter(x => bigramSet2.has(x)));
+            const bigramUnion = new Set([...bigramSet1, ...bigramSet2]);
+            const bigramSim = bigramUnion.size === 0 ? 0 : bigramIntersection.size / bigramUnion.size;
+            
+            let containsSim = 0;
+            if (tokens1.normalized.includes(tokens2.normalized) || tokens2.normalized.includes(tokens1.normalized)) {
+                const shorter = Math.min(tokens1.normalized.length, tokens2.normalized.length);
+                const longer = Math.max(tokens1.normalized.length, tokens2.normalized.length);
+                containsSim = shorter / longer;
+            }
+            
+            return (jaccard * 0.25 + levSim * 0.25 + stemSim * 0.20 + bigramSim * 0.20 + containsSim * 0.10) * 100;
+        }
+
+        // ANÁLISIS DE COHERENCIA MEJORADO
+        function calculateCoherence(sentence1, sentence2) {
+            // Calcular similitud semántica
+            const similarity = calculateSimilarity(sentence1, sentence2);
+            
+            // Verificar conectores lógicos
+            const connectors = ['además', 'también', 'por lo tanto', 'sin embargo', 'pero', 'y', 'asimismo'];
+            let hasConnector = connectors.some(conn => sentence2.toLowerCase().includes(conn));
+            
+            // Verificar continuidad temática (palabras en común)
+            const words1 = new Set(tokenize(sentence1).words);
+            const words2 = new Set(tokenize(sentence2).words);
+            const commonWords = [...words1].filter(w => words2.has(w)).length;
+            
+            // Penalizar repetición exacta
+            if (similarity > 90) return 20;
+            
+            // Calcular score de coherencia
+            let coherence = 50;
+            coherence += (similarity * 0.3);
+            coherence += (hasConnector ? 15 : 0);
+            coherence += (commonWords * 5);
+            
+            return Math.min(coherence, 100);
+        }
+
+        function findMatches(userInput) {
+            const matches = [];
+            const userTokens = tokenize(userInput);
+            const userKeywords = extractKeywords(userInput);
+            
+            trainingData.forEach((item, index) => {
+                let score = 0;
+                const details = [];
+                
+                const qSimilarity = calculateSimilarity(userInput, item.question);
+                score += qSimilarity * 0.5;
+                if (qSimilarity > 5) details.push(`Pregunta: ${qSimilarity.toFixed(0)}%`);
+                
+                const aSimilarity = calculateSimilarity(userInput, item.answer);
+                score += aSimilarity * 0.15;
+                if (aSimilarity > 5) details.push(`Respuesta: ${aSimilarity.toFixed(0)}%`);
+                
+                const keywordMatches = [];
+                userKeywords.forEach(userKw => {
+                    item.keywords.forEach(itemKw => {
+                        if (userKw === itemKw || 
+                            (synonyms[userKw] && synonyms[userKw].includes(itemKw)) ||
+                            (synonyms[itemKw] && synonyms[itemKw].includes(userKw))) {
+                            keywordMatches.push(itemKw);
+                        }
+                    });
+                });
+                
+                if (keywordMatches.length > 0) {
+                    score += keywordMatches.length * 8;
+                    details.push(`Keywords: ${keywordMatches.length}`);
+                }
+                
+                const bigramMatches = item.questionBigrams.filter(bg => userTokens.bigrams.includes(bg));
+                if (bigramMatches.length > 0) {
+                    score += bigramMatches.length * 15;
+                    details.push(`Bigramas: ${bigramMatches.length}`);
+                }
+                
+                const trigramMatches = item.questionTrigrams.filter(tg => userTokens.trigrams.includes(tg));
+                if (trigramMatches.length > 0) {
+                    score += trigramMatches.length * 20;
+                    details.push(`Trigramas: ${trigramMatches.length}`);
+                }
+                
+                const stemMatches = item.questionStems.filter(stem => userTokens.stems.includes(stem));
+                if (stemMatches.length > 0) {
+                    score += stemMatches.length * 5;
+                }
+                
+                if (item.successCount > 0) {
+                    const successRate = item.successCount / (item.successCount + item.failCount || 1);
+                    score += successRate * 10;
+                    if (successRate > 0.5) details.push(`Éxito: ${(successRate * 100).toFixed(0)}%`);
+                }
+                
+                if (conversationContext.length > 0) {
+                    conversationContext.forEach(ctx => {
+                        const ctxSim = calculateSimilarity(ctx, item.question);
+                        if (ctxSim > 30) {
+                            score += 15;
+                            details.push('Contexto+');
+                        }
+                    });
+                }
+                
+                if (score > 0) {
+                    matches.push({ item, index, score: Math.min(score, 100), details });
+                }
+            });
+            
+            matches.sort((a, b) => b.score - a.score);
+            return matches;
+        }
+
+        // GENERACIÓN INTELIGENTE CON COHERENCIA
+        function generateCombinedResponse(userInput, matches) {
+            if (matches.length === 0) return null;
+            
+            const topMatches = matches.slice(0, 6).filter(m => m.score > 15);
+            
+            if (topMatches.length === 0) return null;
+            
+            // Si hay una coincidencia perfecta, usarla
+            if (topMatches.length === 1 && topMatches[0].score > 75) {
+                const corrected = fullCorrection(topMatches[0].item.answer);
+                return {
+                    response: corrected.text,
+                    combined: false,
+                    sources: [topMatches[0]],
+                    confidence: topMatches[0].score,
+                    coherence: 100
+                };
+            }
+            
+            // Calcular pesos con éxito y contexto
+            const weightedSources = topMatches.map(match => {
+                const successRate = match.item.successCount / 
+                    (match.item.successCount + match.item.failCount || 1);
+                const weight = (match.score * 0.65) + (successRate * 100 * 0.35);
+                
+                return { ...match, weight, successRate };
+            });
+            
+            weightedSources.sort((a, b) => b.weight - a.weight);
+            
+            // Extraer oraciones con análisis semántico
+            const sentences = [];
+            weightedSources.forEach(source => {
+                const answerSentences = source.item.answer
+                    .split(/[.!?]+/)
+                    .map(s => s.trim())
+                    .filter(s => s.length > 15);
+                
+                answerSentences.forEach(sentence => {
+                    // Calcular relevancia de la oración
+                    const relevance = calculateSimilarity(userInput, sentence);
+                    
+                    sentences.push({
+                        text: sentence,
+                        weight: source.weight + (relevance * 0.2),
+                        source: source,
+                        relevance: relevance
+                    });
+                });
+            });
+            
+            // Eliminar duplicados semánticos
+            const uniqueSentences = [];
+            sentences.forEach(sent => {
+                const isDuplicate = uniqueSentences.some(unique => 
+                    calculateSimilarity(sent.text, unique.text) > 75
+                );
+                if (!isDuplicate && sent.text.length > 10) {
+                    uniqueSentences.push(sent);
+                }
+            });
+            
+            // Ordenar por peso y relevancia
+            uniqueSentences.sort((a, b) => b.weight - a.weight);
+            
+            // Seleccionar oraciones con análisis de coherencia
+            const selectedSentences = [uniqueSentences[0]];
+            let totalCoherence = 100;
+            let coherenceCount = 1;
+            
+            for (let i = 1; i < Math.min(uniqueSentences.length, 5); i++) {
+                const candidate = uniqueSentences[i];
+                const lastSelected = selectedSentences[selectedSentences.length - 1];
+                
+                // Calcular coherencia con la última oración
+                const coherence = calculateCoherence(lastSelected.text, candidate.text);
+                
+                // Solo agregar si la coherencia es aceptable
+                if (coherence > 40 || selectedSentences.length < 2) {
+                    selectedSentences.push(candidate);
+                    totalCoherence += coherence;
+                    coherenceCount++;
+                }
+                
+                if (selectedSentences.length >= 4) break;
+            }
+            
+            // Combinar oraciones con conectores inteligentes
+            let combinedResponse = '';
+            selectedSentences.forEach((sent, idx) => {
+                if (idx === 0) {
+                    combinedResponse += sent.text;
+                } else {
+                    // Agregar conector si es necesario
+                    const needsConnector = !sent.text.toLowerCase().startsWith('además') &&
+                                          !sent.text.toLowerCase().startsWith('también') &&
+                                          !sent.text.toLowerCase().startsWith('por');
+                    
+                    if (needsConnector && Math.random() > 0.5) {
+                        const connectors = ['. Además, ', '. También, ', '. Por otro lado, ', '. Asimismo, '];
+                        combinedResponse += connectors[Math.floor(Math.random() * connectors.length)] + 
+                                          sent.text.charAt(0).toLowerCase() + sent.text.slice(1);
+                    } else {
+                        combinedResponse += '. ' + sent.text;
+                    }
+                }
+            });
+            
+            // Corrección final completa
+            const finalCorrected = fullCorrection(combinedResponse);
+            
+            // Calcular confianza y coherencia promedio
+            const totalWeight = weightedSources.reduce((sum, s) => sum + s.weight, 0);
+            const avgConfidence = Math.min(totalWeight / weightedSources.length, 100);
+            const avgCoherence = totalCoherence / coherenceCount;
+            
+            return {
+                response: finalCorrected.text,
+                combined: topMatches.length > 1,
+                sources: weightedSources.slice(0, selectedSentences.length),
+                confidence: avgConfidence,
+                coherence: avgCoherence
+            };
+        }
+
+        function trainAI() {
+            const question = document.getElementById('question').value.trim();
+            const answer = document.getElementById('answer').value.trim();
+            const statusDiv = document.getElementById('trainStatus');
+
+            if (!question || !answer) {
+                statusDiv.innerHTML = '<div class="status error">Completa ambos campos</div>';
+                return;
+            }
+
+            // Aplicar corrección completa
+            const qCorrected = fullCorrection(question);
+            const aCorrected = fullCorrection(answer);
+            
+            // Mostrar correcciones
+            const allCorrections = [...qCorrected.corrections, ...aCorrected.corrections];
+            showCorrections(allCorrections);
+            
+            // Usar textos corregidos
+            const correctedQuestion = qCorrected.text;
+            const correctedAnswer = aCorrected.text;
+
+            const { words: qWords, stems: qStems, bigrams: qBigrams, trigrams: qTrigrams } = tokenize(correctedQuestion);
+            const { words: aWords, stems: aStems, bigrams: aBigrams, trigrams: aTrigrams } = tokenize(correctedAnswer);
+            const keywords = extractKeywords(correctedQuestion + ' ' + correctedAnswer);
+            
+            trainingData.push({
+                id: Date.now() + Math.random(),
+                question: correctedQuestion,
+                answer: correctedAnswer,
+                questionNorm: normalizeText(correctedQuestion),
+                answerNorm: normalizeText(correctedAnswer),
+                questionWords: qWords,
+                answerWords: aWords,
+                questionStems: qStems,
+                answerStems: aStems,
+                questionBigrams: qBigrams,
+                answerBigrams: aBigrams,
+                questionTrigrams: qTrigrams,
+                answerTrigrams: aTrigrams,
+                keywords,
+                successCount: 0,
+                failCount: 0,
+                useCount: 0,
+                timestamp: new Date().toISOString()
+            });
+
+            saveToStorage();
+
+            statusDiv.innerHTML = `<div class="status success">✓ Entrenado${allCorrections.length > 0 ? ' y corregido' : ''}</div>`;
+            document.getElementById('question').value = '';
+            document.getElementById('answer').value = '';
+            document.getElementById('autoTags').style.display = 'none';
+            
+            setTimeout(() => {
+                document.getElementById('corrections').style.display = 'none';
+            }, 5000);
+            
+            updateStats();
+            viewTraining();
+        }
+
+        function deleteTraining(id) {
+            if (!confirm('¿Eliminar?')) return;
+            
+            trainingData = trainingData.filter(item => item.id !== id);
+            saveToStorage();
+            
+            const statusDiv = document.getElementById('trainStatus');
+            statusDiv.innerHTML = '<div class="status success">✓ Eliminado</div>';
+            setTimeout(() => { statusDiv.innerHTML = ''; }, 2000);
+            
+            updateStats();
+            viewTraining();
+        }
+
+        function askAI() {
+            const userInput = document.getElementById('userQuestion').value.trim();
+            const responseDiv = document.getElementById('aiResponse');
+            const analysisDiv = document.getElementById('analysis');
+            const feedbackDiv = document.getElementById('feedbackSection');
+
+            if (!userInput) {
+                responseDiv.innerHTML = '<div class="status error">Escribe algo</div>';
+                return;
+            }
+
+            questionCount++;
+            saveToStorage();
+
+            if (trainingData.length === 0) {
+                responseDiv.innerHTML = '<div class="status info">⚠️ Entrena la IA primero</div>';
+                return;
+            }
+
+            // Corregir entrada del usuario
+            const correctedInput = fullCorrection(userInput);
+            const finalInput = correctedInput.text;
+
+            const matches = findMatches(finalInput);
+
+            if (matches.length === 0 || matches[0].score < 10) {
+                responseDiv.innerHTML = '<div class="status info">🤔 Sin coincidencias. Entrena más.</div>';
+                analysisDiv.innerHTML = '';
+                feedbackDiv.innerHTML = '';
+                lastUsedSources = [];
+                
+                conversationContext.push(finalInput);
+                if (conversationContext.length > 5) conversationContext.shift();
+            } else {
+                const result = generateCombinedResponse(finalInput, matches);
+                
+                if (!result) {
+                    responseDiv.innerHTML = '<div class="status info">🤔 No puedo generar respuesta confiable.</div>';
+                    return;
+                }
+                
+                lastUsedSources = result.sources.map(s => s.index);
+                
+                let html = `
+                    <div style="color: #155724;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+                            <strong style="font-size: 1.1em;">🤖 Respuesta IA:</strong>
+                            <div>
+                                <span class="match-score">${result.confidence.toFixed(0)}% confianza</span>
+                                ${result.combined ? '<span class="combined-badge">🔀 COMBINADA</span>' : ''}
+                                <span class="coherence-badge">📝 ${result.coherence.toFixed(0)}% coherencia</span>
+                            </div>
+                        </div>
+                        <div class="generated-response">
+                            ${result.response}
+                        </div>
+                `;
+                
+                if (result.sources.length > 0) {
+                    html += '<div class="source-list"><strong>📚 Fuentes:</strong>';
+                    result.sources.forEach((source, idx) => {
+                        html += `
+                            <div class="source-item">
+                                <span class="source-weight">#${idx + 1} ${source.weight.toFixed(0)}pts</span>
+                                "${source.item.question}"
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+                
+                html += '</div>';
+                responseDiv.innerHTML = html;
+                
+                feedbackDiv.innerHTML = `
+                    <div class="feedback-btns">
+                        <button class="feedback-btn feedback-good" onclick="giveFeedback(true)">
+                            👍 Útil
+                        </button>
+                        <button class="feedback-btn feedback-bad" onclick="giveFeedback(false)">
+                            👎 Incorrecta
+                        </button>
+                    </div>
+                `;
+                
+                let analysisHTML = '<div class="analysis">';
+                analysisHTML += '<strong>🔍 Análisis:</strong><br>';
+                analysisHTML += `<div class="analysis-item">• ${matches.length} fuentes analizadas</div>`;
+                analysisHTML += `<div class="analysis-item">• ${result.sources.length} fuentes combinadas</div>`;
+                analysisHTML += `<div class="analysis-item">• Coherencia: ${result.coherence.toFixed(0)}%</div>`;
+                analysisHTML += `<div class="analysis-item">• Tipo: ${result.combined ? 'Multi-fuente inteligente' : 'Directa'}</div>`;
+                
+                if (correctedInput.corrections.length > 0) {
+                    analysisHTML += `<div class="analysis-item">• Tu pregunta fue corregida automáticamente</div>`;
+                }
+                
+                analysisHTML += '</div>';
+                analysisDiv.innerHTML = analysisHTML;
+                
+                conversationContext.push(finalInput);
+                if (conversationContext.length > 5) conversationContext.shift();
+            }
+
+            updateStats();
+        }
+
+        function giveFeedback(isPositive) {
+            if (lastUsedSources.length === 0) return;
+            
+            lastUsedSources.forEach(idx => {
+                if (trainingData[idx]) {
+                    trainingData[idx].useCount++;
+                    if (isPositive) {
+                        trainingData[idx].successCount++;
+                    } else {
+                        trainingData[idx].failCount++;
+                    }
+                }
+            });
+            
+            saveToStorage();
+            
+            document.getElementById('feedbackSection').innerHTML = `
+                <div class="status success">
+                    ${isPositive ? '✓ ¡Gracias! IA mejorada' : '✓ Registrado, ajustando pesos'}
+                </div>
+            `;
+            updateStats();
+            viewTraining();
+        }
+
+        function downloadTraining() {
+            const statusDiv = document.getElementById('trainStatus');
+            
+            if (trainingData.length === 0) {
+                statusDiv.innerHTML = '<div class="status error">Sin datos</div>';
+                return;
+            }
+
+            const dataToExport = {
+                version: '3.0',
+                exportDate: new Date().toISOString(),
+                trainingData: trainingData,
+                questionCount: questionCount,
+            };
+
+            const dataStr = JSON.stringify(dataToExport, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = `ia-ultra-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(url);
+
+            statusDiv.innerHTML = '<div class="status success">✓ Descargado</div>';
+            setTimeout(() => { statusDiv.innerHTML = ''; }, 3000);
+        }
+
+        function loadTraining(event) {
+            const file = event.target.files[0];
+            const statusDiv = document.getElementById('trainStatus');
+            
+            if (!file) return;
+
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (!importedData.trainingData) {
+                        throw new Error('Formato inválido');
+                    }
+
+                    const loadedCount = importedData.trainingData.length;
+                    
+                    if (trainingData.length > 0) {
+                        if (confirm(`Tienes ${trainingData.length}.\n\nOK=Reemplazar\nCancel=Agregar`)) {
+                            trainingData = importedData.trainingData;
+                        } else {
+                            trainingData = [...trainingData, ...importedData.trainingData];
+                        }
+                    } else {
+                        trainingData = importedData.trainingData;
+                    }
+                    
+                    if (importedData.questionCount) {
+                        questionCount = importedData.questionCount;
+                    }
+                    
+                    saveToStorage();
+                    
+                    statusDiv.innerHTML = `<div class="status success">✓ ${loadedCount} cargados</div>`;
+                    updateStats();
+                    viewTraining();
+                    
+                    setTimeout(() => { statusDiv.innerHTML = ''; }, 3000);
+                    
+                } catch (error) {
+                    statusDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+                }
+            };
+            
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function calculateTotalWords() {
+            const allWords = new Set();
+            trainingData.forEach(item => {
+                item.questionWords.forEach(w => allWords.add(w));
+                item.answerWords.forEach(w => allWords.add(w));
+            });
+            return allWords.size;
+        }
+
+        function viewTraining() {
+            const listDiv = document.getElementById('trainingList');
+            
+            if (trainingData.length === 0) {
+                listDiv.innerHTML = '<div class="status info">Sin entrenamiento</div>';
+                return;
+            }
+
+            const sortedData = [...trainingData].sort((a, b) => {
+                const rateA = a.successCount / (a.successCount + a.failCount || 1);
+                const rateB = b.successCount / (b.successCount + b.failCount || 1);
+                return rateB - rateA;
+            });
+
+            listDiv.innerHTML = sortedData.map(item => {
+                const successRate = item.successCount / (item.successCount + item.failCount || 1);
+                const rateColor = successRate > 0.7 ? '#4caf50' : successRate > 0.4 ? '#ff9800' : '#f44336';
+                
+                return `
+                    <div class="training-item">
+                        <div class="training-content">
+                            <strong>Entrada:</strong> ${item.question}<br>
+                            <strong>Salida:</strong> ${item.answer}<br>
+                            <div style="margin-top: 8px; color: #666; font-size: 0.9em;">
+                                <strong>Keywords:</strong> ${item.keywords.slice(0, 6).join(', ')}${item.keywords.length > 6 ? '...' : ''}
+                            </div>
+                            <div style="margin-top: 8px; display: flex; gap: 15px; font-size: 0.85em; flex-wrap: wrap;">
+                                <span><strong>Usos:</strong> ${item.useCount}</span>
+                                <span><strong>✓:</strong> ${item.successCount}</span>
+                                <span><strong>✗:</strong> ${item.failCount}</span>
+                                <span style="color: ${rateColor};"><strong>Tasa:</strong> ${(successRate * 100).toFixed(0)}%</span>
+                            </div>
+                        </div>
+                        <button class="btn-delete" onclick="deleteTraining('${item.id}')">🗑️</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function clearAllTraining() {
+            if (!confirm('¿BORRAR TODO?')) return;
+
+            trainingData = [];
+            questionCount = 0;
+            conversationContext = [];
+            lastUsedSources = [];
+            
+            saveToStorage();
+            
+            document.getElementById('trainStatus').innerHTML = '<div class="status success">✓ Limpio</div>';
+            updateStats();
+            viewTraining();
+        }
+
+        function updateStats() {
+            document.getElementById('totalTraining').textContent = trainingData.length;
+            document.getElementById('totalQuestions').textContent = questionCount;
+            document.getElementById('totalWords').textContent = calculateTotalWords();
+            
+            const size = new Blob([JSON.stringify(trainingData)]).size;
+            document.getElementById('dbSize').textContent = (size / 1024).toFixed(2) + ' KB';
+        }
+
+        function updateAutoTags() {
+            const question = document.getElementById('question').value.trim();
+            const answer = document.getElementById('answer').value.trim();
+            
+            if (!question && !answer) {
+                document.getElementById('autoTags').style.display = 'none';
+                return;
+            }
+            
+            const keywords = extractKeywords(question + ' ' + answer);
+            const uniqueKeywords = [...new Set(keywords)];
+            
+            if (uniqueKeywords.length > 0) {
+                document.getElementById('tagsList').innerHTML = uniqueKeywords.slice(0, 8).map(tag => 
+                    `<span>${tag}</span>`
+                ).join('') + (uniqueKeywords.length > 8 ? '<span>+</span>' : '');
+                document.getElementById('autoTags').style.display = 'block';
+            } else {
+                document.getElementById('autoTags').style.display = 'none';
+            }
+        }
+
+        document.getElementById('question').addEventListener('input', updateAutoTags);
+        document.getElementById('answer').addEventListener('input', updateAutoTags);
+
+        window.addEventListener('load', () => {
+            checkStorageAvailability();
+            loadFromStorage();
+            updateStats();
+            viewTraining();
+        });
+    </script>
+</body>
+</html>
