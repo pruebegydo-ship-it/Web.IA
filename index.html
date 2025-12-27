@@ -1,2033 +1,774 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA Ultra Avanzada con Corrección Automática</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-
-        .header .badge {
-            display: inline-block;
-            background: rgba(255,255,255,0.2);
-            padding: 5px 15px;
-            border-radius: 20px;
-            margin: 5px;
-            font-size: 0.9em;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            padding: 30px;
-        }
-
-        .section {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .section h2 {
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 10px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .input-group input,
-        .input-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 1em;
-            transition: border-color 0.3s;
-        }
-
-        .input-group input:focus,
-        .input-group textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .input-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
-        }
-
-        .btn-info {
-            background: linear-gradient(135deg, #2196F3 0%, #0d8bf2 100%);
-        }
-
-        .btn-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .btn-delete {
-            background: #f44336;
-            color: white;
-            padding: 6px 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.85em;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 600;
-        }
-
-        .btn-delete:hover {
-            background: #d32f2f;
-            transform: scale(1.05);
-        }
-
-        .response-box {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            border: 2px solid #667eea;
-            min-height: 150px;
-            margin-top: 15px;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-
-        .training-item {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            border-left: 4px solid #667eea;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 15px;
-        }
-
-        .training-content {
-            flex: 1;
-        }
-
-        .training-item strong {
-            color: #667eea;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .stat-card .number {
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .stat-card .label {
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .status {
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 15px;
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .status.info {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .status.warning {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .analysis {
-            background: #e7f3ff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
-            border-left: 4px solid #2196F3;
-        }
-
-        .analysis-item {
-            margin: 5px 0;
-            color: #0d47a1;
-        }
-
-        .match-score {
-            display: inline-block;
-            background: #4caf50;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.85em;
-            font-weight: bold;
-        }
-
-        .combined-badge {
-            display: inline-block;
-            background: #ff9800;
-            color: white;
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-size: 0.85em;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-
-        .source-list {
-            background: #f0f4f8;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 12px;
-            font-size: 0.9em;
-        }
-
-        .source-item {
-            padding: 8px;
-            margin: 5px 0;
-            background: white;
-            border-radius: 6px;
-            border-left: 3px solid #667eea;
-        }
-
-        .source-weight {
-            display: inline-block;
-            background: #e3f2fd;
-            color: #1976d2;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-size: 0.8em;
-            font-weight: bold;
-        }
-
-        .auto-tags {
-            background: #f0f8ff;
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-size: 0.9em;
-        }
-
-        .auto-tags span {
-            display: inline-block;
-            background: #e1f5fe;
-            padding: 3px 8px;
-            border-radius: 12px;
-            margin: 2px;
-            font-size: 0.8em;
-        }
-
-        .correction-box {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-size: 0.9em;
-        }
-
-        .correction-box h4 {
-            color: #856404;
-            margin-bottom: 8px;
-        }
-
-        .correction-item {
-            background: white;
-            padding: 6px 10px;
-            margin: 5px 0;
-            border-radius: 5px;
-            border-left: 3px solid #ff9800;
-        }
-
-        .correction-item .before {
-            text-decoration: line-through;
-            color: #d32f2f;
-        }
-
-        .correction-item .after {
-            color: #388e3c;
-            font-weight: bold;
-        }
-
-        .feedback-btns {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .feedback-btn {
-            flex: 1;
-            padding: 8px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9em;
-            font-weight: 600;
-            transition: transform 0.2s;
-        }
-
-        .feedback-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .feedback-good {
-            background: #4caf50;
-            color: white;
-        }
-
-        .feedback-bad {
-            background: #f44336;
-            color: white;
-        }
-
-        #fileInput {
-            display: none;
-        }
-
-        .generated-response {
-            background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
-            padding: 18px;
-            border-radius: 10px;
-            margin: 12px 0;
-            border-left: 4px solid #4caf50;
-            line-height: 1.8;
-            font-size: 1.05em;
-        }
-
-        .coherence-badge {
-            display: inline-block;
-            background: #9c27b0;
-            color: white;
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-size: 0.85em;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-
-        .toggle-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-
-        .toggle-label {
-            font-weight: 600;
-            color: #667eea;
-            font-size: 1.1em;
-        }
-
-        .toggle-description {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .thinking-indicator {
-            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border-left: 4px solid #9c27b0;
-            animation: pulse 2s infinite;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        .thinking-step {
-            margin: 8px 0;
-            padding: 8px 12px;
-            background: white;
-            border-radius: 6px;
-            font-size: 0.9em;
-            color: #4a148c;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background-color: #f0f0f0;
-            border-radius: 10px;
-            margin-top: 10px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .progress-text {
-            text-align: center;
-            margin-top: 5px;
-            font-size: 0.9em;
-            color: #666;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .btn-group {
-                grid-template-columns: 1fr;
-            }
-
-            .training-item {
-                flex-direction: column;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<title>IA 3D Aprendizaje Autónomo</title>
+<style>
+html,body{
+ margin:0;padding:0;overflow:hidden;background:#000;
+ touch-action:none;
+}
+
+#joy{
+ position:absolute;left:20px;bottom:20px;
+ width:120px;height:120px;border-radius:50%;
+ background:rgba(255,255,255,.25);
+ z-index:10;
+}
+#stick{
+ position:absolute;
+ width:50px;height:50px;border-radius:50%;
+ background:rgba(255,255,255,.8);
+ left:35px;top:35px;
+ pointer-events:none;
+}
+
+#console{
+ position:absolute;
+ top:60px;left:10px;
+ width:340px;height:200px;
+ overflow-y:scroll;
+ background:rgba(0,0,0,.9);
+ color:#0f0;
+ font-family:monospace;
+ font-size:11px;
+ padding:8px;
+ border-radius:6px;
+ border:1px solid #0f0;
+}
+
+#stats{
+ position:absolute;
+ top:10px;left:10px;
+ background:rgba(0,0,0,.9);
+ color:#fff;
+ font-family:monospace;
+ font-size:12px;
+ padding:8px 12px;
+ border-radius:6px;
+ border:1px solid #fff;
+ font-weight:bold;
+}
+
+#inputContainer{
+ position:absolute;
+ bottom:20px;left:160px;
+ width:320px;
+}
+
+#input{
+ width:100%;
+ background:rgba(0,0,0,.9);
+ border:2px solid #0f0;
+ border-radius:6px;
+ padding:10px;
+ color:#0f0;
+ font-family:monospace;
+ font-size:13px;
+}
+
+#input:focus{
+ outline:none;
+ border-color:#0ff;
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🧠 IA Ultra Avanzada</h1>
-            <p>Con Corrección Ortográfica y Análisis Vocal Automático</p>
-            <div>
-                <span class="badge">✍️ Auto-Corrección</span>
-                <span class="badge">🔀 IA Combinada</span>
-                <span class="badge">🎵 Análisis Vocal</span>
-                <span class="badge">🎯 Precisión Mejorada</span>
-                <span class="badge">💾 Auto-Guardado</span>
-                <span class="badge">🧠 Pensamiento Profundo</span>
-                <span class="badge">📝 Lógica Abecedario</span>
-            </div>
-        </div>
-
-        <div class="main-content">
-            <div class="section">
-                <h2>📚 Entrenar IA</h2>
-                <div class="input-group">
-                    <label for="question">Pregunta / Entrada:</label>
-                    <textarea id="question" placeholder="Escribe aquí... (La IA corregirá automáticamente)"></textarea>
-                </div>
-                <div class="input-group">
-                    <label for="answer">Respuesta / Salida:</label>
-                    <textarea id="answer" placeholder="Escribe la respuesta... (Se corregirá al guardar)"></textarea>
-                </div>
-                <div id="corrections" class="correction-box" style="display:none;"></div>
-                <div id="autoTags" class="auto-tags" style="display:none;">
-                    <strong>Palabras clave:</strong> <span id="tagsList"></span>
-                </div>
-                <button class="btn" onclick="trainAI()">✅ Entrenar IA (con corrección)</button>
-                <button class="btn btn-secondary" onclick="viewTraining()">Ver Entrenamiento</button>
-                
-                <div class="btn-group">
-                    <button class="btn btn-success" onclick="downloadTraining()">📥 Descargar</button>
-                    <button class="btn btn-info" onclick="document.getElementById('fileInput').click()">📤 Cargar</button>
-                </div>
-                <input type="file" id="fileInput" accept=".json" onchange="loadTraining(event)">
-                
-                <button class="btn btn-danger" onclick="clearAllTraining()">🗑️ Borrar Todo</button>
-                <div id="trainStatus"></div>
-            </div>
-
-            <div class="section">
-                <h2>💬 Consultar IA</h2>
-                
-                <div class="toggle-container">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="deepThinkingToggle" onchange="toggleDeepThinking()">
-                        <span class="slider"></span>
-                    </label>
-                    <div>
-                        <div class="toggle-label">🧠 Modo Pensamiento Profundo</div>
-                        <div class="toggle-description">Análisis detallado y respuestas más precisas</div>
-                    </div>
-                    <div style="margin-left: auto; display: flex; flex-direction: column; align-items: flex-end;">
-                        <label for="thinkingTime" style="font-size: 0.9em; color: #666; text-align: right;">Tiempo (s):</label>
-                        <input type="number" id="thinkingTime" placeholder="3" min="1" max="30" value="" style="width: 60px; text-align: center;">
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label for="userQuestion">Pregunta:</label>
-                    <textarea id="userQuestion" placeholder="Escribe tu pregunta... La IA generará respuestas inteligentes"></textarea>
-                </div>
-                <button class="btn" onclick="askAI()">🚀 Consultar</button>
-                
-                <div id="thinkingProcess" style="display:none;"></div>
-                
-                <div class="response-box" id="aiResponse">
-                    La IA analizará profundamente tu pregunta y generará una respuesta combinada con corrección automática...
-                </div>
-                <div id="feedbackSection"></div>
-                <div id="analysis"></div>
-            </div>
-
-            <div class="section" style="grid-column: 1 / -1;">
-                <h2>📊 Estadísticas</h2>
-                <div class="stats">
-                    <div class="stat-card">
-                        <div class="number" id="totalTraining">0</div>
-                        <div class="label">Entrenamientos</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="number" id="totalWords">0</div>
-                        <div class="label">Palabras Únicas</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="number" id="totalQuestions">0</div>
-                        <div class="label">Consultas</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="number" id="dbSize">0 KB</div>
-                        <div class="label">Tamaño BD</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section" style="grid-column: 1 / -1;">
-                <h2>📝 Base de Conocimiento</h2>
-                <div id="trainingList"></div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let trainingData = [];
-        let questionCount = 0;
-        let conversationContext = [];
-        let lastUsedSources = [];
-        let deepThinkingMode = false;
-
-        const synonyms = {
-            'hola': ['saludos', 'buenas', 'hey', 'alo', 'que tal'],
-            'adios': ['chao', 'hasta luego', 'nos vemos', 'bye'],
-            'gracias': ['muchas gracias', 'agradecido', 'thanks'],
-            'ayuda': ['ayudar', 'asistencia', 'soporte', 'auxilio'],
-            'como': ['de que manera', 'de que forma'],
-            'que': ['cual', 'cuales'],
-            'hacer': ['realizar', 'ejecutar', 'crear'],
-            'bueno': ['bien', 'excelente', 'genial', 'perfecto'],
-            'malo': ['mal', 'pesimo', 'terrible'],
-            'programar': ['programacion', 'codificar', 'codigo', 'desarrollar'],
-            'javascript': ['js', 'ecmascript'],
-            'python': ['py'],
-            'aprender': ['estudiar', 'ensenar', 'educacion'],
-            'sabes': ['conoces', 'sabes sobre', 'conocimiento'],
-            'saber': ['conocer', 'informacion', 'datos']
-        };
-
-        // Nuevos diccionarios para clasificar tipos de entrada
-        const greetings = ['hola', 'buenas', 'hey', 'alo', 'que tal', 'saludos', 'buen dia', 'buenas tardes', 'buenas noches'];
-        const farewells = ['adios', 'chao', 'hasta luego', 'nos vemos', 'bye'];
-        const insults = ['idiota', 'tonto', 'imbecil', 'estupido', 'pendejo', 'bro mal', 'insulto', 'malo'];
-        const thanks = ['gracias', 'thank you', 'agradecido'];
-
-        const spellingCorrections = {
-            'q': 'que', 'xq': 'porque', 'pq': 'porque', 'xk': 'porque',
-            'tb': 'también', 'tmb': 'también', 'bn': 'bien',
-            'd': 'de', 'k': 'que', 'x': 'por', 'pa': 'para',
-            'porfa': 'por favor', 'porfavor': 'por favor',
-            'hola': 'hola', 'ola': 'hola',
-            'aver': 'a ver', 'aber': 'a ver',
-            'aslo': 'hazlo', 'ase': 'hace', 'ahy': 'ahí',
-            'q': 'qué', 'komo': 'como', 'kien': 'quien',
-            'xfa': 'por favor', 'porq': 'porque',
-            'entiendes': 'entiendes', 'bn': 'bien',
-            'bro': 'hermano', 'wey': 'amigo'
-        };
-
-        const accentCorrections = {
-            'como': 'cómo', 'que': 'qué', 'cual': 'cuál', 'donde': 'dónde',
-            'cuando': 'cuándo', 'quien': 'quién', 'cuanto': 'cuánto',
-            'mas': 'más', 'si': 'sí', 'tu': 'tú', 'mi': 'mí',
-            'te': 'té', 'el': 'él', 'solo': 'sólo',
-            'esta': 'está', 'estas': 'estás', 'este': 'esté',
-            'razon': 'razón', 'acion': 'acción', 'informacion': 'información',
-            'codigo': 'código', 'tambien': 'también', 'ahi': 'ahí',
-            'dia': 'día', 'despues': 'después', 'facil': 'fácil',
-            'dificil': 'difícil', 'util': 'útil', 'semantica': 'semántica'
-        };
-
-        // Nueva función para clasificar el tipo de entrada
-        function classifyInput(text) {
-            const normalized = normalizeText(text);
-            const words = normalized.split(/\s+/);
-
-            // Verificar si es pregunta
-            if (text.includes('?') || words.some(w => w.startsWith('que') || w.startsWith('como') || w.startsWith('cuando') || w.startsWith('donde') || w.startsWith('cual'))) {
-                return { type: 'question', length: words.length };
-            }
-
-            // Saludo
-            if (greetings.some(g => words.includes(g) || normalized.includes(g))) {
-                return { type: 'greeting', length: 1 }; // Corto por defecto
-            }
-
-            // Despedida
-            if (farewells.some(f => words.includes(f) || normalized.includes(f))) {
-                return { type: 'farewell', length: 1 };
-            }
-
-            // Insulto
-            if (insults.some(i => words.includes(i) || normalized.includes(i))) {
-                return { type: 'insult', length: 2 }; // Corto y witty
-            }
-
-            // Agradecimiento
-            if (thanks.some(t => words.includes(t) || normalized.includes(t))) {
-                return { type: 'thanks', length: 1 };
-            }
-
-            // Por defecto, tratar como pregunta o statement
-            return { type: 'statement', length: words.length };
-        }
-
-        function toggleDeepThinking() {
-            deepThinkingMode = document.getElementById('deepThinkingToggle').checked;
-            saveToStorage();
-        }
-
-        // Mejorada: Análisis de abecedario completo (letras + lógica Grok-like)
-        function analyzeAlphabetPattern(text) {
-            const alphabet = 'abcdefghijklmnopqrstuvwxyzáéíóúñ';
-            const normalized = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            let letterCount = {};
-            let pattern = '';
-
-            for (let char of normalized) {
-                if (alphabet.includes(char)) {
-                    pattern += char;
-                    letterCount[char] = (letterCount[char] || 0) + 1;
-                }
-            }
-
-            const totalLetters = Object.values(letterCount).reduce((a, b) => a + b, 0);
-            const letterRatio = totalLetters / normalized.length || 0;
-
-            // Lógica simple Grok-like: Detectar patrones repetidos o raros
-            const repeated = Object.entries(letterCount).filter(([k, v]) => v > 3).map(([k]) => k).join('');
-            const rare = Object.entries(letterCount).filter(([k, v]) => v === 1).length;
-
-            return {
-                letterPattern: pattern,
-                letterCount,
-                totalLetters,
-                letterRatio,
-                repeatedLetters: repeated,
-                rareLetters: rare,
-                logicalInsight: rare > 5 ? 'Texto creativo con vocabulario variado' : 'Estilo directo y repetitivo'
-            };
-        }
-
-        // Generación de variaciones con abecedario completo (mutaciones lógicas)
-        function generateAlphabetVariations(word) {
-            const variations = [word];
-            const alphabetMap = {}; // Mapa simple para swaps lógicos (e.g., b->v para errores comunes)
-            alphabetMap['b'] = ['v', 'p']; // Ejemplos de confusiones fonéticas
-            alphabetMap['c'] = ['k', 's'];
-            alphabetMap['g'] = ['j'];
-            // ... agregar más si se quiere, pero mantener simple
-
-            for (let i = 0; i < word.length; i++) {
-                const char = word[i].toLowerCase();
-                if (alphabetMap[char]) {
-                    alphabetMap[char].forEach(variant => {
-                        const newWord = word.substring(0, i) + variant + word.substring(i + 1);
-                        variations.push(newWord);
-                    });
-                }
-            }
-
-            return variations;
-        }
-
-        // Comparación mejorada con abecedario
-        function compareAlphabetPatterns(pattern1, pattern2) {
-            const p1 = analyzeAlphabetPattern(pattern1);
-            const p2 = analyzeAlphabetPattern(pattern2);
-
-            let score = 0;
-
-            // Coincidencias de letras comunes
-            const commonLetters = Object.keys(p1.letterCount).filter(l => p2.letterCount[l]);
-            score += commonLetters.length * 4;
-
-            // Patrones repetidos similares
-            if (p1.repeatedLetters.includes(p2.repeatedLetters[0])) score += 15;
-
-            // Ratio similar
-            const ratioDiff = Math.abs(p1.letterRatio - p2.letterRatio);
-            score += (1 - ratioDiff) * 20;
-
-            // Insights lógicos coincidentes (simple)
-            if (p1.logicalInsight.includes(p2.logicalInsight.split(' ')[0])) score += 10;
-
-            return score;
-        }
-
-        // Función mejorada para steps de pensamiento profundo (más lógica, abecedario, Grok-like)
-        function generateDynamicStep(userInput, elapsedTime, totalTime, matches, inputClass) {
-            const progress = (elapsedTime / totalTime) * 100;
-            const depth = Math.floor(progress / 20);
-            const dbSize = trainingData.length;
-            const alphaAnalysis = analyzeAlphabetPattern(userInput);
-            const userType = inputClass.type;
-            const userLen = inputClass.length;
-
-            let step = '';
-            if (elapsedTime < 1000) {
-                step = `Clasificando entrada: "${userType}" (longitud: ${userLen} palabras). Iniciando tokenización abecedario.`;
-            } else if (elapsedTime < 2000) {
-                step = `Análisis alfabético: Letras repetidas "${alphaAnalysis.repeatedLetters}", raras: ${alphaAnalysis.rareLetters}. Insight: ${alphaAnalysis.logicalInsight}.`;
-            } else if (elapsedTime < 3000) {
-                step = `Buscando en ${dbSize} entradas. Matches iniciales: ${matches.length}. Ajustando por tipo ${userType}.`;
-            } else if (elapsedTime < 4000) {
-                step = `Lógica Grok: ¿${userType === 'question' ? 'Respuesta detallada?' : userType === 'insult' ? 'Contraataque witty?' : 'Respuesta amigable?'}. Cruzando contextos.`;
-            } else if (elapsedTime < 5000) {
-                step = `Profundizando abecedario: Generando variaciones lógicas para keywords. Ej: "${generateAlphabetVariations(extractKeywords(userInput)[0] || 'base')[1]}".`;
-            } else if (elapsedTime < 6000) {
-                step = `Evaluando longitud respuesta: ${userLen < 5 ? 'Corta' : 'Larga'}. Integrando sinónimos y patrones fonéticos.`;
-            } else if (elapsedTime < 7000) {
-                step = `Cadena lógica: Conectando matches con ${conversationContext.length} contextos previos. Detectando contradicciones.`;
-            } else if (elapsedTime < 8000) {
-                step = `Análisis de sentido: ¿Coherente con entrenamiento? Ajustando pesos (confianza: ${Math.round(Math.random()*50 + 50)}%).`;
-            } else {
-                step = `Sintetizando como Grok: Respuesta adaptada a ${userType}, con humor si insulto. Confianza: ${Math.min(95 + depth*5, 100)}%.`;
-            }
-
-            return step;
-        }
-
-        function showThinkingProcess(userInput, totalTime, matches, inputClass) {
-            const thinkingDiv = document.getElementById('thinkingProcess');
-            if (!deepThinkingMode) {
-                thinkingDiv.style.display = 'none';
-                return;
-            }
-
-            let html = '<div class="thinking-indicator"><strong>🧠 Pensando Profundamente (Grok-Style)...</strong><div id="dynamicSteps"></div>';
-            html += '<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>';
-            html += '<div class="progress-text" id="progressText">Iniciando análisis lógico...</div>';
-            html += '</div>';
-            thinkingDiv.innerHTML = html;
-            thinkingDiv.style.display = 'block';
-
-            const dynamicSteps = document.getElementById('dynamicSteps');
-            const progressFill = document.getElementById('progressFill');
-            const progressText = document.getElementById('progressText');
-            let elapsed = 0;
-            let stepCount = 0;
-
-            const interval = setInterval(() => {
-                elapsed += 500;
-                const progress = Math.min((elapsed / totalTime) * 100, 100);
-                progressFill.style.width = progress + '%';
-
-                const remaining = Math.max(0, Math.ceil((totalTime - elapsed) / 1000));
-                progressText.textContent = `${progress.toFixed(0)}% - ${remaining}s restantes | Tipo: ${inputClass.type}`;
-
-                if (elapsed % 1500 < 500) { // Más frecuente para más profundidad
-                    const newStep = generateDynamicStep(userInput, elapsed, totalTime, matches, inputClass);
-                    const stepEl = document.createElement('div');
-                    stepEl.className = 'thinking-step';
-                    stepEl.textContent = `• ${newStep}`;
-                    dynamicSteps.appendChild(stepEl);
-                    stepCount++;
-                }
-
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    progressText.textContent = '¡Lógica completa! Generando respuesta adaptada...';
-                    dynamicSteps.innerHTML += `<div class="thinking-step">• Respuesta final: Sensata, lógica y personalizada.</div>`;
-                }
-            }, 500);
-
-            setTimeout(() => {
-                thinkingDiv.style.display = 'none';
-            }, totalTime + 1000);
-        }
-
-        function calculateSimilarity(text1, text2) {
-            const tokens1 = tokenize(text1);
-            const tokens2 = tokenize(text2);
-            
-            const set1 = new Set(tokens1.words);
-            const set2 = new Set(tokens2.words);
-            const intersection = new Set([...set1].filter(x => set2.has(x)));
-            const union = new Set([...set1, ...set2]);
-            const jaccard = union.size === 0 ? 0 : intersection.size / union.size;
-            
-            const levSim = levenshtein(tokens1.normalized, tokens2.normalized);
-            
-            const stemSet1 = new Set(tokens1.stems);
-            const stemSet2 = new Set(tokens2.stems);
-            const stemIntersection = new Set([...stemSet1].filter(x => stemSet2.has(x)));
-            const stemUnion = new Set([...stemSet1, ...stemSet2]);
-            const stemSim = stemUnion.size === 0 ? 0 : stemIntersection.size / stemUnion.size;
-            
-            const bigramSet1 = new Set(tokens1.bigrams);
-            const bigramSet2 = new Set(tokens2.bigrams);
-            const bigramIntersection = new Set([...bigramSet1].filter(x => bigramSet2.has(x)));
-            const bigramUnion = new Set([...bigramSet1, ...bigramSet2]);
-            const bigramSim = bigramUnion.size === 0 ? 0 : bigramIntersection.size / bigramUnion.size;
-            
-            let containsSim = 0;
-            if (tokens1.normalized.includes(tokens2.normalized) || tokens2.normalized.includes(tokens1.normalized)) {
-                const shorter = Math.min(tokens1.normalized.length, tokens2.normalized.length);
-                const longer = Math.max(tokens1.normalized.length, tokens2.normalized.length);
-                containsSim = shorter / longer;
-            }
-            
-            const vocalSim = compareVocalPatterns(text1, text2) / 100;
-            const alphaSim = compareAlphabetPatterns(text1, text2) / 100; // Nueva: abecedario
-            
-            return (jaccard * 0.20 + levSim * 0.20 + stemSim * 0.15 + bigramSim * 0.15 + containsSim * 0.10 + vocalSim * 0.10 + alphaSim * 0.10) * 100;
-        }
-
-        // Mejorada: Considera tipo de input para longitud
-        function determineResponseLength(userInput, topMatches, inputClass) {
-            const inputLength = inputClass.length || userInput.split(/\s+/).length;
-            const userType = inputClass.type;
-            
-            // Ajustes por tipo
-            if (userType === 'greeting' || userType === 'thanks' || userType === 'farewell') {
-                return 'short';
-            }
-            if (userType === 'insult') {
-                return 'short'; // Witty y breve
-            }
-            
-            const isSimpleQuery = /^(que es|quien es|cual es|donde esta|cuando|como se)/i.test(userInput);
-            
-            const hasDirectAnswer = topMatches.length > 0 && topMatches[0].score > 85;
-            
-            if (isSimpleQuery || inputLength < 5) {
-                return 'short';
-            }
-            
-            if (hasDirectAnswer && topMatches[0].item.answer.split(/\s+/).length < 30) {
-                return 'short';
-            }
-            
-            if (inputLength > 15 || userInput.includes('explica') || userInput.includes('detalla')) {
-                return 'long';
-            }
-            
-            return 'medium';
-        }
-
-        // En selectBestSentences, agregar ajuste por tipo (e.g., para insultos, priorizar witty)
-        function selectBestSentences(sentences, userInput, targetLength, inputClass) {
-            let maxSentences;
-            if (targetLength === 'short') maxSentences = 1; // Más corto para greetings/insults
-            else if (targetLength === 'medium') maxSentences = 2;
-            else maxSentences = 4;
-
-            // Ajuste por tipo: Para insultos, boost witty (simple keyword)
-            sentences.forEach(sent => {
-                sent.semanticScore = calculateSemanticRelevance(userInput, sent.text);
-                let typeBoost = 0;
-                if (inputClass.type === 'insult' && sent.text.toLowerCase().includes('humor') || sent.text.toLowerCase().includes('witty') || sent.text.toLowerCase().includes('gracioso')) {
-                    typeBoost = 20;
-                } else if (inputClass.type === 'greeting' && sent.text.toLowerCase().includes('amigable')) {
-                    typeBoost = 15;
-                }
-                sent.finalScore = (sent.weight * 0.3) + (sent.semanticScore * 0.6) + typeBoost * 0.1;
-            });
-
-            sentences.sort((a, b) => b.finalScore - a.finalScore);
-
-            const selected = [];
-            const usedConcepts = new Set();
-
-            for (let sent of sentences) {
-                if (selected.length >= maxSentences) break;
-
-                const sentWords = new Set(tokenize(sent.text).words);
-                const isDuplicate = [...usedConcepts].filter(w => sentWords.has(w)).length > 2;
-
-                if (!isDuplicate || selected.length === 0) {
-                    selected.push(sent);
-                    sentWords.forEach(w => usedConcepts.add(w));
-                }
-            }
-
-            return selected;
-        }
-
-        // En generateCombinedResponse: Pasar inputClass, ajustar connectors por tipo
-        function generateCombinedResponse(userInput, matches, inputClass) {
-            if (matches.length === 0) return null;
-            
-            const timeInput = document.getElementById('thinkingTime').value;
-            const totalTime = timeInput && !isNaN(timeInput) ? parseInt(timeInput) * 1000 : 4000; // Aumentado para más profundidad
-            
-            if (deepThinkingMode) {
-                showThinkingProcess(userInput, totalTime, matches, inputClass);
-            }
-
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    const minScore = deepThinkingMode ? 25 : 20; // Más permisivo
-                    const topMatches = matches.slice(0, 8).filter(m => m.score > minScore); // Más matches para variedad
-                    
-                    if (topMatches.length === 0) {
-                        // Fallback por tipo
-                        let fallback = '';
-                        switch (inputClass.type) {
-                            case 'greeting': fallback = '¡Hola! ¿En qué puedo ayudarte hoy?'; break;
-                            case 'farewell': fallback = '¡Hasta luego! Cuídate.'; break;
-                            case 'insult': fallback = '¡Oye, bro! Si eso es lo mejor que tienes, practica más. 😏 ¿Qué tal si charlamos de verdad?'; break;
-                            case 'thanks': fallback = '¡De nada! Siempre un placer.'; break;
-                            default: fallback = 'Interesante... Cuéntame más para entender mejor.';
-                        }
-                        resolve({
-                            response: fallback,
-                            combined: false,
-                            sources: [],
-                            confidence: 70,
-                            coherence: 90,
-                            inputType: inputClass.type
-                        });
-                        return;
-                    }
-                    
-                    const responseLength = determineResponseLength(userInput, topMatches, inputClass);
-                    
-                    if (topMatches.length === 1 && topMatches[0].score > 90) {
-                        const corrected = fullCorrection(topMatches[0].item.answer);
-                        resolve({
-                            response: corrected.text,
-                            combined: false,
-                            sources: [topMatches[0]],
-                            confidence: topMatches[0].score,
-                            coherence: 100,
-                            inputType: inputClass.type
-                        });
-                        return;
-                    }
-                    
-                    const weightedSources = topMatches.map(match => {
-                        const successRate = match.item.successCount / 
-                            (match.item.successCount + match.item.failCount || 1);
-                        const weight = (match.score * 0.7) + (successRate * 100 * 0.3);
-                        
-                        return { ...match, weight, successRate };
-                    });
-                    
-                    weightedSources.sort((a, b) => b.weight - a.weight);
-                    
-                    const sentences = [];
-                    weightedSources.forEach(source => {
-                        const answerSentences = source.item.answer
-                            .split(/[.!?]+/)
-                            .map(s => s.trim())
-                            .filter(s => s.length > 5 && s.split(/\s+/).length >= 1); // Más flexible para cortos
-                        
-                        answerSentences.forEach(sentence => {
-                            const relevance = calculateSemanticRelevance(userInput, sentence);
-                            
-                            sentences.push({
-                                text: sentence,
-                                weight: source.weight,
-                                source: source,
-                                relevance: relevance
-                            });
-                        });
-                    });
-                    
-                    const uniqueSentences = [];
-                    sentences.forEach(sent => {
-                        const isDuplicate = uniqueSentences.some(unique => 
-                            calculateSimilarity(sent.text, unique.text) > 85
-                        );
-                        if (!isDuplicate && sent.text.length > 5) {
-                            uniqueSentences.push(sent);
-                        }
-                    });
-                    
-                    const selectedSentences = selectBestSentences(uniqueSentences, userInput, responseLength, inputClass);
-                    
-                    if (selectedSentences.length === 0) {
-                        resolve(null);
-                        return;
-                    }
-                    
-                    let combinedResponse = '';
-                    selectedSentences.forEach((sent, idx) => {
-                        let text = sent.text;
-                        if (idx === 0) {
-                            text = text.charAt(0).toUpperCase() + text.slice(1);
-                        } else {
-                            // Connectors adaptados por tipo
-                            let connectors;
-                            if (inputClass.type === 'insult') {
-                                connectors = ['. Pero espera, ', '. Jaja, ', '. En serio, ', '. Vamos, '];
-                            } else if (inputClass.type === 'greeting') {
-                                connectors = ['. Por cierto, ', '. Y tú, ', '. Bien, '];
-                            } else {
-                                connectors = ['. Además, ', '. También, ', '. En relación, ', '. Por lo tanto, '];
-                            }
-                            const connector = connectors[Math.floor(Math.random() * connectors.length)];
-                            text = connector + text.charAt(0).toLowerCase() + text.slice(1);
-                        }
-                        combinedResponse += text + '. ';
-                    });
-                    
-                    const finalCorrected = fullCorrection(combinedResponse.trim());
-                    
-                    const totalWeight = selectedSentences.reduce((sum, s) => sum + s.finalScore, 0);
-                    const avgConfidence = Math.min((totalWeight / selectedSentences.length) * 1.2, 100);
-                    
-                    let totalCoherence = 0;
-                    for (let i = 1; i < selectedSentences.length; i++) {
-                        const sim = calculateSimilarity(selectedSentences[i-1].text, selectedSentences[i].text);
-                        totalCoherence += Math.min(sim * 2, 100);
-                    }
-                    const avgCoherence = selectedSentences.length > 1 ? totalCoherence / (selectedSentences.length - 1) : 100;
-                    
-                    resolve({
-                        response: finalCorrected.text,
-                        combined: topMatches.length > 1,
-                        sources: weightedSources.slice(0, selectedSentences.length),
-                        confidence: avgConfidence,
-                        coherence: avgCoherence,
-                        inputType: inputClass.type
-                    });
-                }, totalTime);
-            });
-        }
-
-        // En askAI: Clasificar input
-        async function askAI() {
-            const userInput = document.getElementById('userQuestion').value.trim();
-            const responseDiv = document.getElementById('aiResponse');
-            const analysisDiv = document.getElementById('analysis');
-            const feedbackDiv = document.getElementById('feedbackSection');
-
-            if (!userInput) {
-                responseDiv.innerHTML = '<div class="status error">Escribe algo</div>';
-                return;
-            }
-
-            questionCount++;
-            saveToStorage();
-
-            if (trainingData.length === 0) {
-                responseDiv.innerHTML = '<div class="status info">⚠️ Entrena la IA primero</div>';
-                return;
-            }
-
-            const correctedInput = fullCorrection(userInput);
-            const finalInput = correctedInput.text;
-            const inputClass = classifyInput(finalInput); // Nueva clasificación
-
-            const matches = findMatches(finalInput);
-
-            if (matches.length === 0 || matches[0].score < 15) {
-                // Usar fallback en generate, pero aquí mostrar
-                let fallbackMsg = `🤔 No encontré info específica para "${inputClass.type}". `;
-                if (inputClass.type === 'greeting') fallbackMsg += '¡Hola, bro! ¿Qué onda?';
-                else if (inputClass.type === 'insult') fallbackMsg += '¡Uy, qué fuerte! Pero soy IA, no me afecta. ¿Quieres charlar de verdad?';
-                else fallbackMsg += 'Entrena más datos relacionados.';
-                responseDiv.innerHTML = `<div class="status info">${fallbackMsg}</div>`;
-                analysisDiv.innerHTML = '';
-                feedbackDiv.innerHTML = '';
-                lastUsedSources = [];
-            } else {
-                const result = await generateCombinedResponse(finalInput, matches, inputClass);
-                
-                if (!result) {
-                    responseDiv.innerHTML = '<div class="status info">🤔 No puedo generar una respuesta confiable con los datos actuales.</div>';
-                    return;
-                }
-                
-                lastUsedSources = result.sources.map(s => s.index);
-                
-                let html = `
-                    <div style="color: #155724;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
-                            <strong style="font-size: 1.1em;">🤖 Respuesta IA (${result.inputType}):</strong>
-                            <div>
-                                <span class="match-score">${result.confidence.toFixed(0)}% confianza</span>
-                                ${result.combined ? '<span class="combined-badge">🔀 COMBINADA</span>' : ''}
-                                <span class="coherence-badge">📝 ${result.coherence.toFixed(0)}% coherencia</span>
-                            </div>
-                        </div>
-                        <div class="generated-response">
-                            ${result.response}
-                        </div>
-                `;
-                
-                if (result.sources.length > 0 && deepThinkingMode) {
-                    html += '<div class="source-list"><strong>📚 Fuentes utilizadas:</strong>';
-                    result.sources.forEach((source, idx) => {
-                        html += `
-                            <div class="source-item">
-                                <span class="source-weight">#${idx + 1} ${source.weight.toFixed(0)}pts</span>
-                                "${source.item.question}"
-                            </div>
-                        `;
-                    });
-                    html += '</div>';
-                }
-                
-                html += '</div>';
-                responseDiv.innerHTML = html;
-                
-                feedbackDiv.innerHTML = `
-                    <div class="feedback-btns">
-                        <button class="feedback-btn feedback-good" onclick="giveFeedback(true)">
-                            👍 Útil
-                        </button>
-                        <button class="feedback-btn feedback-bad" onclick="giveFeedback(false)">
-                            👎 Incorrecta
-                        </button>
-                    </div>
-                `;
-                
-                let analysisHTML = '<div class="analysis">';
-                analysisHTML += '<strong>🔍 Análisis:</strong><br>';
-                analysisHTML += `<div class="analysis-item">• Tipo detectado: ${result.inputType}</div>`;
-                analysisHTML += `<div class="analysis-item">• ${matches.length} fuentes encontradas</div>`;
-                analysisHTML += `<div class="analysis-item">• ${result.sources.length} fuentes utilizadas</div>`;
-                analysisHTML += `<div class="analysis-item">• Coherencia: ${result.coherence.toFixed(0)}%</div>`;
-                if (deepThinkingMode) {
-                    analysisHTML += `<div class="analysis-item">• Modo pensamiento profundo (con abecedario) activado</div>`;
-                }
-                
-                if (correctedInput.corrections.length > 0) {
-                    analysisHTML += `<div class="analysis-item">• Pregunta corregida automáticamente</div>`;
-                }
-                
-                analysisHTML += '</div>';
-                analysisDiv.innerHTML = analysisHTML;
-                
-                conversationContext.push(finalInput);
-                if (conversationContext.length > 5) conversationContext.shift();
-            }
-
-            updateStats();
-        }
-
-        function trainAI() {
-            const question = document.getElementById('question').value.trim();
-            const answer = document.getElementById('answer').value.trim();
-            const statusDiv = document.getElementById('trainStatus');
-
-            if (!question || !answer) {
-                statusDiv.innerHTML = '<div class="status error">Completa ambos campos</div>';
-                return;
-            }
-
-            const qCorrected = fullCorrection(question);
-            const aCorrected = fullCorrection(answer);
-            
-            const allCorrections = [...qCorrected.corrections, ...aCorrected.corrections];
-            showCorrections(allCorrections);
-            
-            const correctedQuestion = qCorrected.text;
-            const correctedAnswer = aCorrected.text;
-
-            const { words: qWords, stems: qStems, bigrams: qBigrams, trigrams: qTrigrams, vocalPattern: qVocal } = tokenize(correctedQuestion);
-            const { words: aWords, stems: aStems, bigrams: aBigrams, trigrams: aTrigrams, vocalPattern: aVocal } = tokenize(correctedAnswer);
-            const keywords = extractKeywords(correctedQuestion + ' ' + correctedAnswer);
-            
-            // Nueva: Clasificar y guardar tipo para entrenamiento
-            const qClass = classifyInput(correctedQuestion);
-            
-            trainingData.push({
-                id: Date.now() + Math.random(),
-                question: correctedQuestion,
-                answer: correctedAnswer,
-                inputType: qClass.type, // Nuevo
-                questionNorm: normalizeText(correctedQuestion),
-                answerNorm: normalizeText(correctedAnswer),
-                questionWords: qWords,
-                answerWords: aWords,
-                questionStems: qStems,
-                answerStems: aStems,
-                questionBigrams: qBigrams,
-                answerBigrams: aBigrams,
-                questionTrigrams: qTrigrams,
-                answerTrigrams: aTrigrams,
-                questionVocalPattern: qVocal,
-                answerVocalPattern: aVocal,
-                questionAlphabetPattern: analyzeAlphabetPattern(correctedQuestion), // Nuevo
-                keywords,
-                successCount: 0,
-                failCount: 0,
-                useCount: 0,
-                timestamp: new Date().toISOString()
-            });
-
-            saveToStorage();
-
-            statusDiv.innerHTML = `<div class="status success">✓ Entrenado y guardado${allCorrections.length > 0 ? ' con correcciones' : ''} (Tipo: ${qClass.type})</div>`;
-            document.getElementById('question').value = '';
-            document.getElementById('answer').value = '';
-            document.getElementById('autoTags').style.display = 'none';
-            
-            setTimeout(() => {
-                document.getElementById('corrections').style.display = 'none';
-            }, 5000);
-            
-            updateStats();
-            viewTraining();
-        }
-
-        // Actualizar viewTraining para mostrar tipo
-        function viewTraining() {
-            const listDiv = document.getElementById('trainingList');
-            
-            if (trainingData.length === 0) {
-                listDiv.innerHTML = '<div class="status info">Sin entrenamiento</div>';
-                return;
-            }
-
-            const sortedData = [...trainingData].sort((a, b) => {
-                const rateA = a.successCount / (a.successCount + a.failCount || 1);
-                const rateB = b.successCount / (b.successCount + b.failCount || 1);
-                return rateB - rateA;
-            });
-
-            listDiv.innerHTML = sortedData.map(item => {
-                const successRate = item.successCount / (item.successCount + item.failCount || 1);
-                const rateColor = successRate > 0.7 ? '#4caf50' : successRate > 0.4 ? '#ff9800' : '#f44336';
-                const typeBadge = item.inputType ? `<span style="background: #2196F3; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em;">${item.inputType}</span>` : '';
-                
-                return `
-                    <div class="training-item">
-                        <div class="training-content">
-                            <strong>Entrada:</strong> ${item.question}<br>
-                            <strong>Salida:</strong> ${item.answer}<br>
-                            <div style="margin-top: 8px; color: #666; font-size: 0.9em;">
-                                <strong>Keywords:</strong> ${item.keywords.slice(0, 6).join(', ')}${item.keywords.length > 6 ? '...' : ''}
-                            </div>
-                            <div style="margin-top: 8px; display: flex; gap: 15px; font-size: 0.85em; flex-wrap: wrap; align-items: center;">
-                                ${typeBadge}
-                                <span><strong>Usos:</strong> ${item.useCount}</span>
-                                <span><strong>✓:</strong> ${item.successCount}</span>
-                                <span><strong>✗:</strong> ${item.failCount}</span>
-                                <span style="color: ${rateColor};"><strong>Tasa:</strong> ${(successRate * 100).toFixed(0)}%</span>
-                            </div>
-                        </div>
-                        <button class="btn-delete" onclick="deleteTraining('${item.id}')">🗑️</button>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function saveToStorage() {
-            try {
-                const dataToSave = {
-                    trainingData: trainingData,
-                    questionCount: questionCount,
-                    conversationContext: conversationContext,
-                    deepThinkingMode: deepThinkingMode,
-                    lastSaved: new Date().toISOString(),
-                    version: '3.3.1'
-                };
-                localStorage.setItem('aiTrainingData', JSON.stringify(dataToSave));
-                return true;
-            } catch(e) {
-                console.error('Error guardando datos:', e);
-                return false;
-            }
-        }
-
-        function loadFromStorage() {
-            try {
-                const saved = localStorage.getItem('aiTrainingData');
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    trainingData = parsed.trainingData || [];
-                    questionCount = parsed.questionCount || 0;
-                    conversationContext = parsed.conversationContext || [];
-                    deepThinkingMode = parsed.deepThinkingMode || false;
-                    
-                    document.getElementById('deepThinkingToggle').checked = deepThinkingMode;
-                    
-                    const statusDiv = document.getElementById('trainStatus');
-                    if (trainingData.length > 0) {
-                        statusDiv.innerHTML = `<div class="status success">✓ ${trainingData.length} entrenamientos cargados automáticamente (v${parsed.version || '3.2'})</div>`;
-                        setTimeout(() => { statusDiv.innerHTML = ''; }, 3000);
-                    }
-                    return true;
-                }
-            } catch(e) {
-                console.error('Error cargando datos:', e);
-            }
-            return false;
-        }
-
-        // Funciones de corrección (sin cambios)
-        function correctSpelling(text) {
-            let corrected = text;
-            const corrections = [];
-            
-            const words = text.split(/\s+/);
-            
-            words.forEach(word => {
-                const cleanWord = word.toLowerCase().replace(/[.,!?;:]/g, '');
-                
-                if (spellingCorrections[cleanWord]) {
-                    const replacement = spellingCorrections[cleanWord];
-                    corrected = corrected.replace(new RegExp('\\b' + word + '\\b', 'gi'), replacement);
-                    corrections.push({ before: word, after: replacement });
-                }
-            });
-            
-            return { text: corrected, corrections };
-        }
-
-        function addAccents(text) {
-            let corrected = text;
-            const corrections = [];
-            
-            const isQuestion = text.includes('?') || 
-                              /^(como|que|cual|donde|cuando|quien|cuanto)/i.test(text);
-            
-            if (isQuestion) {
-                Object.entries(accentCorrections).forEach(([without, with_]) => {
-                    const regex = new RegExp('\\b' + without + '\\b', 'gi');
-                    if (regex.test(corrected)) {
-                        corrected = corrected.replace(regex, with_);
-                        corrections.push({ before: without, after: with_ });
-                    }
-                });
-            }
-            
-            return { text: corrected, corrections };
-        }
-
-        function addPunctuation(text) {
-            let corrected = text.trim();
-            const corrections = [];
-            
-            if (!/[.!?]$/.test(corrected)) {
-                corrections.push({ before: 'sin punto final', after: 'con punto final' });
-                corrected += '.';
-            }
-            
-            if (corrected.length > 0 && corrected[0] !== corrected[0].toUpperCase()) {
-                corrections.push({ before: 'minúscula inicial', after: 'mayúscula inicial' });
-                corrected = corrected.charAt(0).toUpperCase() + corrected.slice(1);
-            }
-            
-            corrected = corrected.replace(/\.([a-záéíóúñ])/gi, '. $1');
-            corrected = corrected.replace(/,([a-záéíóúñ])/gi, ', $1');
-            
-            corrected = corrected.replace(/\.\s+([a-záéíóúñ])/g, (match, letter) => {
-                return '. ' + letter.toUpperCase();
-            });
-            
-            return { text: corrected, corrections };
-        }
-
-        function fullCorrection(text) {
-            if (!text || text.trim() === '') return { text: '', corrections: [] };
-            
-            let allCorrections = [];
-            
-            const spelling = correctSpelling(text);
-            let result = spelling.text;
-            allCorrections = allCorrections.concat(spelling.corrections);
-            
-            const accents = addAccents(result);
-            result = accents.text;
-            allCorrections = allCorrections.concat(accents.corrections);
-            
-            const punctuation = addPunctuation(result);
-            result = punctuation.text;
-            allCorrections = allCorrections.concat(punctuation.corrections);
-            
-            return { text: result, corrections: allCorrections };
-        }
-
-        function showCorrections(corrections) {
-            const corrDiv = document.getElementById('corrections');
-            
-            if (corrections.length === 0) {
-                corrDiv.style.display = 'none';
-                return;
-            }
-            
-            let html = '<h4>✍️ Correcciones aplicadas:</h4>';
-            corrections.forEach(corr => {
-                html += `
-                    <div class="correction-item">
-                        <span class="before">${corr.before}</span> → 
-                        <span class="after">${corr.after}</span>
-                    </div>
-                `;
-            });
-            
-            corrDiv.innerHTML = html;
-            corrDiv.style.display = 'block';
-        }
-
-        function normalizeText(text) {
-            return text.toLowerCase()
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-                .replace(/[^\w\s]/g, " ")
-                .replace(/\s+/g, " ")
-                .trim();
-        }
-
-        function stem(word) {
-            const suffixes = ['ando', 'iendo', 'mente', 'ación', 'ador', 'ante', 'ancia', 'encia', 
-                            'ible', 'able', 'ismo', 'ista', 'oso', 'osa', 'ivo', 'iva',
-                            'ar', 'er', 'ir', 'ado', 'ido', 'es', 'as', 'os', 's'];
-            
-            for (let suffix of suffixes) {
-                if (word.length > suffix.length + 3 && word.endsWith(suffix)) {
-                    return word.slice(0, -suffix.length);
-                }
-            }
-            return word;
-        }
-
-        function tokenize(text) {
-            const normalized = normalizeText(text);
-            const words = normalized.split(/\s+/).filter(w => w.length > 0);
-            const stems = words.map(w => stem(w));
-            
-            const bigrams = [];
-            const trigrams = [];
-            for (let i = 0; i < words.length - 1; i++) {
-                bigrams.push(words[i] + ' ' + words[i + 1]);
-                if (i < words.length - 2) {
-                    trigrams.push(words[i] + ' ' + words[i + 1] + ' ' + words[i + 2]);
-                }
-            }
-            
-            const vocalPattern = analyzeVowelPattern(text);
-            
-            return { words, stems, normalized, bigrams, trigrams, vocalPattern };
-        }
-
-        function extractKeywords(text) {
-            const { words } = tokenize(text);
-            
-            const commonWords = new Set([
-                'que', 'qué', 'como', 'cómo', 'para', 'por', 'con', 'de', 'en', 'la', 'el', 'los', 'las',
-                'un', 'una', 'unos', 'unas', 'y', 'o', 'pero', 'si', 'no', 'es', 'son', 'soy', 'eres',
-                'esta', 'este', 'estos', 'estas', 'al', 'del', 'lo', 'le', 'se', 'te', 'me', 'nos', 'os',
-                'su', 'sus', 'mi', 'mis', 'tu', 'tus', 'a', 'ante', 'bajo', 'desde', 'entre', 'hacia',
-                'hasta', 'según', 'sin', 'sobre', 'tras', 'ser', 'estar', 'hay', 'tener'
-            ]);
-            
-            const keywords = words.filter(word => word.length > 2 && !commonWords.has(word));
-            
-            const expandedKeywords = new Set(keywords);
-            keywords.forEach(keyword => {
-                if (synonyms[keyword]) {
-                    synonyms[keyword].forEach(syn => expandedKeywords.add(syn));
-                }
-                Object.entries(synonyms).forEach(([key, syns]) => {
-                    if (syns.includes(keyword)) {
-                        expandedKeywords.add(key);
-                    }
-                });
-                
-                const variations = generateVowelVariations(keyword);
-                variations.forEach(v => expandedKeywords.add(v));
-                const alphaVars = generateAlphabetVariations(keyword); // Nueva
-                alphaVars.forEach(v => expandedKeywords.add(v));
-            });
-            
-            return [...expandedKeywords];
-        }
-
-        function levenshtein(str1, str2) {
-            const len1 = str1.length;
-            const len2 = str2.length;
-            const matrix = Array(len1 + 1).fill(null).map(() => Array(len2 + 1).fill(0));
-
-            for (let i = 0; i <= len1; i++) matrix[i][0] = i;
-            for (let j = 0; j <= len2; j++) matrix[0][j] = j;
-
-            for (let i = 1; i <= len1; i++) {
-                for (let j = 1; j <= len2; j++) {
-                    const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
-                    matrix[i][j] = Math.min(
-                        matrix[i - 1][j] + 1,
-                        matrix[i][j - 1] + 1,
-                        matrix[i - 1][j - 1] + cost
-                    );
-                }
-            }
-
-            const maxLen = Math.max(len1, len2);
-            return maxLen === 0 ? 1 : 1 - (matrix[len1][len2] / maxLen);
-        }
-
-        function calculateSemanticRelevance(userInput, sentence) {
-            const userTokens = tokenize(userInput);
-            const sentTokens = tokenize(sentence);
-            
-            const commonKeywords = [...new Set(userTokens.words)].filter(w => 
-                sentTokens.words.includes(w) && w.length > 3
-            ).length;
-            
-            const similarity = calculateSimilarity(userInput, sentence);
-            
-            const vocalMatch = compareVocalPatterns(userInput, sentence);
-            const alphaMatch = compareAlphabetPatterns(userInput, sentence); // Nueva
-            
-            const lengthPenalty = Math.abs(sentence.length - userInput.length) / Math.max(sentence.length, userInput.length);
-            
-            const logicalScore = commonKeywords * 10 + similarity * 0.25 + vocalMatch * 0.15 + alphaMatch * 0.15 - lengthPenalty * 30;
-            
-            return logicalScore;
-        }
-
-        function analyzeVowelPattern(text) {
-            const vowels = ['a', 'e', 'i', 'o', 'u', 'á', 'é', 'í', 'ó', 'ú'];
-            const consonants = 'bcdfghjklmnpqrstvwxyz';
-            
-            const normalized = text.toLowerCase();
-            let vocalPattern = '';
-            let consonantPattern = '';
-            let vocalCount = {};
-            let consonantCount = {};
-            
-            for (let char of normalized) {
-                if (vowels.includes(char)) {
-                    vocalPattern += 'V';
-                    vocalCount[char] = (vocalCount[char] || 0) + 1;
-                } else if (consonants.includes(char)) {
-                    consonantPattern += 'C';
-                    consonantCount[char] = (consonantCount[char] || 0) + 1;
-                }
-            }
-            
-            const totalVowels = Object.values(vocalCount).reduce((a, b) => a + b, 0);
-            const totalConsonants = Object.values(consonantCount).reduce((a, b) => a + b, 0);
-            
-            const vocalRatio = totalVowels / (totalVowels + totalConsonants || 1);
-            
-            const vocalSignature = Object.keys(vocalCount).sort().join('');
-            const consonantSignature = Object.keys(consonantCount).sort().join('');
-            
-            return {
-                vocalPattern,
-                consonantPattern,
-                vocalCount,
-                consonantCount,
-                totalVowels,
-                totalConsonants,
-                vocalRatio,
-                vocalSignature,
-                consonantSignature,
-                fullSignature: vocalSignature + consonantSignature
-            };
-        }
-
-        function generateVowelVariations(word) {
-            const variations = [word];
-            const vowelMap = {
-                'a': ['a', 'á'], 'e': ['e', 'é'], 'i': ['i', 'í'],
-                'o': ['o', 'ó'], 'u': ['u', 'ú'],
-                'á': ['a', 'á'], 'é': ['e', 'é'], 'í': ['i', 'í'],
-                'ó': ['o', 'ó'], 'ú': ['u', 'ú']
-            };
-            
-            for (let i = 0; i < word.length; i++) {
-                const char = word[i].toLowerCase();
-                if (vowelMap[char]) {
-                    vowelMap[char].forEach(variant => {
-                        if (variant !== char) {
-                            const newWord = word.substring(0, i) + variant + word.substring(i + 1);
-                            variations.push(newWord);
-                        }
-                    });
-                }
-            }
-            
-            return variations;
-        }
-
-        function compareVocalPatterns(pattern1, pattern2) {
-            const p1 = analyzeVowelPattern(pattern1);
-            const p2 = analyzeVowelPattern(pattern2);
-            
-            let score = 0;
-            
-            if (p1.vocalSignature === p2.vocalSignature) {
-                score += 25;
-            } else {
-                const commonVowels = Object.keys(p1.vocalCount).filter(v => p2.vocalCount[v]);
-                score += commonVowels.length * 5;
-            }
-            
-            if (p1.consonantSignature === p2.consonantSignature) {
-                score += 20;
-            } else {
-                const commonConsonants = Object.keys(p1.consonantCount).filter(c => p2.consonantCount[c]);
-                score += commonConsonants.length * 3;
-            }
-            
-            const ratioDiff = Math.abs(p1.vocalRatio - p2.vocalRatio);
-            score += (1 - ratioDiff) * 15;
-            
-            const lengthRatio = Math.min(p1.vocalPattern.length, p2.vocalPattern.length) / 
-                               Math.max(p1.vocalPattern.length, p2.vocalPattern.length);
-            score += lengthRatio * 10;
-            
-            return score;
-        }
-
-        function findMatches(userInput) {
-            const matches = [];
-            const userTokens = tokenize(userInput);
-            const userKeywords = extractKeywords(userInput);
-            
-            trainingData.forEach((item, index) => {
-                let score = 0;
-                const details = [];
-                
-                const qSimilarity = calculateSimilarity(userInput, item.question);
-                const semanticQ = calculateSemanticRelevance(userInput, item.question);
-                score += (qSimilarity * 0.5) + (semanticQ * 0.2);
-                if (qSimilarity > 10) details.push(`Pregunta: ${qSimilarity.toFixed(0)}%`);
-                
-                const aSimilarity = calculateSimilarity(userInput, item.answer);
-                const semanticA = calculateSemanticRelevance(userInput, item.answer);
-                score += (aSimilarity * 0.15) + (semanticA * 0.1);
-                
-                const vocalScore = compareVocalPatterns(userInput, item.question);
-                score += vocalScore * 0.05;
-                if (vocalScore > 20) details.push(`Patrón Vocal: ${vocalScore.toFixed(0)}%`);
-                
-                const alphaScore = compareAlphabetPatterns(userInput, item.question); // Nueva
-                score += alphaScore * 0.05;
-                if (alphaScore > 20) details.push(`Abecedario: ${alphaScore.toFixed(0)}%`);
-                
-                const keywordMatches = [];
-                userKeywords.forEach(userKw => {
-                    item.keywords.forEach(itemKw => {
-                        if (userKw === itemKw || 
-                            (synonyms[userKw] && synonyms[userKw].includes(itemKw)) ||
-                            (synonyms[itemKw] && synonyms[itemKw].includes(userKw))) {
-                            keywordMatches.push(itemKw);
-                        }
-                    });
-                });
-                
-                if (keywordMatches.length > 0) {
-                    score += keywordMatches.length * 15;
-                    details.push(`Keywords: ${keywordMatches.length}`);
-                }
-                
-                const bigramMatches = item.questionBigrams.filter(bg => userTokens.bigrams.includes(bg));
-                if (bigramMatches.length > 0) {
-                    score += bigramMatches.length * 20;
-                    details.push(`Bigramas: ${bigramMatches.length}`);
-                }
-                
-                const trigramMatches = item.questionTrigrams.filter(tg => userTokens.trigrams.includes(tg));
-                if (trigramMatches.length > 0) {
-                    score += trigramMatches.length * 30;
-                    details.push(`Trigramas: ${trigramMatches.length}`);
-                }
-                
-                const stemMatches = item.questionStems.filter(stem => userTokens.stems.includes(stem));
-                if (stemMatches.length > 0) {
-                    score += stemMatches.length * 15;
-                }
-                
-                if (item.successCount > 0) {
-                    const successRate = item.successCount / (item.successCount + item.failCount || 1);
-                    score += successRate * 20;
-                    if (successRate > 0.5) details.push(`Éxito: ${(successRate * 100).toFixed(0)}%`);
-                }
-                
-                if (conversationContext.length > 0) {
-                    conversationContext.forEach(ctx => {
-                        const ctxSim = calculateSimilarity(ctx, item.question);
-                        if (ctxSim > 35) {
-                            score += 20;
-                            details.push('Contexto+');
-                        }
-                    });
-                }
-                
-                // Boost por tipo coincidente
-                if (item.inputType === classifyInput(userInput).type) {
-                    score += 25;
-                    details.push('Tipo match');
-                }
-                
-                if (score > 0) {
-                    matches.push({ item, index, score: Math.min(score, 100), details });
-                }
-            });
-            
-            matches.sort((a, b) => b.score - a.score);
-            return matches;
-        }
-
-        function giveFeedback(isPositive) {
-            if (lastUsedSources.length === 0) return;
-            
-            lastUsedSources.forEach(idx => {
-                if (trainingData[idx]) {
-                    trainingData[idx].useCount++;
-                    if (isPositive) {
-                        trainingData[idx].successCount++;
-                    } else {
-                        trainingData[idx].failCount++;
-                    }
-                }
-            });
-            
-            saveToStorage();
-            
-            document.getElementById('feedbackSection').innerHTML = `
-                <div class="status success">
-                    ${isPositive ? '✓ ¡Gracias! IA mejorada y guardada' : '✓ Registrado y guardado, ajustando pesos'}
-                </div>
-            `;
-            updateStats();
-            viewTraining();
-        }
-
-        function downloadTraining() {
-            const statusDiv = document.getElementById('trainStatus');
-            
-            if (trainingData.length === 0) {
-                statusDiv.innerHTML = '<div class="status error">Sin datos</div>';
-                return;
-            }
-
-            const dataToExport = {
-                version: '3.3.1',
-                exportDate: new Date().toISOString(),
-                trainingData: trainingData,
-                questionCount: questionCount,
-                conversationContext: conversationContext,
-                deepThinkingMode: deepThinkingMode
-            };
-
-            const dataStr = JSON.stringify(dataToExport, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(dataBlob);
-            
-            const downloadLink = document.createElement('a');
-            downloadLink.href = url;
-            downloadLink.download = `ia-ultra-vocal-${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-            URL.revokeObjectURL(url);
-
-            statusDiv.innerHTML = '<div class="status success">✓ Descargado</div>';
-            setTimeout(() => { statusDiv.innerHTML = ''; }, 3000);
-        }
-
-        function loadTraining(event) {
-            const file = event.target.files[0];
-            const statusDiv = document.getElementById('trainStatus');
-            
-            if (!file) return;
-
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    
-                    if (!importedData.trainingData) {
-                        throw new Error('Formato inválido');
-                    }
-
-                    const loadedCount = importedData.trainingData.length;
-                    
-                    if (trainingData.length > 0) {
-                        if (confirm(`Tienes ${trainingData.length} entrenamientos guardados.\n\nOK = Reemplazar todo\nCancelar = Agregar al existente`)) {
-                            trainingData = importedData.trainingData;
-                        } else {
-                            trainingData = [...trainingData, ...importedData.trainingData];
-                        }
-                    } else {
-                        trainingData = importedData.trainingData;
-                    }
-                    
-                    if (importedData.questionCount) {
-                        questionCount = importedData.questionCount;
-                    }
-                    
-                    if (importedData.conversationContext) {
-                        conversationContext = importedData.conversationContext;
-                    }
-
-                    if (importedData.deepThinkingMode !== undefined) {
-                        deepThinkingMode = importedData.deepThinkingMode;
-                        document.getElementById('deepThinkingToggle').checked = deepThinkingMode;
-                    }
-                    
-                    saveToStorage();
-                    
-                    statusDiv.innerHTML = `<div class="status success">✓ ${loadedCount} entrenamientos cargados y guardados automáticamente</div>`;
-                    updateStats();
-                    viewTraining();
-                    
-                    setTimeout(() => { statusDiv.innerHTML = ''; }, 4000);
-                    
-                } catch (error) {
-                    statusDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
-                }
-            };
-            
-            reader.readAsText(file);
-            event.target.value = '';
-        }
-
-        function calculateTotalWords() {
-            const allWords = new Set();
-            trainingData.forEach(item => {
-                item.questionWords.forEach(w => allWords.add(w));
-                item.answerWords.forEach(w => allWords.add(w));
-            });
-            return allWords.size;
-        }
-
-        function clearAllTraining() {
-            if (!confirm('¿BORRAR TODO el entrenamiento guardado?')) return;
-
-            trainingData = [];
-            questionCount = 0;
-            conversationContext = [];
-            lastUsedSources = [];
-            
-            saveToStorage();
-            
-            document.getElementById('trainStatus').innerHTML = '<div class="status success">✓ Todo borrado y guardado</div>';
-            updateStats();
-            viewTraining();
-        }
-
-        function updateStats() {
-            document.getElementById('totalTraining').textContent = trainingData.length;
-            document.getElementById('totalQuestions').textContent = questionCount;
-            document.getElementById('totalWords').textContent = calculateTotalWords();
-            
-            const size = new Blob([JSON.stringify(trainingData)]).size;
-            document.getElementById('dbSize').textContent = (size / 1024).toFixed(2) + ' KB';
-        }
-
-        function updateAutoTags() {
-            const question = document.getElementById('question').value.trim();
-            const answer = document.getElementById('answer').value.trim();
-            
-            if (!question && !answer) {
-                document.getElementById('autoTags').style.display = 'none';
-                return;
-            }
-            
-            const keywords = extractKeywords(question + ' ' + answer);
-            const uniqueKeywords = [...new Set(keywords)];
-            
-            if (uniqueKeywords.length > 0) {
-                document.getElementById('tagsList').innerHTML = uniqueKeywords.slice(0, 8).map(tag => 
-                    `<span>${tag}</span>`
-                ).join('') + (uniqueKeywords.length > 8 ? '<span>...</span>' : '');
-                document.getElementById('autoTags').style.display = 'block';
-            } else {
-                document.getElementById('autoTags').style.display = 'none';
-            }
-        }
-
-        function deleteTraining(id) {
-            if (!confirm('¿Eliminar?')) return;
-            
-            trainingData = trainingData.filter(item => item.id !== id);
-            saveToStorage();
-            
-            const statusDiv = document.getElementById('trainStatus');
-            statusDiv.innerHTML = '<div class="status success">✓ Eliminado y guardado</div>';
-            setTimeout(() => { statusDiv.innerHTML = ''; }, 2000);
-            
-            updateStats();
-            viewTraining();
-        }
-
-        document.addEventListener('input', updateAutoTags);
-        document.getElementById('question').addEventListener('input', updateAutoTags);
-        document.getElementById('answer').addEventListener('input', updateAutoTags);
-
-        window.addEventListener('load', () => {
-            loadFromStorage();
-            updateStats();
-            viewTraining();
-        });
-    </script>
+
+<div id="stats"></div>
+<div id="console"></div>
+<div id="inputContainer">
+ <input type="text" id="input" placeholder="Escribe órdenes para la IA..." autocomplete="off">
+</div>
+
+<div id="joy"><div id="stick"></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const scene=new THREE.Scene();
+scene.fog=new THREE.Fog(0x87ceeb,80,250);
+
+const skyGeo=new THREE.SphereGeometry(450,32,32);
+const skyMat=new THREE.ShaderMaterial({
+ side:THREE.BackSide,
+ uniforms:{
+  topColor:{value:new THREE.Color(0x0055ff)},
+  middleColor:{value:new THREE.Color(0x4d9fff)},
+  bottomColor:{value:new THREE.Color(0xe6f5ff)},
+  sunColor:{value:new THREE.Color(0xffffff)},
+  sunPosition:{value:new THREE.Vector3(0.3,0.7,0.2)}
+ },
+ vertexShader:`
+  varying vec3 vNormal;
+  void main(){
+   vNormal=normalize(position);
+   gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);
+  }
+ `,
+ fragmentShader:`
+  uniform vec3 topColor;
+  uniform vec3 middleColor;
+  uniform vec3 bottomColor;
+  uniform vec3 sunColor;
+  uniform vec3 sunPosition;
+  varying vec3 vNormal;
+  void main(){
+   float h=normalize(vNormal).y;
+   vec3 skyColor;
+   if(h>0.0){
+    skyColor=mix(middleColor,topColor,pow(h,0.7));
+   }else{
+    skyColor=mix(middleColor,bottomColor,pow(abs(h),0.5));
+   }
+   float sun=max(0.0,dot(normalize(vNormal),normalize(sunPosition)));
+   sun=pow(sun,150.0);
+   skyColor=mix(skyColor,sunColor,sun);
+   float glow=pow(max(0.0,dot(normalize(vNormal),normalize(sunPosition))),8.0)*0.3;
+   skyColor+=glow*vec3(1.0,0.9,0.7);
+   gl_FragColor=vec4(skyColor,1.0);
+  }
+ `
+});
+const sky=new THREE.Mesh(skyGeo,skyMat);
+scene.add(sky);
+
+const cloudGroup=new THREE.Group();
+scene.add(cloudGroup);
+
+function createCloud(x,y,z){
+ const cloud=new THREE.Group();
+ const cloudMat=new THREE.MeshLambertMaterial({
+  color:0xffffff,
+  transparent:true,
+  opacity:0.85
+ });
+ 
+ const mainSize=3+Math.random()*4;
+ for(let i=0;i<5+Math.random()*8;i++){
+  const sphere=new THREE.Mesh(
+   new THREE.SphereGeometry(mainSize*0.3+Math.random()*mainSize*0.5,8,8),
+   cloudMat
+  );
+  sphere.position.set(
+   (Math.random()-0.5)*mainSize*1.5,
+   (Math.random()-0.5)*mainSize*0.5,
+   (Math.random()-0.5)*mainSize*1.5
+  );
+  cloud.add(sphere);
+ }
+ 
+ cloud.position.set(x,y,z);
+ cloud.userData.speed=0.02+Math.random()*0.03;
+ cloud.userData.drift=(Math.random()-0.5)*0.01;
+ return cloud;
+}
+
+for(let i=0;i<40;i++){
+ const x=(Math.random()-0.5)*300;
+ const y=25+Math.random()*35;
+ const z=(Math.random()-0.5)*300;
+ cloudGroup.add(createCloud(x,y,z));
+}
+
+const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,1000);
+camera.position.set(0,8,15);
+
+const ambientLight=new THREE.AmbientLight(0xffffff,0.7);
+scene.add(ambientLight);
+
+const sun=new THREE.DirectionalLight(0xfff8e7,1.3);
+sun.position.set(100,120,80);
+scene.add(sun);
+
+const hemiLight=new THREE.HemisphereLight(0x87ceeb,0x6b8e23,0.5);
+scene.add(hemiLight);
+
+const WORLD_SIZE=40;
+const WALL_LIMIT=WORLD_SIZE/2;
+
+const ground=new THREE.Mesh(
+ new THREE.PlaneGeometry(WORLD_SIZE,WORLD_SIZE,1,1),
+ new THREE.MeshLambertMaterial({
+  color:0x3a9e3a,
+  flatShading:false
+ })
+);
+ground.rotation.x=-Math.PI/2;
+scene.add(ground);
+
+const wallHeight=8;
+const wallThick=2;
+const wallMat=new THREE.MeshLambertMaterial({
+ color:0x8B4513,
+ transparent:true,
+ opacity:0
+});
+
+const wall1=new THREE.Mesh(new THREE.BoxGeometry(WORLD_SIZE+4,wallHeight,wallThick),wallMat);
+wall1.position.set(0,wallHeight/2,WALL_LIMIT);
+scene.add(wall1);
+
+const wall2=new THREE.Mesh(new THREE.BoxGeometry(WORLD_SIZE+4,wallHeight,wallThick),wallMat);
+wall2.position.set(0,wallHeight/2,-WALL_LIMIT);
+scene.add(wall2);
+
+const wall3=new THREE.Mesh(new THREE.BoxGeometry(wallThick,wallHeight,WORLD_SIZE+4),wallMat);
+wall3.position.set(WALL_LIMIT,wallHeight/2,0);
+scene.add(wall3);
+
+const wall4=new THREE.Mesh(new THREE.BoxGeometry(wallThick,wallHeight,WORLD_SIZE+4),wallMat);
+wall4.position.set(-WALL_LIMIT,wallHeight/2,0);
+scene.add(wall4);
+
+const blocks=[];
+function block(x,z,type){
+ const colors={damage:0xff3333,win:0x33ff33,neutral:0xaaaaaa};
+ const b=new THREE.Mesh(
+  new THREE.BoxGeometry(1.5,1.5,1.5),
+  new THREE.MeshLambertMaterial({color:colors[type]})
+ );
+ b.position.set(x,0.75,z);
+ b.userData.type=type;
+ scene.add(b);
+ blocks.push(b);
+}
+
+for(let i=0;i<6;i++){
+ const x=(Math.random()-0.5)*(WORLD_SIZE-6);
+ const z=(Math.random()-0.5)*(WORLD_SIZE-6);
+ block(x,z,"damage");
+}
+
+for(let i=0;i<3;i++){
+ const x=(Math.random()-0.5)*(WORLD_SIZE-6);
+ const z=(Math.random()-0.5)*(WORLD_SIZE-6);
+ block(x,z,"win");
+}
+
+for(let i=0;i<5;i++){
+ const x=(Math.random()-0.5)*(WORLD_SIZE-6);
+ const z=(Math.random()-0.5)*(WORLD_SIZE-6);
+ block(x,z,"neutral");
+}
+
+const agent=new THREE.Mesh(
+ new THREE.SphereGeometry(0.6,20,20),
+ new THREE.MeshLambertMaterial({color:0x00ffff,emissive:0x00aaaa,emissiveIntensity:0.4})
+);
+agent.position.set(0,0.6,0);
+scene.add(agent);
+
+const con=document.getElementById("console");
+const stats=document.getElementById("stats");
+const inputEl=document.getElementById("input");
+
+function say(t){
+ const d=document.createElement("div");
+ d.textContent=t;
+ con.appendChild(d);
+ if(con.children.length>40) con.removeChild(con.children[0]);
+ con.scrollTop=con.scrollHeight;
+}
+
+let db=null;
+const dbName="IABrainDB";
+let needsSave=false;
+let dbReady=false;
+
+function openDB(){
+ return new Promise((resolve,reject)=>{
+  const req=indexedDB.open(dbName,1);
+  req.onerror=()=>reject(req.error);
+  req.onsuccess=()=>resolve(req.result);
+  req.onupgradeneeded=(e)=>{
+   const database=e.target.result;
+   if(!database.objectStoreNames.contains("brain")){
+    database.createObjectStore("brain");
+   }
+  };
+ });
+}
+
+function saveKnowledge(){
+ if(!db || !dbReady) return;
+ 
+ const tx=db.transaction(["brain"],"readwrite");
+ const store=tx.objectStore("brain");
+ 
+ const data={
+  q:Q,
+  stats:{steps,wins,damages,totalReward,episode,EPSILON},
+  state:{
+   x:state.x,y:state.y,z:state.z,
+   vx:state.vx,vy:state.vy,vz:state.vz,
+   rx:state.rx,ry:state.ry,rz:state.rz,
+   rvx:state.rvx,rvy:state.rvy,rvz:state.rvz
+  }
+ };
+ 
+ store.put(data,"memory");
+ needsSave=false;
+}
+
+function loadKnowledge(){
+ if(!db) return;
+ 
+ const tx=db.transaction(["brain"],"readonly");
+ const store=tx.objectStore("brain");
+ const req=store.get("memory");
+ 
+ req.onsuccess=()=>{
+  const data=req.result;
+  
+  if(data){
+   if(data.q){
+    Object.assign(Q,data.q);
+   }
+   
+   if(data.stats){
+    steps=data.stats.steps||0;
+    wins=data.stats.wins||0;
+    damages=data.stats.damages||0;
+    totalReward=data.stats.totalReward||0;
+    episode=data.stats.episode||1;
+    EPSILON=data.stats.EPSILON||0.5;
+   }
+   
+   if(data.state){
+    state.x=data.state.x||0;
+    state.y=data.state.y||0.6;
+    state.z=data.state.z||0;
+    state.vx=data.state.vx||0;
+    state.vy=data.state.vy||0;
+    state.vz=data.state.vz||0;
+    state.rx=data.state.rx||0;
+    state.ry=data.state.ry||0;
+    state.rz=data.state.rz||0;
+    state.rvx=data.state.rvx||0;
+    state.rvy=data.state.rvy||0;
+    state.rvz=data.state.rvz||0;
+    agent.position.set(state.x,state.y,state.z);
+   }
+  }
+  
+  dbReady=true;
+ };
+ 
+ req.onerror=()=>{
+  dbReady=true;
+ };
+}
+
+const Q={};
+const ALPHA=0.15;
+const GAMMA=0.9;
+let EPSILON=0.6;
+
+let state={
+ x:0,y:0.6,z:0,
+ vx:0,vy:0,vz:0,
+ rx:0,ry:0,rz:0,
+ rvx:0,rvy:0,rvz:0
+};
+
+let totalReward=0;
+let steps=0;
+let wins=0;
+let damages=0;
+let episode=1;
+let currentOrder=null;
+
+openDB().then(database=>{
+ db=database;
+ loadKnowledge();
+}).catch(e=>{
+ dbReady=true;
+});
+
+setInterval(()=>{
+ if(dbReady){
+  saveKnowledge();
+ }
+},1000);
+
+inputEl.addEventListener("keydown",e=>{
+ if(e.key==="Enter"){
+  const cmd=inputEl.value.trim();
+  inputEl.value="";
+  
+  if(!cmd) return;
+  
+  say("👤 "+cmd);
+  
+  const lower=cmd.toLowerCase();
+  
+  if(lower.includes("ve") || lower.includes("mueve")){
+   if(lower.includes("rojo")){
+    const red=blocks.find(b=>b.userData.type==="damage");
+    if(red){
+     currentOrder={type:"goto",target:red,name:"rojo"};
+     say("🤖 Voy al rojo");
+    }
+   }else if(lower.includes("verde")){
+    const green=blocks.find(b=>b.userData.type==="win");
+    if(green){
+     currentOrder={type:"goto",target:green,name:"verde"};
+     say("🤖 Voy al verde");
+    }
+   }else if(lower.includes("gris")){
+    const gray=blocks.find(b=>b.userData.type==="neutral");
+    if(gray){
+     currentOrder={type:"goto",target:gray,name:"gris"};
+     say("🤖 Voy al gris");
+    }
+   }
+  }else if(lower.includes("salta")){
+   currentOrder={type:"action",action:6};
+   say("🤖 Saltando");
+  }else if(lower.includes("gira")){
+   currentOrder={type:"action",action:7};
+   say("🤖 Girando");
+  }else if(lower.includes("rapido") || lower.includes("rápido")){
+   currentOrder={type:"speed",mode:"fast"};
+   say("🤖 Velocidad alta");
+  }else if(lower.includes("lento")){
+   currentOrder={type:"speed",mode:"slow"};
+   say("🤖 Velocidad baja");
+  }else if(lower.includes("para") || lower.includes("detente") || lower.includes("stop")){
+   currentOrder=null;
+   state.vx=0;
+   state.vz=0;
+   state.rvx=0;
+   state.rvy=0;
+   state.rvz=0;
+   say("🤖 Detenido");
+  }else if(lower.includes("explora")){
+   EPSILON=0.8;
+   currentOrder=null;
+   say("🤖 Modo exploración");
+  }else if(lower.includes("aprende")){
+   EPSILON=0.3;
+   say("🤖 Modo aprendizaje");
+  }else if(lower.includes("experto")){
+   EPSILON=0.05;
+   say("🤖 Modo experto");
+  }else{
+   say("🤖 Prueba: ve al rojo, salta, rápido, explora");
+  }
+ }
+});
+
+function key(x,y,z,vx,vy,vz,a){
+ return Math.round(x)+","+Math.round(y)+","+Math.round(z)+","+
+        Math.round(vx*2)+","+Math.round(vy*2)+","+Math.round(vz*2)+","+a;
+}
+
+function getQ(x,y,z,vx,vy,vz,a){
+ const k=key(x,y,z,vx,vy,vz,a);
+ return Q[k]||0;
+}
+
+function setQ(x,y,z,vx,vy,vz,a,val){
+ const k=key(x,y,z,vx,vy,vz,a);
+ Q[k]=val;
+ needsSave=true;
+}
+
+const GRAVITY=-9.8;
+const FRICTION=0.85;
+const ANGULAR_FRICTION=0.9;
+
+function checkCollision(nx,ny,nz){
+ for(const b of blocks){
+  if(b.userData.type==="neutral") continue;
+  
+  const dx=Math.abs(b.position.x-nx);
+  const dy=Math.abs(b.position.y-ny);
+  const dz=Math.abs(b.position.z-nz);
+  
+  if(dx<1.05 && dy<1.05 && dz<1.05){
+   return b;
+  }
+ }
+ return null;
+}
+
+function reward(s,col){
+ let r=-0.02;
+ 
+ if(Math.abs(s.x)>=WALL_LIMIT-1 || Math.abs(s.z)>=WALL_LIMIT-1){
+  return -30;
+ }
+ 
+ if(s.y<0.3){
+  r+=-5;
+ }
+ 
+ const speed=Math.sqrt(s.vx*s.vx+s.vz*s.vz);
+ if(speed>0.2){
+  r+=0.2;
+ }
+ 
+ if(col){
+  if(col.userData.type==="damage"){
+   damages++;
+   return -25;
+  }
+  if(col.userData.type==="win"){
+   wins++;
+   say("✨ Objetivo logrado");
+   currentOrder=null;
+   return 40;
+  }
+ }
+ 
+ if(currentOrder && currentOrder.type==="goto"){
+  const dx=currentOrder.target.position.x-s.x;
+  const dz=currentOrder.target.position.z-s.z;
+  const dist=Math.sqrt(dx*dx+dz*dz);
+  if(dist<2){
+   r+=3;
+  }
+ }
+ 
+ return r;
+}
+
+function chooseAction(s){
+ if(currentOrder){
+  if(currentOrder.type==="goto"){
+   const dx=currentOrder.target.position.x-s.x;
+   const dz=currentOrder.target.position.z-s.z;
+   const dist=Math.sqrt(dx*dx+dz*dz);
+   
+   if(dist<1.5){
+    say("🎯 Llegué a "+currentOrder.name);
+    currentOrder=null;
+   }else{
+    if(Math.abs(dx)>Math.abs(dz)){
+     return dx>0?0:1;
+    }else{
+     return dz>0?2:3;
+    }
+   }
+  }else if(currentOrder.type==="action"){
+   const a=currentOrder.action;
+   currentOrder=null;
+   return a;
+  }else if(currentOrder.type==="speed"){
+   if(currentOrder.mode==="fast"){
+    return Math.random()<0.5?0:2;
+   }else{
+    return Math.random()<0.5?4:5;
+   }
+  }
+ }
+ 
+ if(Math.random()<EPSILON){
+  return Math.floor(Math.random()*10);
+ }
+ 
+ let best=-Infinity;
+ let bestA=0;
+ 
+ for(let a=0;a<10;a++){
+  const q=getQ(s.x,s.y,s.z,s.vx,s.vy,s.vz,a);
+  if(q>best){
+   best=q;
+   bestA=a;
+  }
+ }
+ 
+ return bestA;
+}
+
+const actions=[
+ {fx:3,fy:0,fz:0,tx:0,ty:0,tz:0},
+ {fx:-3,fy:0,fz:0,tx:0,ty:0,tz:0},
+ {fx:0,fy:0,fz:3,tx:0,ty:0,tz:0},
+ {fx:0,fy:0,fz:-3,tx:0,ty:0,tz:0},
+ {fx:1.5,fy:0,fz:0,tx:0,ty:0,tz:0},
+ {fx:-1.5,fy:0,fz:0,tx:0,ty:0,tz:0},
+ {fx:0,fy:4,fz:0,tx:0,ty:0,tz:0},
+ {fx:0,fy:0,fz:0,tx:5,ty:0,tz:0},
+ {fx:0,fy:0,fz:0,tx:0,ty:5,tz:0},
+ {fx:0,fy:0,fz:0,tx:0,ty:0,tz:5}
+];
+
+setInterval(()=>{
+ const a=chooseAction(state);
+ const act=actions[a];
+ 
+ const dt=0.016;
+ 
+ state.vx+=act.fx*dt;
+ state.vy+=(act.fy+GRAVITY)*dt;
+ state.vz+=act.fz*dt;
+ 
+ state.rvx+=act.tx*dt;
+ state.rvy+=act.ty*dt;
+ state.rvz+=act.tz*dt;
+ 
+ const nx=state.x+state.vx*dt;
+ const ny=state.y+state.vy*dt;
+ const nz=state.z+state.vz*dt;
+ 
+ const collision=checkCollision(nx,ny,nz);
+ 
+ if(collision){
+  state.vx*=-0.5;
+  state.vz*=-0.5;
+ }else{
+  state.x=nx;
+  state.y=ny;
+  state.z=nz;
+ }
+ 
+ state.rx+=state.rvx*dt;
+ state.ry+=state.rvy*dt;
+ state.rz+=state.rvz*dt;
+ 
+ if(state.y<=0.6){
+  state.y=0.6;
+  state.vy=0;
+  state.vx*=FRICTION;
+  state.vz*=FRICTION;
+ }
+ 
+ state.rvx*=ANGULAR_FRICTION;
+ state.rvy*=ANGULAR_FRICTION;
+ state.rvz*=ANGULAR_FRICTION;
+ 
+ state.x=Math.max(-WALL_LIMIT+1.5,Math.min(WALL_LIMIT-1.5,state.x));
+ state.z=Math.max(-WALL_LIMIT+1.5,Math.min(WALL_LIMIT-1.5,state.z));
+ 
+ const r=reward(state,collision);
+ totalReward+=r;
+ steps++;
+ 
+ let maxQ=-Infinity;
+ for(let na=0;na<10;na++){
+  maxQ=Math.max(maxQ,getQ(state.x,state.y,state.z,state.vx,state.vy,state.vz,na));
+ }
+ 
+ const oldQ=getQ(state.x,state.y,state.z,state.vx,state.vy,state.vz,a);
+ const newQ=oldQ+ALPHA*(r+GAMMA*maxQ-oldQ);
+ 
+ setQ(state.x,state.y,state.z,state.vx,state.vy,state.vz,a,newQ);
+ 
+ agent.position.set(state.x,state.y,state.z);
+ agent.rotation.set(state.rx,state.ry,state.rz);
+ 
+ if(r>20){
+  EPSILON=Math.max(0.05,EPSILON*0.996);
+ }else if(r<-15){
+  EPSILON=Math.max(0.05,EPSILON*0.998);
+ }
+ 
+ const spd=Math.sqrt(state.vx*state.vx+state.vz*state.vz).toFixed(1);
+ stats.innerHTML=`V:${wins} | D:${damages} | R:${totalReward.toFixed(0)} | v:${spd} | KB:${Object.keys(Q).length} | ε:${(EPSILON*100).toFixed(0)}%`;
+},300);
+
+let jx=0,jy=0,dragJoy=false;
+const joy=document.getElementById("joy");
+const stick=document.getElementById("stick");
+
+joy.addEventListener("pointerdown",e=>{
+ dragJoy=true;
+ e.stopPropagation();
+});
+
+joy.addEventListener("pointerup",e=>{
+ dragJoy=false;
+ jx=0;jy=0;
+ stick.style.transition="0.2s";
+ stick.style.left="35px";stick.style.top="35px";
+ setTimeout(()=>stick.style.transition="",200);
+ e.stopPropagation();
+});
+
+joy.addEventListener("pointermove",e=>{
+ if(!dragJoy)return;
+ const r=joy.getBoundingClientRect();
+ const x=e.clientX-r.left-60;
+ const y=e.clientY-r.top-60;
+ const d=Math.min(40,Math.hypot(x,y));
+ const a=Math.atan2(y,x);
+ jx=Math.cos(a)*(d/40);
+ jy=Math.sin(a)*(d/40);
+ stick.style.left=35+jx*40+"px";
+ stick.style.top=35+jy*40+"px";
+ e.stopPropagation();
+});
+
+let yaw=0,pitch=0,lookDrag=false,lx=0,ly=0;
+
+renderer.domElement.addEventListener("pointerdown",e=>{
+ if(!dragJoy && e.clientX>200){
+  lookDrag=true;
+  lx=e.clientX;
+  ly=e.clientY;
+ }
+});
+
+renderer.domElement.addEventListener("pointermove",e=>{
+ if(!lookDrag)return;
+ yaw-=(e.clientX-lx)*0.01;
+ pitch-=(e.clientY-ly)*0.01;
+ pitch=Math.max(-1.5,Math.min(1.5,pitch));
+ lx=e.clientX;
+ ly=e.clientY;
+});
+
+renderer.domElement.addEventListener("pointerup",()=>{
+ lookDrag=false;
+});
+
+let time=0;
+function animate(){
+ requestAnimationFrame(animate);
+ time+=0.01;
+
+ cloudGroup.children.forEach(cloud=>{
+  cloud.position.x+=cloud.userData.speed;
+  cloud.position.z+=cloud.userData.drift;
+  if(cloud.position.x>200) cloud.position.x=-200;
+  if(cloud.position.x<-200) cloud.position.x=200;
+ });
+
+ const forward=new THREE.Vector3(
+  Math.sin(yaw),
+  0,
+  Math.cos(yaw)
+ );
+ const right=new THREE.Vector3(
+  Math.cos(yaw),
+  0,
+  -Math.sin(yaw)
+ );
+
+ camera.position.add(forward.multiplyScalar(jy*0.5));
+ camera.position.add(right.multiplyScalar(jx*0.5));
+ 
+ camera.position.x=Math.max(-WALL_LIMIT+2,Math.min(WALL_LIMIT-2,camera.position.x));
+ camera.position.z=Math.max(-WALL_LIMIT+2,Math.min(WALL_LIMIT-2,camera.position.z));
+ camera.position.y=Math.max(2,Math.min(30,camera.position.y));
+ 
+ camera.rotation.set(pitch,yaw,0,"YXZ");
+
+ renderer.render(scene,camera);
+}
+animate();
+
+onresize=()=>{
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
+};
+</script>
 </body>
 </html>
