@@ -115,10 +115,10 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 <h1>📚 Biblioteca de Comics</h1>
 <div class="settings-bar">
 <div class="setting-item">
-<label class="setting-label">
+                <label class="setting-label">
 <span>🌐 Proxy CORS</span>
 <label class="switch">
-<input type="checkbox" id="proxyToggle">
+<input type="checkbox" id="proxyToggle" onchange="onProxyToggle()">
 <span class="slider"></span>
 </label>
 </label>
@@ -245,6 +245,16 @@ store.createIndex('title','title',{unique:false});
 store.createIndex('date','date',{unique:false});
 }
 };
+}
+
+function onProxyToggle(){
+const coverImages=document.querySelectorAll('.comic-cover-img');
+coverImages.forEach(img=>{
+const originalSrc=img.getAttribute('data-original-url');
+if(originalSrc){
+img.src=getProxyUrl(originalSrc);
+}
+});
 }
 
 function exportSelectedComics(){
@@ -686,7 +696,7 @@ openComic(comic);
 };
 card.innerHTML=`
 <div class="comic-cover-container">
-<img src="${getProxyUrl(comic.cover)}" class="comic-cover-img">
+<img src="${getProxyUrl(comic.cover)}" class="comic-cover-img" data-original-url="${comic.cover}">
 </div>
 <input type="checkbox" class="select-checkbox" ${isSelected?'checked':''} onclick="toggleComicSelection(${comic.id},event)">
 <div class="selection-order" style="display:${isSelected?'flex':'none'}">${selectionOrder}</div>
