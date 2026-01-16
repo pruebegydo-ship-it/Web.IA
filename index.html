@@ -92,12 +92,15 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 .url-edit-modal.active{display:block;}
 .url-edit-box{background:white;border-radius:15px;padding:30px;max-width:800px;margin:0 auto;box-shadow:0 10px 40px rgba(0,0,0,0.5);}
 .url-edit-box h3{color:#333;margin-bottom:20px;font-size:22px;text-align:center;}
-.failed-url-item{background:#f8f9fa;padding:15px;border-radius:10px;margin-bottom:15px;border:2px solid #e0e0e0;position:relative;}
+.failed-url-item{background:#f8f9fa;padding:15px;border-radius:10px;margin-bottom:15px;border:2px solid #e0e0e0;position:relative;padding-left:100px;padding-right:50px;}
 .failed-url-item label{display:block;color:#666;font-size:12px;font-weight:600;margin-bottom:8px;}
 .failed-url-item input{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:monospace;}
 .failed-url-item input:focus{outline:none;border-color:#667eea;}
 .failed-url-number{display:inline-block;background:#dc3545;color:white;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:bold;margin-right:8px;}
-.delete-url-btn{position:absolute;top:15px;right:15px;background:#dc3545;color:white;border:none;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:bold;cursor:pointer;transition:all 0.2s;}
+.failed-url-thumbnail{position:absolute;top:15px;left:15px;width:70px;height:70px;border-radius:8px;overflow:hidden;border:2px solid #dee2e6;background:#f8f9fa;}
+.failed-url-thumbnail img{width:100%;height:100%;object-fit:cover;}
+.failed-url-thumbnail.error{display:flex;align-items:center;justify-content:center;font-size:30px;color:#999;}
+.delete-url-btn{position:absolute;right:15px;top:50%;transform:translateY(-50%);background:#dc3545;color:white;border:none;width:32px;height:32px;border-radius:6px;font-size:16px;cursor:pointer;transition:all 0.2s;z-index:2;display:flex;align-items:center;justify-content:center;padding:0;}
 .delete-url-btn:hover{background:#c82333;transform:scale(1.05);}
 .url-edit-buttons{display:flex;gap:10px;margin-top:20px;}
 .url-edit-buttons button{padding:14px 28px;border:none;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer;flex:1;width:auto;}
@@ -241,6 +244,10 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 <div class="url-edit-modal" id="urlEditModal">
 <div class="url-edit-box">
 <h3>🔧 Editar URLs del Comic</h3>
+<div class="url-edit-buttons" style="margin-bottom:20px;margin-top:0;">
+<button class="url-save-btn" onclick="saveAllEditedUrls()">💾 Guardar</button>
+<button class="url-cancel-btn" onclick="closeUrlEdit()">❌ Cancelar</button>
+</div>
 <div style="background:#fff3cd;border:2px solid #ffc107;border-radius:10px;padding:15px;margin-bottom:20px;">
 <label style="display:block;color:#856404;font-size:13px;font-weight:600;margin-bottom:10px;">🔄 Cambiar formato para todas las URLs:</label>
 <select id="bulkFormatChange" style="width:100%;padding:12px;border:2px solid #ffc107;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">
@@ -256,10 +263,6 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 <button onclick="applyBulkFormatChange()" style="margin-top:10px;background:#ffc107;color:#000;padding:10px 20px;border:none;border-radius:8px;font-size:13px;font-weight:bold;cursor:pointer;width:100%;">✨ Aplicar a todas</button>
 </div>
 <div id="failedUrlsList"></div>
-<div class="url-edit-buttons">
-<button class="url-save-btn" onclick="saveAllEditedUrls()">💾 Guardar</button>
-<button class="url-cancel-btn" onclick="closeUrlEdit()">❌ Cancelar</button>
-</div>
 </div>
 </div>
 <div class="merge-modal" id="mergeModal">
@@ -623,9 +626,12 @@ allUrlsForEdit.forEach((item,idx)=>{
 const div=document.createElement('div');
 div.className='failed-url-item';
 div.innerHTML=`
+<div class="failed-url-thumbnail" id="thumb${idx}">
+<img src="${getProxyUrl(item.url)}" onerror="this.parentElement.classList.add('error');this.style.display='none';this.parentElement.innerHTML+='❌';">
+</div>
 <label><span class="failed-url-number">Página ${item.index+1}</span>URL:</label>
 <input type="text" id="editUrl${idx}" value="${item.url}" data-index="${idx}">
-<button class="delete-url-btn" onclick="deleteUrlFromEdit(${idx})">🗑️ Eliminar</button>
+<button class="delete-url-btn" onclick="deleteUrlFromEdit(${idx})">🗑️</button>
 `;
 list.appendChild(div);
 });
@@ -726,6 +732,9 @@ failedImages.forEach((item,idx)=>{
 const div=document.createElement('div');
 div.className='failed-url-item';
 div.innerHTML=`
+<div class="failed-url-thumbnail error">
+❌
+</div>
 <label><span class="failed-url-number">Imagen ${item.index+1}</span>URL actual:</label>
 <input type="text" id="failedUrl${idx}" value="${item.url}" data-index="${idx}">
 `;
