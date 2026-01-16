@@ -388,14 +388,16 @@ document.getElementById('importFile').value='';
 }
 
 function switchTab(tab){
-document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+const tabs=document.querySelectorAll('.tab');
+const sections=document.querySelectorAll('.section');
+tabs.forEach(t=>t.classList.remove('active'));
+sections.forEach(s=>s.classList.remove('active'));
 if(tab==='library'){
-document.querySelectorAll('.tab')[0].classList.add('active');
+tabs[0].classList.add('active');
 document.getElementById('librarySection').classList.add('active');
 loadLibrary();
 }else{
-document.querySelectorAll('.tab')[1].classList.add('active');
+tabs[1].classList.add('active');
 document.getElementById('addSection').classList.add('active');
 }
 }
@@ -739,12 +741,24 @@ alert('⚠️ Selecciona un formato primero');
 return;
 }
 const inputs=document.querySelectorAll('[id^="failedUrl"],[id^="editUrl"]');
+let changesMade=false;
 inputs.forEach(input=>{
 const currentUrl=input.value;
+if(!currentUrl||currentUrl.trim()===''){
+return;
+}
 const urlWithoutExt=currentUrl.replace(/\.\w+(\?.*)?$/,'');
-input.value=urlWithoutExt+newFormat;
+const newUrl=urlWithoutExt+newFormat;
+if(currentUrl!==newUrl){
+input.value=newUrl;
+changesMade=true;
+}
 });
+if(changesMade){
 alert(`✅ Formato ${newFormat} aplicado a todas las URLs`);
+}else{
+alert('ℹ️ No se realizaron cambios');
+}
 }
 
 function closeUrlEdit(){
