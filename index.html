@@ -2,773 +2,709 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>IA 3D Aprendizaje Autónomo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biblioteca de Comics</title>
 <style>
-html,body{
- margin:0;padding:0;overflow:hidden;background:#000;
- touch-action:none;
-}
-
-#joy{
- position:absolute;left:20px;bottom:20px;
- width:120px;height:120px;border-radius:50%;
- background:rgba(255,255,255,.25);
- z-index:10;
-}
-#stick{
- position:absolute;
- width:50px;height:50px;border-radius:50%;
- background:rgba(255,255,255,.8);
- left:35px;top:35px;
- pointer-events:none;
-}
-
-#console{
- position:absolute;
- top:60px;left:10px;
- width:340px;height:200px;
- overflow-y:scroll;
- background:rgba(0,0,0,.9);
- color:#0f0;
- font-family:monospace;
- font-size:11px;
- padding:8px;
- border-radius:6px;
- border:1px solid #0f0;
-}
-
-#stats{
- position:absolute;
- top:10px;left:10px;
- background:rgba(0,0,0,.9);
- color:#fff;
- font-family:monospace;
- font-size:12px;
- padding:8px 12px;
- border-radius:6px;
- border:1px solid #fff;
- font-weight:bold;
-}
-
-#inputContainer{
- position:absolute;
- bottom:20px;left:160px;
- width:320px;
-}
-
-#input{
- width:100%;
- background:rgba(0,0,0,.9);
- border:2px solid #0f0;
- border-radius:6px;
- padding:10px;
- color:#0f0;
- font-family:monospace;
- font-size:13px;
-}
-
-#input:focus{
- outline:none;
- border-color:#0ff;
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:15px;}
+.container{max-width:1200px;margin:0 auto;}
+.header{text-align:center;color:white;margin-bottom:20px;}
+.header h1{font-size:2em;margin-bottom:15px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);}
+.settings-bar{display:flex;gap:15px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;}
+.setting-item{background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);border-radius:12px;padding:12px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 15px rgba(0,0,0,0.2);}
+.setting-label{color:white;font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px;}
+.switch{position:relative;display:inline-block;width:54px;height:30px;}
+.switch input{opacity:0;width:0;height:0;}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:rgba(255,255,255,0.3);transition:.3s;border-radius:30px;box-shadow:inset 0 2px 4px rgba(0,0,0,0.2);}
+.slider:before{position:absolute;content:"";height:22px;width:22px;left:4px;bottom:4px;background-color:white;transition:.3s;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.3);}
+input:checked + .slider{background:linear-gradient(135deg,#11998e 0%,#38ef7d 100%);}
+input:checked + .slider:before{transform:translateX(24px);}
+.tabs{display:flex;gap:10px;margin-bottom:20px;justify-content:center;}
+.tab{padding:12px 25px;background:rgba(255,255,255,0.2);color:white;border:none;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer;transition:all 0.3s;}
+.tab.active{background:white;color:#667eea;}
+.section{display:none;}
+.section.active{display:block;}
+.upload-box{background:white;border-radius:15px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,0.3);margin-bottom:20px;}
+.input-group{display:flex;flex-direction:column;gap:10px;margin-bottom:15px;}
+input[type="text"],textarea{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:10px;font-size:15px;font-family:inherit;transition:border-color 0.3s;}
+textarea{resize:vertical;min-height:100px;}
+input:focus,textarea:focus{outline:none;border-color:#667eea;}
+.file-input-wrapper{position:relative;overflow:hidden;display:inline-block;width:100%;}
+.file-input-wrapper input[type=file]{position:absolute;left:-9999px;}
+.file-input-label{display:block;padding:12px;background:#f5f5f5;border:2px dashed #ccc;border-radius:10px;text-align:center;cursor:pointer;transition:all 0.3s;}
+.file-input-label:hover{border-color:#667eea;background:#f0f0ff;}
+button{padding:12px 25px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;width:100%;}
+button:hover{transform:translateY(-2px);box-shadow:0 5px 15px rgba(0,0,0,0.3);}
+button:disabled{opacity:0.6;cursor:not-allowed;}
+.status{text-align:center;color:white;font-size:16px;margin-bottom:15px;min-height:25px;}
+.library{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:15px;padding:10px;}
+.comic-card{background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.2);cursor:pointer;transition:transform 0.3s,box-shadow 0.3s;position:relative;}
+.comic-card:hover{transform:translateY(-5px);box-shadow:0 8px 25px rgba(0,0,0,0.3);}
+.comic-card.selected{outline:4px solid #11998e;transform:translateY(-5px);box-shadow:0 8px 25px rgba(17,153,142,0.5);}
+.comic-cover-container{width:100%;aspect-ratio:2/3;position:relative;overflow:hidden;background:#f0f0f0;}
+.comic-cover-img{width:100%;height:100%;object-fit:cover;}
+.comic-info{padding:10px;background:linear-gradient(to bottom,rgba(102,126,234,0.1),rgba(118,75,162,0.1));}
+.comic-title{font-size:13px;font-weight:bold;color:#333;margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.comic-pages{font-size:11px;color:#666;}
+.comic-actions{position:absolute;top:6px;right:6px;display:flex;flex-direction:column;gap:4px;z-index:10;}
+.action-btn{background:rgba(0,0,0,0.35);color:white;border:none;padding:4px 8px;border-radius:4px;font-size:10px;font-weight:600;cursor:pointer;transition:all 0.2s;backdrop-filter:blur(5px);white-space:nowrap;width:auto;}
+.action-btn:hover{background:rgba(0,0,0,0.65);transform:scale(1.05);}
+.download-btn{background:rgba(17,153,142,0.35);display:none;}
+.download-btn:hover{background:rgba(17,153,142,0.65);}
+.delete-btn{background:rgba(245,87,108,0.35);display:none;}
+.delete-btn:hover{background:rgba(245,87,108,1);}
+.select-checkbox{position:absolute;top:6px;left:6px;width:24px;height:24px;display:none;z-index:10;cursor:pointer;accent-color:#11998e;}
+.comic-card.selecting .select-checkbox{display:block;}
+.selection-order{position:absolute;top:6px;left:6px;background:#11998e;color:white;width:28px;height:28px;border-radius:50%;display:none;align-items:center;justify-content:center;font-weight:bold;font-size:14px;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.3);}
+.comic-card.selected .selection-order{display:flex;}
+.view-selected-btn{position:fixed;bottom:30px;right:30px;background:linear-gradient(135deg,#11998e 0%,#38ef7d 100%);color:white;border:none;padding:15px 30px;border-radius:50px;font-size:16px;font-weight:bold;cursor:pointer;box-shadow:0 8px 25px rgba(0,0,0,0.3);z-index:100;display:none;width:auto;}
+.view-selected-btn:hover{transform:scale(1.05);}
+.view-selected-btn.show{display:block;}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:1000;overflow-y:auto;}
+.modal.active{display:block;}
+.modal-close{position:fixed;top:15px;right:15px;background:rgba(255,255,255,0.2);color:white;border:none;padding:12px 20px;border-radius:10px;font-size:18px;cursor:pointer;z-index:1001;width:auto;}
+.modal-content{display:flex;flex-direction:column;gap:0;padding:60px 0 20px 0;}
+.modal-image-container{position:relative;width:100%;display:block;}
+.modal-image{width:100%;display:block;}
+.modal-image.error{filter:grayscale(100%) brightness(0.5);min-height:200px;background:#333;}
+.image-number{position:absolute;bottom:10px;right:10px;color:rgba(0,0,0,0.6);font-size:28px;font-weight:900;font-family:'Segoe UI',sans-serif;text-shadow:1px 1px 3px rgba(255,255,255,0.8),-1px -1px 3px rgba(255,255,255,0.8),1px -1px 3px rgba(255,255,255,0.8),-1px 1px 3px rgba(255,255,255,0.8);}
+.fix-errors-btn{position:fixed;top:70px;right:15px;background:rgba(244,67,54,0.95);color:white;border:none;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;z-index:1001;width:auto;box-shadow:0 4px 15px rgba(244,67,54,0.5);display:none;backdrop-filter:blur(10px);}
+.fix-errors-btn:hover{background:rgba(244,67,54,1);transform:scale(1.05);}
+.fix-errors-btn.show{display:block;}
+.url-edit-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:2000;overflow-y:auto;padding:20px;}
+.url-edit-modal.active{display:block;}
+.url-edit-box{background:white;border-radius:15px;padding:30px;max-width:800px;margin:0 auto;box-shadow:0 10px 40px rgba(0,0,0,0.5);}
+.url-edit-box h3{color:#333;margin-bottom:20px;font-size:22px;text-align:center;}
+.failed-url-item{background:#f8f9fa;padding:15px;border-radius:10px;margin-bottom:15px;border:2px solid #e0e0e0;}
+.failed-url-item label{display:block;color:#666;font-size:12px;font-weight:600;margin-bottom:8px;}
+.failed-url-item input{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:monospace;}
+.failed-url-item input:focus{outline:none;border-color:#667eea;}
+.failed-url-number{display:inline-block;background:#dc3545;color:white;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:bold;margin-right:8px;}
+.url-edit-buttons{display:flex;gap:10px;margin-top:20px;}
+.url-edit-buttons button{padding:14px 28px;border:none;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer;flex:1;width:auto;}
+.url-save-btn{background:linear-gradient(135deg,#11998e 0%,#38ef7d 100%);color:white;}
+.url-cancel-btn{background:#6c757d;color:white;}
+.url-save-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(17,153,142,0.4);}
+.url-cancel-btn:hover{background:#5a6268;}
+.empty-state{text-align:center;color:white;padding:40px 20px;}
+.empty-state-icon{font-size:60px;margin-bottom:15px;}
+.loading::after{content:'...';animation:dots 1.5s steps(4,end) infinite;}
+@keyframes dots{0%,20%{content:'.';}40%{content:'..';}60%,100%{content:'...';}}
+@media(max-width:600px){
+.library{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;}
+.comic-title{font-size:12px;}
+.comic-pages{font-size:10px;}
+.settings-bar{gap:10px;}
+.setting-item{padding:10px 15px;}
+.setting-label{font-size:13px;}
+.action-btn{padding:4px 8px;font-size:9px;}
+.view-selected-btn{bottom:20px;right:20px;padding:12px 24px;font-size:14px;}
+.image-number{font-size:20px;}
 }
 </style>
 </head>
 <body>
-
-<div id="stats"></div>
-<div id="console"></div>
-<div id="inputContainer">
- <input type="text" id="input" placeholder="Escribe órdenes para la IA..." autocomplete="off">
+<div class="container">
+<div class="header">
+<h1>📚 Biblioteca de Comics</h1>
+<div class="settings-bar">
+<div class="setting-item">
+<label class="setting-label">
+<span>🌐 Proxy CORS</span>
+<label class="switch">
+<input type="checkbox" id="proxyToggle">
+<span class="slider"></span>
+</label>
+</label>
 </div>
-
-<div id="joy"><div id="stick"></div></div>
-
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<div class="setting-item">
+<label class="setting-label">
+<span>✅ Validar URLs</span>
+<label class="switch">
+<input type="checkbox" id="validateToggle" checked>
+<span class="slider"></span>
+</label>
+</label>
+</div>
+<div class="setting-item">
+<label class="setting-label">
+<span>🗑️ Modo Eliminar</span>
+<label class="switch">
+<input type="checkbox" id="deleteToggle" onchange="toggleDeleteMode()">
+<span class="slider"></span>
+</label>
+</label>
+</div>
+<div class="setting-item">
+<label class="setting-label">
+<span>🎯 Modo Selección</span>
+<label class="switch">
+<input type="checkbox" id="selectToggle" onchange="toggleSelectMode()">
+<span class="slider"></span>
+</label>
+</label>
+</div>
+</div>
+</div>
+<div class="tabs">
+<button class="tab active" onclick="switchTab('library')">📚 Biblioteca</button>
+<button class="tab" onclick="switchTab('add')">➕ Agregar</button>
+</div>
+<div id="librarySection" class="section active">
+<div id="library" class="library"></div>
+<div id="emptyState" class="empty-state">
+<div class="empty-state-icon">📖</div>
+<p>No hay comics en tu biblioteca</p>
+<p style="font-size:14px;margin-top:10px;opacity:0.8;">Ve a "Agregar" para subir tus primeros comics</p>
+</div>
+</div>
+<div id="addSection" class="section">
+<div class="upload-box">
+<div class="input-group">
+<input type="text" id="comicTitle" placeholder="Título del comic (opcional para archivos múltiples)">
+</div>
+<div class="input-group">
+<textarea id="urlInput" placeholder="Pega las URLs de las páginas (una por línea)&#10;&#10;Ejemplo:&#10;https://ejemplo.com/pagina1.jpg&#10;https://ejemplo.com/pagina2.gif"></textarea>
+</div>
+<div class="input-group">
+<div class="file-input-wrapper">
+<input type="file" id="fileInput" accept=".txt" multiple onchange="loadFromFile()">
+<label for="fileInput" class="file-input-label">📄 O cargar desde archivo(s) .txt (múltiple)</label>
+</div>
+</div>
+<button onclick="saveComic()">💾 Guardar Comic</button>
+</div>
+<div class="status" id="status"></div>
+</div>
+</div>
+<button class="view-selected-btn" id="viewSelectedBtn" onclick="viewSelectedComics()">
+👁️ Ver Seleccionados (<span id="selectedCount">0</span>)
+</button>
+<div class="modal" id="modal">
+<button class="modal-close" onclick="closeModal()">✕ Cerrar</button>
+<button class="fix-errors-btn" id="fixErrorsBtn" onclick="openFixErrors()">⚠️ Corregir URLs (<span id="errorCount">0</span>)</button>
+<div class="modal-content" id="modalContent"></div>
+</div>
+<div class="url-edit-modal" id="urlEditModal">
+<div class="url-edit-box">
+<h3>🔧 Corregir URLs que no cargaron</h3>
+<div style="background:#fff3cd;border:2px solid #ffc107;border-radius:10px;padding:15px;margin-bottom:20px;">
+<label style="display:block;color:#856404;font-size:13px;font-weight:600;margin-bottom:10px;">🔄 Cambiar formato para todas las URLs:</label>
+<select id="bulkFormatChange" style="width:100%;padding:12px;border:2px solid #ffc107;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">
+<option value="">-- Seleccionar nuevo formato --</option>
+<option value=".jpg">.jpg</option>
+<option value=".jpeg">.jpeg</option>
+<option value=".png">.png</option>
+<option value=".webp">.webp</option>
+<option value=".gif">.gif</option>
+<option value=".bmp">.bmp</option>
+<option value=".svg">.svg</option>
+</select>
+<button onclick="applyBulkFormatChange()" style="margin-top:10px;background:#ffc107;color:#000;padding:10px 20px;border:none;border-radius:8px;font-size:13px;font-weight:bold;cursor:pointer;width:100%;">✨ Aplicar a todas</button>
+</div>
+<div id="failedUrlsList"></div>
+<div class="url-edit-buttons">
+<button class="url-save-btn" onclick="saveAllEditedUrls()">💾 Guardar Todos</button>
+<button class="url-cancel-btn" onclick="closeUrlEdit()">❌ Cancelar</button>
+</div>
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <script>
-const renderer=new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth,innerHeight);
-document.body.appendChild(renderer.domElement);
+let db;
+const PROXY_URL='https://ia-sofia.armijosfeo5.workers.dev/?url=';
+let selectedComics=[];
+let currentEditingComicId=null;
+let failedImages=[];
 
-const scene=new THREE.Scene();
-scene.fog=new THREE.Fog(0x87ceeb,80,250);
-
-const skyGeo=new THREE.SphereGeometry(450,32,32);
-const skyMat=new THREE.ShaderMaterial({
- side:THREE.BackSide,
- uniforms:{
-  topColor:{value:new THREE.Color(0x0055ff)},
-  middleColor:{value:new THREE.Color(0x4d9fff)},
-  bottomColor:{value:new THREE.Color(0xe6f5ff)},
-  sunColor:{value:new THREE.Color(0xffffff)},
-  sunPosition:{value:new THREE.Vector3(0.3,0.7,0.2)}
- },
- vertexShader:`
-  varying vec3 vNormal;
-  void main(){
-   vNormal=normalize(position);
-   gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);
-  }
- `,
- fragmentShader:`
-  uniform vec3 topColor;
-  uniform vec3 middleColor;
-  uniform vec3 bottomColor;
-  uniform vec3 sunColor;
-  uniform vec3 sunPosition;
-  varying vec3 vNormal;
-  void main(){
-   float h=normalize(vNormal).y;
-   vec3 skyColor;
-   if(h>0.0){
-    skyColor=mix(middleColor,topColor,pow(h,0.7));
-   }else{
-    skyColor=mix(middleColor,bottomColor,pow(abs(h),0.5));
-   }
-   float sun=max(0.0,dot(normalize(vNormal),normalize(sunPosition)));
-   sun=pow(sun,150.0);
-   skyColor=mix(skyColor,sunColor,sun);
-   float glow=pow(max(0.0,dot(normalize(vNormal),normalize(sunPosition))),8.0)*0.3;
-   skyColor+=glow*vec3(1.0,0.9,0.7);
-   gl_FragColor=vec4(skyColor,1.0);
-  }
- `
-});
-const sky=new THREE.Mesh(skyGeo,skyMat);
-scene.add(sky);
-
-const cloudGroup=new THREE.Group();
-scene.add(cloudGroup);
-
-function createCloud(x,y,z){
- const cloud=new THREE.Group();
- const cloudMat=new THREE.MeshLambertMaterial({
-  color:0xffffff,
-  transparent:true,
-  opacity:0.85
- });
- 
- const mainSize=3+Math.random()*4;
- for(let i=0;i<5+Math.random()*8;i++){
-  const sphere=new THREE.Mesh(
-   new THREE.SphereGeometry(mainSize*0.3+Math.random()*mainSize*0.5,8,8),
-   cloudMat
-  );
-  sphere.position.set(
-   (Math.random()-0.5)*mainSize*1.5,
-   (Math.random()-0.5)*mainSize*0.5,
-   (Math.random()-0.5)*mainSize*1.5
-  );
-  cloud.add(sphere);
- }
- 
- cloud.position.set(x,y,z);
- cloud.userData.speed=0.02+Math.random()*0.03;
- cloud.userData.drift=(Math.random()-0.5)*0.01;
- return cloud;
-}
-
-for(let i=0;i<40;i++){
- const x=(Math.random()-0.5)*300;
- const y=25+Math.random()*35;
- const z=(Math.random()-0.5)*300;
- cloudGroup.add(createCloud(x,y,z));
-}
-
-const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,1000);
-camera.position.set(0,8,15);
-
-const ambientLight=new THREE.AmbientLight(0xffffff,0.7);
-scene.add(ambientLight);
-
-const sun=new THREE.DirectionalLight(0xfff8e7,1.3);
-sun.position.set(100,120,80);
-scene.add(sun);
-
-const hemiLight=new THREE.HemisphereLight(0x87ceeb,0x6b8e23,0.5);
-scene.add(hemiLight);
-
-const WORLD_SIZE=40;
-const WALL_LIMIT=WORLD_SIZE/2;
-
-const ground=new THREE.Mesh(
- new THREE.PlaneGeometry(WORLD_SIZE,WORLD_SIZE,1,1),
- new THREE.MeshLambertMaterial({
-  color:0x3a9e3a,
-  flatShading:false
- })
-);
-ground.rotation.x=-Math.PI/2;
-scene.add(ground);
-
-const wallHeight=8;
-const wallThick=2;
-const wallMat=new THREE.MeshLambertMaterial({
- color:0x8B4513,
- transparent:true,
- opacity:0
-});
-
-const wall1=new THREE.Mesh(new THREE.BoxGeometry(WORLD_SIZE+4,wallHeight,wallThick),wallMat);
-wall1.position.set(0,wallHeight/2,WALL_LIMIT);
-scene.add(wall1);
-
-const wall2=new THREE.Mesh(new THREE.BoxGeometry(WORLD_SIZE+4,wallHeight,wallThick),wallMat);
-wall2.position.set(0,wallHeight/2,-WALL_LIMIT);
-scene.add(wall2);
-
-const wall3=new THREE.Mesh(new THREE.BoxGeometry(wallThick,wallHeight,WORLD_SIZE+4),wallMat);
-wall3.position.set(WALL_LIMIT,wallHeight/2,0);
-scene.add(wall3);
-
-const wall4=new THREE.Mesh(new THREE.BoxGeometry(wallThick,wallHeight,WORLD_SIZE+4),wallMat);
-wall4.position.set(-WALL_LIMIT,wallHeight/2,0);
-scene.add(wall4);
-
-const blocks=[];
-function block(x,z,type){
- const colors={damage:0xff3333,win:0x33ff33,neutral:0xaaaaaa};
- const b=new THREE.Mesh(
-  new THREE.BoxGeometry(1.5,1.5,1.5),
-  new THREE.MeshLambertMaterial({color:colors[type]})
- );
- b.position.set(x,0.75,z);
- b.userData.type=type;
- scene.add(b);
- blocks.push(b);
-}
-
-for(let i=0;i<6;i++){
- const x=(Math.random()-0.5)*(WORLD_SIZE-6);
- const z=(Math.random()-0.5)*(WORLD_SIZE-6);
- block(x,z,"damage");
-}
-
-for(let i=0;i<3;i++){
- const x=(Math.random()-0.5)*(WORLD_SIZE-6);
- const z=(Math.random()-0.5)*(WORLD_SIZE-6);
- block(x,z,"win");
-}
-
-for(let i=0;i<5;i++){
- const x=(Math.random()-0.5)*(WORLD_SIZE-6);
- const z=(Math.random()-0.5)*(WORLD_SIZE-6);
- block(x,z,"neutral");
-}
-
-const agent=new THREE.Mesh(
- new THREE.SphereGeometry(0.6,20,20),
- new THREE.MeshLambertMaterial({color:0x00ffff,emissive:0x00aaaa,emissiveIntensity:0.4})
-);
-agent.position.set(0,0.6,0);
-scene.add(agent);
-
-const con=document.getElementById("console");
-const stats=document.getElementById("stats");
-const inputEl=document.getElementById("input");
-
-function say(t){
- const d=document.createElement("div");
- d.textContent=t;
- con.appendChild(d);
- if(con.children.length>40) con.removeChild(con.children[0]);
- con.scrollTop=con.scrollHeight;
-}
-
-let db=null;
-const dbName="IABrainDB";
-let needsSave=false;
-let dbReady=false;
-
-function openDB(){
- return new Promise((resolve,reject)=>{
-  const req=indexedDB.open(dbName,1);
-  req.onerror=()=>reject(req.error);
-  req.onsuccess=()=>resolve(req.result);
-  req.onupgradeneeded=(e)=>{
-   const database=e.target.result;
-   if(!database.objectStoreNames.contains("brain")){
-    database.createObjectStore("brain");
-   }
-  };
- });
-}
-
-function saveKnowledge(){
- if(!db || !dbReady) return;
- 
- const tx=db.transaction(["brain"],"readwrite");
- const store=tx.objectStore("brain");
- 
- const data={
-  q:Q,
-  stats:{steps,wins,damages,totalReward,episode,EPSILON},
-  state:{
-   x:state.x,y:state.y,z:state.z,
-   vx:state.vx,vy:state.vy,vz:state.vz,
-   rx:state.rx,ry:state.ry,rz:state.rz,
-   rvx:state.rvx,rvy:state.rvy,rvz:state.rvz
-  }
- };
- 
- store.put(data,"memory");
- needsSave=false;
-}
-
-function loadKnowledge(){
- if(!db) return;
- 
- const tx=db.transaction(["brain"],"readonly");
- const store=tx.objectStore("brain");
- const req=store.get("memory");
- 
- req.onsuccess=()=>{
-  const data=req.result;
-  
-  if(data){
-   if(data.q){
-    Object.assign(Q,data.q);
-   }
-   
-   if(data.stats){
-    steps=data.stats.steps||0;
-    wins=data.stats.wins||0;
-    damages=data.stats.damages||0;
-    totalReward=data.stats.totalReward||0;
-    episode=data.stats.episode||1;
-    EPSILON=data.stats.EPSILON||0.5;
-   }
-   
-   if(data.state){
-    state.x=data.state.x||0;
-    state.y=data.state.y||0.6;
-    state.z=data.state.z||0;
-    state.vx=data.state.vx||0;
-    state.vy=data.state.vy||0;
-    state.vz=data.state.vz||0;
-    state.rx=data.state.rx||0;
-    state.ry=data.state.ry||0;
-    state.rz=data.state.rz||0;
-    state.rvx=data.state.rvx||0;
-    state.rvy=data.state.rvy||0;
-    state.rvz=data.state.rvz||0;
-    agent.position.set(state.x,state.y,state.z);
-   }
-  }
-  
-  dbReady=true;
- };
- 
- req.onerror=()=>{
-  dbReady=true;
- };
-}
-
-const Q={};
-const ALPHA=0.15;
-const GAMMA=0.9;
-let EPSILON=0.6;
-
-let state={
- x:0,y:0.6,z:0,
- vx:0,vy:0,vz:0,
- rx:0,ry:0,rz:0,
- rvx:0,rvy:0,rvz:0
+function initDB(){
+const request=indexedDB.open('ComicsDB',1);
+request.onerror=()=>console.error('Error al abrir DB');
+request.onsuccess=(e)=>{
+db=e.target.result;
+loadLibrary();
 };
-
-let totalReward=0;
-let steps=0;
-let wins=0;
-let damages=0;
-let episode=1;
-let currentOrder=null;
-
-openDB().then(database=>{
- db=database;
- loadKnowledge();
-}).catch(e=>{
- dbReady=true;
-});
-
-setInterval(()=>{
- if(dbReady){
-  saveKnowledge();
- }
-},1000);
-
-inputEl.addEventListener("keydown",e=>{
- if(e.key==="Enter"){
-  const cmd=inputEl.value.trim();
-  inputEl.value="";
-  
-  if(!cmd) return;
-  
-  say("👤 "+cmd);
-  
-  const lower=cmd.toLowerCase();
-  
-  if(lower.includes("ve") || lower.includes("mueve")){
-   if(lower.includes("rojo")){
-    const red=blocks.find(b=>b.userData.type==="damage");
-    if(red){
-     currentOrder={type:"goto",target:red,name:"rojo"};
-     say("🤖 Voy al rojo");
-    }
-   }else if(lower.includes("verde")){
-    const green=blocks.find(b=>b.userData.type==="win");
-    if(green){
-     currentOrder={type:"goto",target:green,name:"verde"};
-     say("🤖 Voy al verde");
-    }
-   }else if(lower.includes("gris")){
-    const gray=blocks.find(b=>b.userData.type==="neutral");
-    if(gray){
-     currentOrder={type:"goto",target:gray,name:"gris"};
-     say("🤖 Voy al gris");
-    }
-   }
-  }else if(lower.includes("salta")){
-   currentOrder={type:"action",action:6};
-   say("🤖 Saltando");
-  }else if(lower.includes("gira")){
-   currentOrder={type:"action",action:7};
-   say("🤖 Girando");
-  }else if(lower.includes("rapido") || lower.includes("rápido")){
-   currentOrder={type:"speed",mode:"fast"};
-   say("🤖 Velocidad alta");
-  }else if(lower.includes("lento")){
-   currentOrder={type:"speed",mode:"slow"};
-   say("🤖 Velocidad baja");
-  }else if(lower.includes("para") || lower.includes("detente") || lower.includes("stop")){
-   currentOrder=null;
-   state.vx=0;
-   state.vz=0;
-   state.rvx=0;
-   state.rvy=0;
-   state.rvz=0;
-   say("🤖 Detenido");
-  }else if(lower.includes("explora")){
-   EPSILON=0.8;
-   currentOrder=null;
-   say("🤖 Modo exploración");
-  }else if(lower.includes("aprende")){
-   EPSILON=0.3;
-   say("🤖 Modo aprendizaje");
-  }else if(lower.includes("experto")){
-   EPSILON=0.05;
-   say("🤖 Modo experto");
-  }else{
-   say("🤖 Prueba: ve al rojo, salta, rápido, explora");
-  }
- }
-});
-
-function key(x,y,z,vx,vy,vz,a){
- return Math.round(x)+","+Math.round(y)+","+Math.round(z)+","+
-        Math.round(vx*2)+","+Math.round(vy*2)+","+Math.round(vz*2)+","+a;
+request.onupgradeneeded=(e)=>{
+db=e.target.result;
+if(!db.objectStoreNames.contains('comics')){
+const store=db.createObjectStore('comics',{keyPath:'id',autoIncrement:true});
+store.createIndex('title','title',{unique:false});
+store.createIndex('date','date',{unique:false});
 }
-
-function getQ(x,y,z,vx,vy,vz,a){
- const k=key(x,y,z,vx,vy,vz,a);
- return Q[k]||0;
-}
-
-function setQ(x,y,z,vx,vy,vz,a,val){
- const k=key(x,y,z,vx,vy,vz,a);
- Q[k]=val;
- needsSave=true;
-}
-
-const GRAVITY=-9.8;
-const FRICTION=0.85;
-const ANGULAR_FRICTION=0.9;
-
-function checkCollision(nx,ny,nz){
- for(const b of blocks){
-  if(b.userData.type==="neutral") continue;
-  
-  const dx=Math.abs(b.position.x-nx);
-  const dy=Math.abs(b.position.y-ny);
-  const dz=Math.abs(b.position.z-nz);
-  
-  if(dx<1.05 && dy<1.05 && dz<1.05){
-   return b;
-  }
- }
- return null;
-}
-
-function reward(s,col){
- let r=-0.02;
- 
- if(Math.abs(s.x)>=WALL_LIMIT-1 || Math.abs(s.z)>=WALL_LIMIT-1){
-  return -30;
- }
- 
- if(s.y<0.3){
-  r+=-5;
- }
- 
- const speed=Math.sqrt(s.vx*s.vx+s.vz*s.vz);
- if(speed>0.2){
-  r+=0.2;
- }
- 
- if(col){
-  if(col.userData.type==="damage"){
-   damages++;
-   return -25;
-  }
-  if(col.userData.type==="win"){
-   wins++;
-   say("✨ Objetivo logrado");
-   currentOrder=null;
-   return 40;
-  }
- }
- 
- if(currentOrder && currentOrder.type==="goto"){
-  const dx=currentOrder.target.position.x-s.x;
-  const dz=currentOrder.target.position.z-s.z;
-  const dist=Math.sqrt(dx*dx+dz*dz);
-  if(dist<2){
-   r+=3;
-  }
- }
- 
- return r;
-}
-
-function chooseAction(s){
- if(currentOrder){
-  if(currentOrder.type==="goto"){
-   const dx=currentOrder.target.position.x-s.x;
-   const dz=currentOrder.target.position.z-s.z;
-   const dist=Math.sqrt(dx*dx+dz*dz);
-   
-   if(dist<1.5){
-    say("🎯 Llegué a "+currentOrder.name);
-    currentOrder=null;
-   }else{
-    if(Math.abs(dx)>Math.abs(dz)){
-     return dx>0?0:1;
-    }else{
-     return dz>0?2:3;
-    }
-   }
-  }else if(currentOrder.type==="action"){
-   const a=currentOrder.action;
-   currentOrder=null;
-   return a;
-  }else if(currentOrder.type==="speed"){
-   if(currentOrder.mode==="fast"){
-    return Math.random()<0.5?0:2;
-   }else{
-    return Math.random()<0.5?4:5;
-   }
-  }
- }
- 
- if(Math.random()<EPSILON){
-  return Math.floor(Math.random()*10);
- }
- 
- let best=-Infinity;
- let bestA=0;
- 
- for(let a=0;a<10;a++){
-  const q=getQ(s.x,s.y,s.z,s.vx,s.vy,s.vz,a);
-  if(q>best){
-   best=q;
-   bestA=a;
-  }
- }
- 
- return bestA;
-}
-
-const actions=[
- {fx:3,fy:0,fz:0,tx:0,ty:0,tz:0},
- {fx:-3,fy:0,fz:0,tx:0,ty:0,tz:0},
- {fx:0,fy:0,fz:3,tx:0,ty:0,tz:0},
- {fx:0,fy:0,fz:-3,tx:0,ty:0,tz:0},
- {fx:1.5,fy:0,fz:0,tx:0,ty:0,tz:0},
- {fx:-1.5,fy:0,fz:0,tx:0,ty:0,tz:0},
- {fx:0,fy:4,fz:0,tx:0,ty:0,tz:0},
- {fx:0,fy:0,fz:0,tx:5,ty:0,tz:0},
- {fx:0,fy:0,fz:0,tx:0,ty:5,tz:0},
- {fx:0,fy:0,fz:0,tx:0,ty:0,tz:5}
-];
-
-setInterval(()=>{
- const a=chooseAction(state);
- const act=actions[a];
- 
- const dt=0.016;
- 
- state.vx+=act.fx*dt;
- state.vy+=(act.fy+GRAVITY)*dt;
- state.vz+=act.fz*dt;
- 
- state.rvx+=act.tx*dt;
- state.rvy+=act.ty*dt;
- state.rvz+=act.tz*dt;
- 
- const nx=state.x+state.vx*dt;
- const ny=state.y+state.vy*dt;
- const nz=state.z+state.vz*dt;
- 
- const collision=checkCollision(nx,ny,nz);
- 
- if(collision){
-  state.vx*=-0.5;
-  state.vz*=-0.5;
- }else{
-  state.x=nx;
-  state.y=ny;
-  state.z=nz;
- }
- 
- state.rx+=state.rvx*dt;
- state.ry+=state.rvy*dt;
- state.rz+=state.rvz*dt;
- 
- if(state.y<=0.6){
-  state.y=0.6;
-  state.vy=0;
-  state.vx*=FRICTION;
-  state.vz*=FRICTION;
- }
- 
- state.rvx*=ANGULAR_FRICTION;
- state.rvy*=ANGULAR_FRICTION;
- state.rvz*=ANGULAR_FRICTION;
- 
- state.x=Math.max(-WALL_LIMIT+1.5,Math.min(WALL_LIMIT-1.5,state.x));
- state.z=Math.max(-WALL_LIMIT+1.5,Math.min(WALL_LIMIT-1.5,state.z));
- 
- const r=reward(state,collision);
- totalReward+=r;
- steps++;
- 
- let maxQ=-Infinity;
- for(let na=0;na<10;na++){
-  maxQ=Math.max(maxQ,getQ(state.x,state.y,state.z,state.vx,state.vy,state.vz,na));
- }
- 
- const oldQ=getQ(state.x,state.y,state.z,state.vx,state.vy,state.vz,a);
- const newQ=oldQ+ALPHA*(r+GAMMA*maxQ-oldQ);
- 
- setQ(state.x,state.y,state.z,state.vx,state.vy,state.vz,a,newQ);
- 
- agent.position.set(state.x,state.y,state.z);
- agent.rotation.set(state.rx,state.ry,state.rz);
- 
- if(r>20){
-  EPSILON=Math.max(0.05,EPSILON*0.996);
- }else if(r<-15){
-  EPSILON=Math.max(0.05,EPSILON*0.998);
- }
- 
- const spd=Math.sqrt(state.vx*state.vx+state.vz*state.vz).toFixed(1);
- stats.innerHTML=`V:${wins} | D:${damages} | R:${totalReward.toFixed(0)} | v:${spd} | KB:${Object.keys(Q).length} | ε:${(EPSILON*100).toFixed(0)}%`;
-},300);
-
-let jx=0,jy=0,dragJoy=false;
-const joy=document.getElementById("joy");
-const stick=document.getElementById("stick");
-
-joy.addEventListener("pointerdown",e=>{
- dragJoy=true;
- e.stopPropagation();
-});
-
-joy.addEventListener("pointerup",e=>{
- dragJoy=false;
- jx=0;jy=0;
- stick.style.transition="0.2s";
- stick.style.left="35px";stick.style.top="35px";
- setTimeout(()=>stick.style.transition="",200);
- e.stopPropagation();
-});
-
-joy.addEventListener("pointermove",e=>{
- if(!dragJoy)return;
- const r=joy.getBoundingClientRect();
- const x=e.clientX-r.left-60;
- const y=e.clientY-r.top-60;
- const d=Math.min(40,Math.hypot(x,y));
- const a=Math.atan2(y,x);
- jx=Math.cos(a)*(d/40);
- jy=Math.sin(a)*(d/40);
- stick.style.left=35+jx*40+"px";
- stick.style.top=35+jy*40+"px";
- e.stopPropagation();
-});
-
-let yaw=0,pitch=0,lookDrag=false,lx=0,ly=0;
-
-renderer.domElement.addEventListener("pointerdown",e=>{
- if(!dragJoy && e.clientX>200){
-  lookDrag=true;
-  lx=e.clientX;
-  ly=e.clientY;
- }
-});
-
-renderer.domElement.addEventListener("pointermove",e=>{
- if(!lookDrag)return;
- yaw-=(e.clientX-lx)*0.01;
- pitch-=(e.clientY-ly)*0.01;
- pitch=Math.max(-1.5,Math.min(1.5,pitch));
- lx=e.clientX;
- ly=e.clientY;
-});
-
-renderer.domElement.addEventListener("pointerup",()=>{
- lookDrag=false;
-});
-
-let time=0;
-function animate(){
- requestAnimationFrame(animate);
- time+=0.01;
-
- cloudGroup.children.forEach(cloud=>{
-  cloud.position.x+=cloud.userData.speed;
-  cloud.position.z+=cloud.userData.drift;
-  if(cloud.position.x>200) cloud.position.x=-200;
-  if(cloud.position.x<-200) cloud.position.x=200;
- });
-
- const forward=new THREE.Vector3(
-  Math.sin(yaw),
-  0,
-  Math.cos(yaw)
- );
- const right=new THREE.Vector3(
-  Math.cos(yaw),
-  0,
-  -Math.sin(yaw)
- );
-
- camera.position.add(forward.multiplyScalar(jy*0.5));
- camera.position.add(right.multiplyScalar(jx*0.5));
- 
- camera.position.x=Math.max(-WALL_LIMIT+2,Math.min(WALL_LIMIT-2,camera.position.x));
- camera.position.z=Math.max(-WALL_LIMIT+2,Math.min(WALL_LIMIT-2,camera.position.z));
- camera.position.y=Math.max(2,Math.min(30,camera.position.y));
- 
- camera.rotation.set(pitch,yaw,0,"YXZ");
-
- renderer.render(scene,camera);
-}
-animate();
-
-onresize=()=>{
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
- renderer.setSize(innerWidth,innerHeight);
 };
+}
+
+function switchTab(tab){
+document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+if(tab==='library'){
+document.querySelectorAll('.tab')[0].classList.add('active');
+document.getElementById('librarySection').classList.add('active');
+loadLibrary();
+}else{
+document.querySelectorAll('.tab')[1].classList.add('active');
+document.getElementById('addSection').classList.add('active');
+}
+}
+
+function toggleDeleteMode(){
+const deleteMode=document.getElementById('deleteToggle').checked;
+const deleteButtons=document.querySelectorAll('.delete-btn');
+const downloadButtons=document.querySelectorAll('.download-btn');
+deleteButtons.forEach(btn=>{
+btn.style.display=deleteMode?'block':'none';
+});
+downloadButtons.forEach(btn=>{
+btn.style.display=deleteMode?'block':'none';
+});
+}
+
+function toggleSelectMode(){
+const selectMode=document.getElementById('selectToggle').checked;
+const cards=document.querySelectorAll('.comic-card');
+if(!selectMode){
+selectedComics=[];
+updateSelectedButton();
+}
+cards.forEach(card=>{
+if(selectMode){
+card.classList.add('selecting');
+}else{
+card.classList.remove('selecting','selected');
+card.querySelector('.selection-order').style.display='none';
+}
+});
+}
+
+function toggleComicSelection(comicId,event){
+event.stopPropagation();
+const index=selectedComics.indexOf(comicId);
+if(index>-1){
+selectedComics.splice(index,1);
+}else{
+selectedComics.push(comicId);
+}
+updateSelectedButton();
+loadLibrary();
+}
+
+function updateSelectedButton(){
+const btn=document.getElementById('viewSelectedBtn');
+const count=document.getElementById('selectedCount');
+count.textContent=selectedComics.length;
+if(selectedComics.length>=3){
+btn.classList.add('show');
+}else{
+btn.classList.remove('show');
+}
+}
+
+function viewSelectedComics(){
+if(selectedComics.length<3)return;
+const transaction=db.transaction(['comics'],'readonly');
+const store=transaction.objectStore('comics');
+let allPages=[];
+let loaded=0;
+selectedComics.forEach(comicId=>{
+const request=store.get(comicId);
+request.onsuccess=(e)=>{
+const comic=e.target.result;
+if(comic){
+allPages=allPages.concat(comic.pages);
+}
+loaded++;
+if(loaded===selectedComics.length){
+openComicPages(allPages);
+}
+};
+});
+}
+
+function openComicPages(pages){
+const modal=document.getElementById('modal');
+const content=document.getElementById('modalContent');
+content.innerHTML='';
+failedImages=[];
+pages.forEach((url,index)=>{
+const container=document.createElement('div');
+container.className='modal-image-container';
+const img=document.createElement('img');
+img.className='modal-image';
+img.src=getProxyUrl(url);
+img.alt=`Página ${index+1}`;
+img.onerror=function(){
+this.classList.add('error');
+failedImages.push({index,url,comicId:null});
+updateErrorButton();
+};
+const numberBadge=document.createElement('div');
+numberBadge.className='image-number';
+numberBadge.textContent=index+1;
+container.appendChild(img);
+container.appendChild(numberBadge);
+content.appendChild(container);
+});
+modal.classList.add('active');
+document.body.style.overflow='hidden';
+updateErrorButton();
+}
+
+function updateErrorButton(){
+const btn=document.getElementById('fixErrorsBtn');
+const count=document.getElementById('errorCount');
+count.textContent=failedImages.length;
+if(failedImages.length>0){
+btn.classList.add('show');
+}else{
+btn.classList.remove('show');
+}
+}
+
+function openFixErrors(){
+if(failedImages.length===0)return;
+const list=document.getElementById('failedUrlsList');
+list.innerHTML='';
+document.getElementById('bulkFormatChange').value='';
+failedImages.forEach((item,idx)=>{
+const div=document.createElement('div');
+div.className='failed-url-item';
+div.innerHTML=`
+<label><span class="failed-url-number">Imagen ${item.index+1}</span>URL actual:</label>
+<input type="text" id="failedUrl${idx}" value="${item.url}" data-index="${idx}">
+`;
+list.appendChild(div);
+});
+document.getElementById('urlEditModal').classList.add('active');
+}
+
+function applyBulkFormatChange(){
+const newFormat=document.getElementById('bulkFormatChange').value;
+if(!newFormat){
+alert('⚠️ Selecciona un formato primero');
+return;
+}
+failedImages.forEach((item,idx)=>{
+const input=document.getElementById(`failedUrl${idx}`);
+const currentUrl=input.value;
+const urlWithoutExt=currentUrl.replace(/\.\w+(\?.*)?$/,'');
+input.value=urlWithoutExt+newFormat;
+});
+alert(`✅ Formato ${newFormat} aplicado a todas las URLs`);
+}
+
+function closeUrlEdit(){
+document.getElementById('urlEditModal').classList.remove('active');
+}
+
+function saveAllEditedUrls(){
+if(currentEditingComicId===null){
+alert('ℹ️ Estas imágenes son de una vista combinada y no se pueden editar directamente. Edita los comics individuales.');
+closeUrlEdit();
+return;
+}
+const transaction=db.transaction(['comics'],'readwrite');
+const store=transaction.objectStore('comics');
+const request=store.get(currentEditingComicId);
+request.onsuccess=(e)=>{
+const comic=e.target.result;
+if(comic){
+let updated=false;
+failedImages.forEach((item,idx)=>{
+const input=document.getElementById(`failedUrl${idx}`);
+const newUrl=input.value.trim();
+if(newUrl&&newUrl!==item.url){
+comic.pages[item.index]=newUrl;
+if(item.index===0){
+comic.cover=newUrl;
+}
+updated=true;
+}
+});
+if(updated){
+const updateRequest=store.put(comic);
+updateRequest.onsuccess=()=>{
+closeUrlEdit();
+closeModal();
+loadLibrary();
+alert('✅ URLs actualizadas correctamente');
+};
+}else{
+alert('ℹ️ No se realizaron cambios');
+closeUrlEdit();
+}
+}
+};
+}
+
+function getProxyUrl(url){
+const useProxy=document.getElementById('proxyToggle').checked;
+return useProxy?PROXY_URL+encodeURIComponent(url):url;
+}
+
+function loadFromFile(){
+const files=document.getElementById('fileInput').files;
+if(!files||files.length===0)return;
+const status=document.getElementById('status');
+if(files.length===1){
+const reader=new FileReader();
+reader.onload=(e)=>{
+document.getElementById('urlInput').value=e.target.result;
+};
+reader.readAsText(files[0]);
+}else{
+status.innerHTML='<span class="loading">Cargando archivos</span>';
+let processed=0;
+Array.from(files).forEach((file,index)=>{
+const reader=new FileReader();
+reader.onload=async(e)=>{
+const urlsText=e.target.result.trim();
+const urls=urlsText.split('\n').map(url=>url.trim()).filter(url=>url.length>0);
+if(urls.length>0){
+const fileName=file.name.replace('.txt','');
+await saveComicDirect(fileName,urls);
+}
+processed++;
+if(processed===files.length){
+status.textContent=`✅ ${files.length} comics guardados`;
+setTimeout(()=>{
+switchTab('library');
+},1500);
+}
+};
+reader.readAsText(file);
+});
+}
+}
+
+async function saveComic(){
+const title=document.getElementById('comicTitle').value.trim();
+const urlsText=document.getElementById('urlInput').value.trim();
+const status=document.getElementById('status');
+if(!title){
+status.textContent='⚠️ Ingresa un título';
+return;
+}
+if(!urlsText){
+status.textContent='⚠️ Ingresa las URLs';
+return;
+}
+const urls=urlsText.split('\n').map(url=>url.trim()).filter(url=>url.length>0);
+if(urls.length===0){
+status.textContent='⚠️ No hay URLs válidas';
+return;
+}
+await saveComicDirect(title,urls);
+}
+
+async function saveComicDirect(title,urls){
+const status=document.getElementById('status');
+const shouldValidate=document.getElementById('validateToggle').checked;
+let validUrls=[];
+if(shouldValidate){
+status.innerHTML='<span class="loading">Validando imágenes</span>';
+for(let i=0;i<urls.length;i++){
+const valid=await checkImageExists(urls[i]);
+if(valid)validUrls.push(urls[i]);
+status.innerHTML=`<span class="loading">Validando ${i+1}/${urls.length}</span>`;
+}
+if(validUrls.length===0){
+status.textContent='❌ No se pudo cargar ninguna imagen';
+return;
+}
+}else{
+validUrls=urls;
+status.innerHTML='<span class="loading">Guardando sin validar</span>';
+}
+const comic={
+title:title,
+pages:validUrls,
+cover:validUrls[0],
+date:new Date().toISOString()
+};
+const transaction=db.transaction(['comics'],'readwrite');
+const store=transaction.objectStore('comics');
+const request=store.add(comic);
+request.onsuccess=()=>{
+status.textContent=`✅ Comic guardado (${validUrls.length} páginas)`;
+document.getElementById('comicTitle').value='';
+document.getElementById('urlInput').value='';
+setTimeout(()=>{
+switchTab('library');
+},1500);
+};
+request.onerror=()=>{
+status.textContent='❌ Error al guardar';
+};
+}
+
+async function checkImageExists(url){
+return new Promise((resolve)=>{
+const img=new Image();
+img.onload=()=>resolve(true);
+img.onerror=()=>resolve(false);
+img.src=getProxyUrl(url);
+setTimeout(()=>resolve(false),5000);
+});
+}
+
+function loadLibrary(){
+if(!db)return;
+const transaction=db.transaction(['comics'],'readonly');
+const store=transaction.objectStore('comics');
+const request=store.getAll();
+request.onsuccess=(e)=>{
+const comics=e.target.result;
+const library=document.getElementById('library');
+const emptyState=document.getElementById('emptyState');
+const deleteMode=document.getElementById('deleteToggle').checked;
+const selectMode=document.getElementById('selectToggle').checked;
+library.innerHTML='';
+if(comics.length===0){
+emptyState.style.display='block';
+return;
+}
+emptyState.style.display='none';
+comics.reverse().forEach(comic=>{
+const isSelected=selectedComics.indexOf(comic.id)>-1;
+const selectionOrder=selectedComics.indexOf(comic.id)+1;
+const card=document.createElement('div');
+card.className='comic-card';
+if(selectMode)card.classList.add('selecting');
+if(isSelected)card.classList.add('selected');
+card.onclick=(e)=>{
+if(selectMode){
+toggleComicSelection(comic.id,e);
+}else{
+openComic(comic);
+}
+};
+card.innerHTML=`
+<div class="comic-cover-container">
+<img src="${getProxyUrl(comic.cover)}" class="comic-cover-img">
+</div>
+<input type="checkbox" class="select-checkbox" ${isSelected?'checked':''} onclick="toggleComicSelection(${comic.id},event)">
+<div class="selection-order" style="display:${isSelected?'flex':'none'}">${selectionOrder}</div>
+<div class="comic-actions">
+<button class="action-btn download-btn" onclick="event.stopPropagation();downloadComic(${comic.id})">📥 Descargar</button>
+<button class="action-btn delete-btn" style="display:${deleteMode?'block':'none'}" onclick="event.stopPropagation();deleteComic(${comic.id})">🗑️ Eliminar</button>
+</div>
+<div class="comic-info">
+<div class="comic-title">${comic.title}</div>
+<div class="comic-pages">${comic.pages.length} páginas</div>
+</div>
+`;
+library.appendChild(card);
+});
+};
+}
+
+function openComic(comic){
+const modal=document.getElementById('modal');
+const content=document.getElementById('modalContent');
+content.innerHTML='';
+currentEditingComicId=comic.id;
+failedImages=[];
+comic.pages.forEach((url,index)=>{
+const container=document.createElement('div');
+container.className='modal-image-container';
+const img=document.createElement('img');
+img.className='modal-image';
+img.src=getProxyUrl(url);
+img.alt=`Página ${index+1}`;
+img.onerror=function(){
+this.classList.add('error');
+failedImages.push({index,url,comicId:comic.id});
+updateErrorButton();
+};
+const numberBadge=document.createElement('div');
+numberBadge.className='image-number';
+numberBadge.textContent=index+1;
+container.appendChild(img);
+container.appendChild(numberBadge);
+content.appendChild(container);
+});
+modal.classList.add('active');
+document.body.style.overflow='hidden';
+updateErrorButton();
+}
+
+function closeModal(){
+const modal=document.getElementById('modal');
+modal.classList.remove('active');
+document.body.style.overflow='auto';
+failedImages=[];
+currentEditingComicId=null;
+updateErrorButton();
+}
+
+async function downloadComic(id){
+const transaction=db.transaction(['comics'],'readonly');
+const store=transaction.objectStore('comics');
+const request=store.get(id);
+request.onsuccess=async(e)=>{
+const comic=e.target.result;
+const status=document.getElementById('status');
+const useProxy=document.getElementById('proxyToggle').checked;
+if(!useProxy){
+status.innerHTML='📝 Generando archivo de URLs';
+let urlText='';
+comic.pages.forEach((url,index)=>{
+urlText+=`${String(index+1).padStart(3,'0')} - ${url}\n`;
+});
+const blob=new Blob([urlText],{type:'text/plain;charset=utf-8'});
+saveAs(blob,`${comic.title}_urls.txt`);
+status.textContent='✅ URLs descargadas';
+setTimeout(()=>status.textContent='',3000);
+return;
+}
+status.innerHTML='<span class="loading">Preparando descarga</span>';
+try{
+const zip=new JSZip();
+for(let i=0;i<comic.pages.length;i++){
+status.innerHTML=`<span class="loading">Descargando ${i+1}/${comic.pages.length}</span>`;
+try{
+const response=await fetch(getProxyUrl(comic.pages[i]));
+const blob=await response.blob();
+const ext=getImageExtension(comic.pages[i]);
+zip.file(`${String(i+1).padStart(3,'0')}.${ext}`,blob);
+}catch(err){
+console.error('Error:',err);
+}
+}
+status.innerHTML='<span class="loading">Generando ZIP</span>';
+const content=await zip.generateAsync({type:'blob'});
+saveAs(content,`${comic.title}.zip`);
+status.textContent='✅ Descarga completa';
+setTimeout(()=>status.textContent='',3000);
+}catch(err){
+status.textContent='❌ Error al descargar';
+console.error(err);
+}
+};
+}
+
+function deleteComic(id){
+if(!confirm('¿Eliminar este comic?'))return;
+const transaction=db.transaction(['comics'],'readwrite');
+const store=transaction.objectStore('comics');
+const request=store.delete(id);
+request.onsuccess=()=>{
+const index=selectedComics.indexOf(id);
+if(index>-1){
+selectedComics.splice(index,1);
+updateSelectedButton();
+}
+loadLibrary();
+};
+}
+
+function getImageExtension(url){
+const match=url.match(/\.(jpg|jpeg|png|gif|webp|bmp)(\?|$)/i);
+return match?match[1].toLowerCase():'jpg';
+}
+
+initDB();
 </script>
 </body>
 </html>
