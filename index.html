@@ -10,6 +10,9 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-g
 .container{max-width:1200px;margin:0 auto;}
 .header{text-align:center;color:white;margin-bottom:20px;}
 .header h1{font-size:2em;margin-bottom:15px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);}
+.export-btn-fixed{position:fixed;top:15px;right:15px;background:rgba(255,255,255,0.25);backdrop-filter:blur(10px);color:white;border:none;padding:8px 15px;border-radius:8px;font-size:13px;font-weight:bold;cursor:pointer;transition:all 0.3s;box-shadow:0 4px 15px rgba(0,0,0,0.2);width:auto;z-index:500;display:none;}
+.export-btn-fixed.show{display:block;}
+.export-btn-fixed:hover{background:rgba(255,255,255,0.35);transform:translateY(-2px);}
 .settings-bar{display:flex;gap:15px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;}
 .setting-item{background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);border-radius:12px;padding:12px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 15px rgba(0,0,0,0.2);}
 .setting-label{color:white;font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px;}
@@ -100,10 +103,13 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 .action-btn{padding:4px 8px;font-size:9px;}
 .view-selected-btn{bottom:20px;right:20px;padding:12px 24px;font-size:14px;}
 .image-number{font-size:20px;}
+.export-buttons{top:10px;right:10px;gap:5px;}
+.export-btn{padding:6px 10px;font-size:11px;}
 }
 </style>
 </head>
 <body>
+<button class="export-btn-fixed" id="exportSelectedBtn" onclick="exportSelectedComics()">💾 Exportar Seleccionados</button>
 <div class="container">
 <div class="header">
 <h1>📚 Biblioteca de Comics</h1>
@@ -169,7 +175,13 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 <div class="input-group">
 <div class="file-input-wrapper">
 <input type="file" id="fileInput" accept=".txt" multiple onchange="loadFromFile()">
-<label for="fileInput" class="file-input-label">📄 O cargar desde archivo(s) .txt (múltiple)</label>
+<label for="fileInput" class="file-input-label">📄 Cargar desde archivo(s) .txt (múltiple)</label>
+</div>
+</div>
+<div class="input-group">
+<div class="file-input-wrapper">
+<input type="file" id="importFile" accept=".json" style="position:absolute;left:-9999px;" onchange="importAllComics()">
+<label for="importFile" class="file-input-label">📂 Importar biblioteca completa (.json)</label>
 </div>
 </div>
 <button onclick="saveComic()">💾 Guardar Comic</button>
@@ -235,6 +247,81 @@ store.createIndex('date','date',{unique:false});
 };
 }
 
+function exportSelectedComics(){
+if(selectedComics.length===0){
+alert('⚠️ No hay comics seleccionados');
+return;
+}
+const transaction=db.transaction(['comics'],'readonly');
+const store=transaction.objectStore('comics');
+let exportComics=[];
+let loaded=0;
+selectedComics.forEach(comicId=>{
+const request=store.get(comicId);
+request.onsuccess=(e)=>{
+const comic=e.target.result;
+if(comic){
+exportComics.push(comic);
+}
+loaded++;
+if(loaded===selectedComics.length){
+const exportData={
+version:'1.0',
+exportDate:new Date().toISOString(),
+comics:exportComics
+};
+const dataStr=JSON.stringify(exportData,null,2);
+const blob=new Blob([dataStr],{type:'application/json'});
+const fileName=`comics_seleccionados_${new Date().toISOString().split('T')[0]}.json`;
+saveAs(blob,fileName);
+const status=document.getElementById('status');
+status.textContent=`✅ ${exportComics.length} comics exportados`;
+setTimeout(()=>status.textContent='',3000);
+}
+};
+});
+}
+
+function importAllComics(){
+const file=document.getElementById('importFile').files[0];
+if(!file)return;
+const status=document.getElementById('status');
+status.innerHTML='<span class="loading">Importando comics</span>';
+const reader=new FileReader();
+reader.onload=(e)=>{
+try{
+const importData=JSON.parse(e.target.result);
+if(!importData.comics||!Array.isArray(importData.comics)){
+alert('❌ Archivo inválido');
+status.textContent='';
+return;
+}
+const transaction=db.transaction(['comics'],'readwrite');
+const store=transaction.objectStore('comics');
+let imported=0;
+importData.comics.forEach(comic=>{
+delete comic.id;
+const request=store.add(comic);
+request.onsuccess=()=>{
+imported++;
+if(imported===importData.comics.length){
+status.textContent=`✅ ${imported} comics importados`;
+setTimeout(()=>{
+status.textContent='';
+switchTab('library');
+},2000);
+}
+};
+});
+}catch(err){
+alert('❌ Error al leer el archivo');
+status.textContent='';
+}
+};
+reader.readAsText(file);
+document.getElementById('importFile').value='';
+}
+
 function switchTab(tab){
 document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
 document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
@@ -263,16 +350,23 @@ btn.style.display=deleteMode?'block':'none';
 function toggleSelectMode(){
 const selectMode=document.getElementById('selectToggle').checked;
 const cards=document.querySelectorAll('.comic-card');
+const exportBtn=document.getElementById('exportSelectedBtn');
 if(!selectMode){
 selectedComics=[];
 updateSelectedButton();
+exportBtn.classList.remove('show');
+}else{
+if(selectedComics.length>0){
+exportBtn.classList.add('show');
+}
 }
 cards.forEach(card=>{
 if(selectMode){
 card.classList.add('selecting');
 }else{
 card.classList.remove('selecting','selected');
-card.querySelector('.selection-order').style.display='none';
+const orderBadge=card.querySelector('.selection-order');
+if(orderBadge)orderBadge.style.display='none';
 }
 });
 }
@@ -286,7 +380,18 @@ selectedComics.splice(index,1);
 selectedComics.push(comicId);
 }
 updateSelectedButton();
+updateExportButton();
 loadLibrary();
+}
+
+function updateExportButton(){
+const exportBtn=document.getElementById('exportSelectedBtn');
+const selectMode=document.getElementById('selectToggle').checked;
+if(selectMode&&selectedComics.length>0){
+exportBtn.classList.add('show');
+}else{
+exportBtn.classList.remove('show');
+}
 }
 
 function updateSelectedButton(){
