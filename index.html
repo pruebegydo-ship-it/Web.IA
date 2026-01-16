@@ -44,6 +44,7 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 .comic-card{background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.2);cursor:pointer;transition:transform 0.3s,box-shadow 0.3s;position:relative;}
 .comic-card:hover{transform:translateY(-5px);box-shadow:0 8px 25px rgba(0,0,0,0.3);}
 .comic-card.selected{outline:4px solid #11998e;transform:translateY(-5px);box-shadow:0 8px 25px rgba(17,153,142,0.5);}
+.comic-card.downloading{pointer-events:none;}
 .comic-cover-container{width:100%;aspect-ratio:2/3;position:relative;overflow:hidden;background:#f0f0f0;}
 .comic-cover-img{width:100%;height:100%;object-fit:cover;}
 .comic-info{padding:10px;background:linear-gradient(to bottom,rgba(102,126,234,0.1),rgba(118,75,162,0.1));}
@@ -56,6 +57,8 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 .download-btn:hover{background:rgba(17,153,142,0.65);}
 .delete-btn{background:rgba(245,87,108,0.35);display:none;}
 .delete-btn:hover{background:rgba(245,87,108,1);}
+.edit-btn{background:rgba(255,193,7,0.35);display:none;}
+.edit-btn:hover{background:rgba(255,193,7,0.85);}
 .select-checkbox{position:absolute;top:6px;left:6px;width:24px;height:24px;display:none;z-index:10;cursor:pointer;accent-color:#11998e;}
 .comic-card.selecting .select-checkbox{display:block;}
 .selection-order{position:absolute;top:6px;left:6px;background:#11998e;color:white;width:28px;height:28px;border-radius:50%;display:none;align-items:center;justify-content:center;font-weight:bold;font-size:14px;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.3);}
@@ -63,6 +66,17 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 .view-selected-btn{position:fixed;bottom:30px;right:30px;background:linear-gradient(135deg,#11998e 0%,#38ef7d 100%);color:white;border:none;padding:15px 30px;border-radius:50px;font-size:16px;font-weight:bold;cursor:pointer;box-shadow:0 8px 25px rgba(0,0,0,0.3);z-index:100;display:none;width:auto;}
 .view-selected-btn:hover{transform:scale(1.05);}
 .view-selected-btn.show{display:block;}
+.selection-actions{position:fixed;bottom:100px;right:30px;display:none;flex-direction:column;gap:10px;z-index:100;}
+.selection-actions.show{display:flex;}
+.selection-action-btn{background:rgba(255,255,255,0.95);color:#667eea;border:none;padding:12px 24px;border-radius:50px;font-size:14px;font-weight:bold;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,0.2);transition:all 0.3s;width:auto;}
+.selection-action-btn:hover{transform:scale(1.05);background:white;}
+.selection-action-btn.merge{background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);color:white;}
+.download-progress{position:absolute;bottom:0;left:0;width:100%;height:0;background:linear-gradient(135deg,rgba(17,153,142,0.4) 0%,rgba(56,239,125,0.4) 100%);transition:height 0.3s ease;z-index:5;display:none;}
+.download-progress.active{display:block;}
+.download-text{position:absolute;bottom:10px;left:0;right:0;text-align:center;color:white;font-size:12px;font-weight:bold;z-index:6;text-shadow:0 2px 4px rgba(0,0,0,0.5);display:none;}
+.download-text.active{display:block;}
+.download-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);display:none;z-index:4;}
+.download-overlay.active{display:block;}
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:1000;overflow-y:auto;}
 .modal.active{display:block;}
 .modal-close{position:fixed;top:15px;right:15px;background:rgba(255,255,255,0.2);color:white;border:none;padding:12px 20px;border-radius:10px;font-size:18px;cursor:pointer;z-index:1001;width:auto;}
@@ -78,17 +92,34 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 .url-edit-modal.active{display:block;}
 .url-edit-box{background:white;border-radius:15px;padding:30px;max-width:800px;margin:0 auto;box-shadow:0 10px 40px rgba(0,0,0,0.5);}
 .url-edit-box h3{color:#333;margin-bottom:20px;font-size:22px;text-align:center;}
-.failed-url-item{background:#f8f9fa;padding:15px;border-radius:10px;margin-bottom:15px;border:2px solid #e0e0e0;}
+.failed-url-item{background:#f8f9fa;padding:15px;border-radius:10px;margin-bottom:15px;border:2px solid #e0e0e0;position:relative;}
 .failed-url-item label{display:block;color:#666;font-size:12px;font-weight:600;margin-bottom:8px;}
 .failed-url-item input{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:monospace;}
 .failed-url-item input:focus{outline:none;border-color:#667eea;}
 .failed-url-number{display:inline-block;background:#dc3545;color:white;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:bold;margin-right:8px;}
+.delete-url-btn{position:absolute;top:15px;right:15px;background:#dc3545;color:white;border:none;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:bold;cursor:pointer;transition:all 0.2s;}
+.delete-url-btn:hover{background:#c82333;transform:scale(1.05);}
 .url-edit-buttons{display:flex;gap:10px;margin-top:20px;}
 .url-edit-buttons button{padding:14px 28px;border:none;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer;flex:1;width:auto;}
 .url-save-btn{background:linear-gradient(135deg,#11998e 0%,#38ef7d 100%);color:white;}
 .url-cancel-btn{background:#6c757d;color:white;}
 .url-save-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(17,153,142,0.4);}
 .url-cancel-btn:hover{background:#5a6268;}
+.merge-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:2000;overflow-y:auto;padding:20px;}
+.merge-modal.active{display:block;}
+.merge-box{background:white;border-radius:15px;padding:30px;max-width:600px;margin:0 auto;box-shadow:0 10px 40px rgba(0,0,0,0.5);}
+.merge-box h3{color:#333;margin-bottom:20px;font-size:22px;text-align:center;}
+.merge-input{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:10px;font-size:15px;margin-bottom:20px;}
+.merge-input:focus{outline:none;border-color:#667eea;}
+.merge-info{background:#e3f2fd;padding:15px;border-radius:10px;margin-bottom:20px;color:#1976d2;font-size:14px;}
+.merge-buttons{display:flex;gap:10px;}
+.merge-buttons button{padding:14px 28px;border:none;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer;flex:1;width:auto;}
+.merge-confirm-btn{background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);color:white;}
+.merge-cancel-btn{background:#6c757d;color:white;}
+.select-all-container{display:none;background:rgba(255,255,255,0.95);padding:15px 20px;border-radius:12px;margin-bottom:20px;box-shadow:0 4px 15px rgba(0,0,0,0.2);align-items:center;justify-content:center;gap:12px;}
+.select-all-container.show{display:flex;}
+.select-all-label{color:#667eea;font-weight:bold;font-size:15px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;}
+.select-all-checkbox{width:22px;height:22px;cursor:pointer;accent-color:#11998e;}
 .empty-state{text-align:center;color:white;padding:40px 20px;}
 .empty-state-icon{font-size:60px;margin-bottom:15px;}
 .loading::after{content:'...';animation:dots 1.5s steps(4,end) infinite;}
@@ -102,20 +133,20 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 .setting-label{font-size:13px;}
 .action-btn{padding:4px 8px;font-size:9px;}
 .view-selected-btn{bottom:20px;right:20px;padding:12px 24px;font-size:14px;}
+.selection-actions{bottom:80px;right:20px;}
 .image-number{font-size:20px;}
-.export-buttons{top:10px;right:10px;gap:5px;}
-.export-btn{padding:6px 10px;font-size:11px;}
+.export-btn-fixed{top:10px;right:10px;padding:6px 10px;font-size:11px;}
 }
 </style>
 </head>
 <body>
-<button class="export-btn-fixed" id="exportSelectedBtn" onclick="exportSelectedComics()">💾 Exportar Seleccionados</button>
+<button class="export-btn-fixed" id="exportSelectedBtn" onclick="exportSelectedComics()">💾 Exportar</button>
 <div class="container">
 <div class="header">
 <h1>📚 Biblioteca de Comics</h1>
 <div class="settings-bar">
 <div class="setting-item">
-                <label class="setting-label">
+<label class="setting-label">
 <span>🌐 Proxy CORS</span>
 <label class="switch">
 <input type="checkbox" id="proxyToggle" onchange="onProxyToggle()" checked>
@@ -157,6 +188,12 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 <button class="tab" onclick="switchTab('add')">➕ Agregar</button>
 </div>
 <div id="librarySection" class="section active">
+<div class="select-all-container" id="selectAllContainer">
+<label class="select-all-label">
+<input type="checkbox" class="select-all-checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
+<span>Seleccionar Todos los Comics</span>
+</label>
+</div>
 <div id="library" class="library"></div>
 <div id="emptyState" class="empty-state">
 <div class="empty-state-icon">📖</div>
@@ -189,6 +226,10 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 <div class="status" id="status"></div>
 </div>
 </div>
+<div class="selection-actions" id="selectionActions">
+<button class="selection-action-btn merge" onclick="openMergeModal()">🔗 Fusionar Comics</button>
+<button class="selection-action-btn" onclick="openEditSelectedComic()">✏️ Editar URLs</button>
+</div>
 <button class="view-selected-btn" id="viewSelectedBtn" onclick="viewSelectedComics()">
 👁️ Ver Seleccionados (<span id="selectedCount">0</span>)
 </button>
@@ -199,7 +240,7 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 </div>
 <div class="url-edit-modal" id="urlEditModal">
 <div class="url-edit-box">
-<h3>🔧 Corregir URLs que no cargaron</h3>
+<h3>🔧 Editar URLs del Comic</h3>
 <div style="background:#fff3cd;border:2px solid #ffc107;border-radius:10px;padding:15px;margin-bottom:20px;">
 <label style="display:block;color:#856404;font-size:13px;font-weight:600;margin-bottom:10px;">🔄 Cambiar formato para todas las URLs:</label>
 <select id="bulkFormatChange" style="width:100%;padding:12px;border:2px solid #ffc107;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">
@@ -216,8 +257,21 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 </div>
 <div id="failedUrlsList"></div>
 <div class="url-edit-buttons">
-<button class="url-save-btn" onclick="saveAllEditedUrls()">💾 Guardar Todos</button>
+<button class="url-save-btn" onclick="saveAllEditedUrls()">💾 Guardar</button>
 <button class="url-cancel-btn" onclick="closeUrlEdit()">❌ Cancelar</button>
+</div>
+</div>
+</div>
+<div class="merge-modal" id="mergeModal">
+<div class="merge-box">
+<h3>🔗 Fusionar Comics Seleccionados</h3>
+<div class="merge-info">
+📊 Se fusionarán <strong id="mergeCount">0</strong> comics en uno solo
+</div>
+<input type="text" class="merge-input" id="mergeTitle" placeholder="Título del comic fusionado">
+<div class="merge-buttons">
+<button class="merge-confirm-btn" onclick="confirmMerge()">🔗 Fusionar</button>
+<button class="merge-cancel-btn" onclick="closeMergeModal()">❌ Cancelar</button>
 </div>
 </div>
 </div>
@@ -229,6 +283,7 @@ const PROXY_URL='https://ia-sofia.armijosfeo5.workers.dev/?url=';
 let selectedComics=[];
 let currentEditingComicId=null;
 let failedImages=[];
+let allUrlsForEdit=[];
 
 function initDB(){
 const request=indexedDB.open('ComicsDB',1);
@@ -361,13 +416,24 @@ function toggleSelectMode(){
 const selectMode=document.getElementById('selectToggle').checked;
 const cards=document.querySelectorAll('.comic-card');
 const exportBtn=document.getElementById('exportSelectedBtn');
+const selectionActions=document.getElementById('selectionActions');
+const selectAllContainer=document.getElementById('selectAllContainer');
 if(!selectMode){
 selectedComics=[];
 updateSelectedButton();
 exportBtn.classList.remove('show');
+selectionActions.classList.remove('show');
+selectAllContainer.classList.remove('show');
+document.getElementById('selectAllCheckbox').checked=false;
 }else{
 if(selectedComics.length>0){
 exportBtn.classList.add('show');
+if(selectedComics.length>=2){
+selectionActions.classList.add('show');
+}
+if(selectedComics.length>=3){
+selectAllContainer.classList.add('show');
+}
 }
 }
 cards.forEach(card=>{
@@ -383,6 +449,8 @@ if(orderBadge)orderBadge.style.display='none';
 
 function toggleComicSelection(comicId,event){
 event.stopPropagation();
+const selectMode=document.getElementById('selectToggle').checked;
+if(!selectMode)return;
 const index=selectedComics.indexOf(comicId);
 if(index>-1){
 selectedComics.splice(index,1);
@@ -391,6 +459,7 @@ selectedComics.push(comicId);
 }
 updateSelectedButton();
 updateExportButton();
+updateSelectionActions();
 loadLibrary();
 }
 
@@ -404,19 +473,188 @@ exportBtn.classList.remove('show');
 }
 }
 
+function updateSelectionActions(){
+const selectionActions=document.getElementById('selectionActions');
+const selectAllContainer=document.getElementById('selectAllContainer');
+const selectMode=document.getElementById('selectToggle').checked;
+if(selectMode&&selectedComics.length>=1){
+selectionActions.classList.add('show');
+}else{
+selectionActions.classList.remove('show');
+}
+if(selectMode&&selectedComics.length>=3){
+selectAllContainer.classList.add('show');
+}else{
+selectAllContainer.classList.remove('show');
+}
+}
+
+function toggleSelectAll(){
+const checkbox=document.getElementById('selectAllCheckbox');
+if(checkbox.checked){
+selectAllComics();
+}else{
+deselectAllComics();
+}
+}
+
 function updateSelectedButton(){
 const btn=document.getElementById('viewSelectedBtn');
 const count=document.getElementById('selectedCount');
 count.textContent=selectedComics.length;
-if(selectedComics.length>=3){
+if(selectedComics.length>=2){
 btn.classList.add('show');
 }else{
 btn.classList.remove('show');
 }
 }
 
+function selectAllComics(){
+if(!db)return;
+const transaction=db.transaction(['comics'],'readonly');
+const store=transaction.objectStore('comics');
+const request=store.getAll();
+request.onsuccess=(e)=>{
+const comics=e.target.result;
+selectedComics=comics.map(comic=>comic.id);
+updateSelectedButton();
+updateExportButton();
+updateSelectionActions();
+loadLibrary();
+};
+}
+
+function deselectAllComics(){
+selectedComics=[];
+updateSelectedButton();
+updateExportButton();
+updateSelectionActions();
+loadLibrary();
+}
+
+function openMergeModal(){
+if(selectedComics.length<2){
+alert('⚠️ Selecciona al menos 2 comics para fusionar');
+return;
+}
+document.getElementById('mergeCount').textContent=selectedComics.length;
+document.getElementById('mergeTitle').value='';
+document.getElementById('mergeModal').classList.add('active');
+}
+
+function closeMergeModal(){
+document.getElementById('mergeModal').classList.remove('active');
+}
+
+function confirmMerge(){
+const title=document.getElementById('mergeTitle').value.trim();
+if(!title){
+alert('⚠️ Ingresa un título para el comic fusionado');
+return;
+}
+const transaction=db.transaction(['comics'],'readwrite');
+const store=transaction.objectStore('comics');
+let allPages=[];
+let loaded=0;
+const comicsToDelete=[];
+selectedComics.forEach(comicId=>{
+const request=store.get(comicId);
+request.onsuccess=(e)=>{
+const comic=e.target.result;
+if(comic){
+allPages=allPages.concat(comic.pages);
+comicsToDelete.push(comicId);
+}
+loaded++;
+if(loaded===selectedComics.length){
+const mergedComic={
+title:title,
+pages:allPages,
+cover:allPages[0],
+date:new Date().toISOString()
+};
+const addRequest=store.add(mergedComic);
+addRequest.onsuccess=()=>{
+comicsToDelete.forEach(id=>{
+store.delete(id);
+});
+selectedComics=[];
+updateSelectedButton();
+updateExportButton();
+updateSelectionActions();
+closeMergeModal();
+loadLibrary();
+alert(`✅ Comic fusionado con ${allPages.length} páginas`);
+};
+}
+};
+});
+}
+
+function openEditSelectedComic(){
+if(selectedComics.length===0){
+alert('⚠️ No hay comics seleccionados');
+return;
+}
+if(selectedComics.length>1){
+alert('⚠️ Selecciona solo un comic para editar');
+return;
+}
+const transaction=db.transaction(['comics'],'readonly');
+const store=transaction.objectStore('comics');
+const request=store.get(selectedComics[0]);
+request.onsuccess=(e)=>{
+const comic=e.target.result;
+if(comic){
+openUrlEditForComic(comic);
+}
+};
+}
+
+function openUrlEditForComic(comic){
+currentEditingComicId=comic.id;
+allUrlsForEdit=comic.pages.map((url,index)=>({index,url}));
+const list=document.getElementById('failedUrlsList');
+list.innerHTML='';
+document.getElementById('bulkFormatChange').value='';
+allUrlsForEdit.forEach((item,idx)=>{
+const div=document.createElement('div');
+div.className='failed-url-item';
+div.innerHTML=`
+<label><span class="failed-url-number">Página ${item.index+1}</span>URL:</label>
+<input type="text" id="editUrl${idx}" value="${item.url}" data-index="${idx}">
+<button class="delete-url-btn" onclick="deleteUrlFromEdit(${idx})">🗑️ Eliminar</button>
+`;
+list.appendChild(div);
+});
+document.getElementById('urlEditModal').classList.add('active');
+}
+
+function deleteUrlFromEdit(idx){
+if(allUrlsForEdit.length<=1){
+alert('⚠️ No puedes eliminar todas las páginas');
+return;
+}
+if(!confirm('¿Eliminar esta página?'))return;
+allUrlsForEdit.splice(idx,1);
+const transaction=db.transaction(['comics'],'readwrite');
+const store=transaction.objectStore('comics');
+const request=store.get(currentEditingComicId);
+request.onsuccess=(e)=>{
+const comic=e.target.result;
+if(comic){
+comic.pages=allUrlsForEdit.map(item=>item.url);
+comic.cover=comic.pages[0];
+const updateRequest=store.put(comic);
+updateRequest.onsuccess=()=>{
+openUrlEditForComic(comic);
+};
+}
+};
+}
+
 function viewSelectedComics(){
-if(selectedComics.length<3)return;
+if(selectedComics.length<2)return;
 const transaction=db.transaction(['comics'],'readonly');
 const store=transaction.objectStore('comics');
 let allPages=[];
@@ -430,16 +668,17 @@ allPages=allPages.concat(comic.pages);
 }
 loaded++;
 if(loaded===selectedComics.length){
-openComicPages(allPages);
+openComicPages(allPages,null);
 }
 };
 });
 }
 
-function openComicPages(pages){
+function openComicPages(pages,comicId){
 const modal=document.getElementById('modal');
 const content=document.getElementById('modalContent');
 content.innerHTML='';
+currentEditingComicId=comicId;
 failedImages=[];
 pages.forEach((url,index)=>{
 const container=document.createElement('div');
@@ -450,7 +689,7 @@ img.src=getProxyUrl(url);
 img.alt=`Página ${index+1}`;
 img.onerror=function(){
 this.classList.add('error');
-failedImages.push({index,url,comicId:null});
+failedImages.push({index,url,comicId:comicId});
 updateErrorButton();
 };
 const numberBadge=document.createElement('div');
@@ -499,8 +738,8 @@ if(!newFormat){
 alert('⚠️ Selecciona un formato primero');
 return;
 }
-failedImages.forEach((item,idx)=>{
-const input=document.getElementById(`failedUrl${idx}`);
+const inputs=document.querySelectorAll('[id^="failedUrl"],[id^="editUrl"]');
+inputs.forEach(input=>{
 const currentUrl=input.value;
 const urlWithoutExt=currentUrl.replace(/\.\w+(\?.*)?$/,'');
 input.value=urlWithoutExt+newFormat;
@@ -510,11 +749,12 @@ alert(`✅ Formato ${newFormat} aplicado a todas las URLs`);
 
 function closeUrlEdit(){
 document.getElementById('urlEditModal').classList.remove('active');
+allUrlsForEdit=[];
 }
 
 function saveAllEditedUrls(){
 if(currentEditingComicId===null){
-alert('ℹ️ Estas imágenes son de una vista combinada y no se pueden editar directamente. Edita los comics individuales.');
+alert('ℹ️ Estas imágenes son de una vista combinada y no se pueden editar directamente');
 closeUrlEdit();
 return;
 }
@@ -525,6 +765,21 @@ request.onsuccess=(e)=>{
 const comic=e.target.result;
 if(comic){
 let updated=false;
+if(allUrlsForEdit.length>0){
+const newPages=[];
+allUrlsForEdit.forEach((item,idx)=>{
+const input=document.getElementById(`editUrl${idx}`);
+const newUrl=input.value.trim();
+if(newUrl){
+newPages.push(newUrl);
+if(newUrl!==item.url){
+updated=true;
+}
+}
+});
+comic.pages=newPages;
+comic.cover=newPages[0];
+}else{
 failedImages.forEach((item,idx)=>{
 const input=document.getElementById(`failedUrl${idx}`);
 const newUrl=input.value.trim();
@@ -536,7 +791,8 @@ comic.cover=newUrl;
 updated=true;
 }
 });
-if(updated){
+}
+if(updated||allUrlsForEdit.length>0){
 const updateRequest=store.put(comic);
 updateRequest.onsuccess=()=>{
 closeUrlEdit();
@@ -674,12 +930,15 @@ const library=document.getElementById('library');
 const emptyState=document.getElementById('emptyState');
 const deleteMode=document.getElementById('deleteToggle').checked;
 const selectMode=document.getElementById('selectToggle').checked;
+const selectAllCheckbox=document.getElementById('selectAllCheckbox');
 library.innerHTML='';
 if(comics.length===0){
 emptyState.style.display='block';
 return;
 }
 emptyState.style.display='none';
+const allSelected=comics.length>0&&comics.every(comic=>selectedComics.includes(comic.id));
+selectAllCheckbox.checked=allSelected;
 comics.reverse().forEach(comic=>{
 const isSelected=selectedComics.indexOf(comic.id)>-1;
 const selectionOrder=selectedComics.indexOf(comic.id)+1;
@@ -688,6 +947,7 @@ card.className='comic-card';
 if(selectMode)card.classList.add('selecting');
 if(isSelected)card.classList.add('selected');
 card.onclick=(e)=>{
+const selectMode=document.getElementById('selectToggle').checked;
 if(selectMode){
 toggleComicSelection(comic.id,e);
 }else{
@@ -697,6 +957,9 @@ openComic(comic);
 card.innerHTML=`
 <div class="comic-cover-container">
 <img src="${getProxyUrl(comic.cover)}" class="comic-cover-img" data-original-url="${comic.cover}">
+<div class="download-overlay" id="downloadOverlay${comic.id}"></div>
+<div class="download-progress" id="downloadProgress${comic.id}"></div>
+<div class="download-text" id="downloadText${comic.id}">0%</div>
 </div>
 <input type="checkbox" class="select-checkbox" ${isSelected?'checked':''} onclick="toggleComicSelection(${comic.id},event)">
 <div class="selection-order" style="display:${isSelected?'flex':'none'}">${selectionOrder}</div>
@@ -715,33 +978,8 @@ library.appendChild(card);
 }
 
 function openComic(comic){
-const modal=document.getElementById('modal');
-const content=document.getElementById('modalContent');
-content.innerHTML='';
 currentEditingComicId=comic.id;
-failedImages=[];
-comic.pages.forEach((url,index)=>{
-const container=document.createElement('div');
-container.className='modal-image-container';
-const img=document.createElement('img');
-img.className='modal-image';
-img.src=getProxyUrl(url);
-img.alt=`Página ${index+1}`;
-img.onerror=function(){
-this.classList.add('error');
-failedImages.push({index,url,comicId:comic.id});
-updateErrorButton();
-};
-const numberBadge=document.createElement('div');
-numberBadge.className='image-number';
-numberBadge.textContent=index+1;
-container.appendChild(img);
-container.appendChild(numberBadge);
-content.appendChild(container);
-});
-modal.classList.add('active');
-document.body.style.overflow='hidden';
-updateErrorButton();
+openComicPages(comic.pages,comic.id);
 }
 
 function closeModal(){
@@ -759,42 +997,56 @@ const store=transaction.objectStore('comics');
 const request=store.get(id);
 request.onsuccess=async(e)=>{
 const comic=e.target.result;
-const status=document.getElementById('status');
-const useProxy=document.getElementById('proxyToggle').checked;
-if(!useProxy){
-status.innerHTML='📝 Generando archivo de URLs';
-let urlText='';
-comic.pages.forEach((url,index)=>{
-urlText+=`${String(index+1).padStart(3,'0')} - ${url}\n`;
-});
-const blob=new Blob([urlText],{type:'text/plain;charset=utf-8'});
-saveAs(blob,`${comic.title}_urls.txt`);
-status.textContent='✅ URLs descargadas';
-setTimeout(()=>status.textContent='',3000);
-return;
-}
-status.innerHTML='<span class="loading">Preparando descarga</span>';
+const progressBar=document.getElementById(`downloadProgress${id}`);
+const progressText=document.getElementById(`downloadText${id}`);
+const overlay=document.getElementById(`downloadOverlay${id}`);
+const card=document.querySelector(`.comic-card [id="downloadProgress${id}"]`)?.closest('.comic-card');
+if(card)card.classList.add('downloading');
+if(progressBar)progressBar.classList.add('active');
+if(progressText)progressText.classList.add('active');
+if(overlay)overlay.classList.add('active');
 try{
 const zip=new JSZip();
-for(let i=0;i<comic.pages.length;i++){
-status.innerHTML=`<span class="loading">Descargando ${i+1}/${comic.pages.length}</span>`;
+const totalPages=comic.pages.length;
+for(let i=0;i<totalPages;i++){
+const percent=Math.round(((i+1)/totalPages)*100);
+if(progressBar){
+progressBar.style.height=`${percent}%`;
+}
+if(progressText){
+progressText.textContent=`${percent}%`;
+}
 try{
 const response=await fetch(getProxyUrl(comic.pages[i]));
 const blob=await response.blob();
 const ext=getImageExtension(comic.pages[i]);
 zip.file(`${String(i+1).padStart(3,'0')}.${ext}`,blob);
 }catch(err){
-console.error('Error:',err);
+console.error('Error descargando imagen:',err);
 }
 }
-status.innerHTML='<span class="loading">Generando ZIP</span>';
+if(progressText)progressText.textContent='Generando ZIP...';
 const content=await zip.generateAsync({type:'blob'});
 saveAs(content,`${comic.title}.zip`);
-status.textContent='✅ Descarga completa';
-setTimeout(()=>status.textContent='',3000);
+setTimeout(()=>{
+if(card)card.classList.remove('downloading');
+if(progressBar){
+progressBar.classList.remove('active');
+progressBar.style.height='0';
+}
+if(progressText)progressText.classList.remove('active');
+if(overlay)overlay.classList.remove('active');
+},800);
 }catch(err){
-status.textContent='❌ Error al descargar';
-console.error(err);
+console.error('Error general:',err);
+alert('❌ Error al descargar el comic');
+if(card)card.classList.remove('downloading');
+if(progressBar){
+progressBar.classList.remove('active');
+progressBar.style.height='0';
+}
+if(progressText)progressText.classList.remove('active');
+if(overlay)overlay.classList.remove('active');
 }
 };
 }
@@ -809,6 +1061,8 @@ const index=selectedComics.indexOf(id);
 if(index>-1){
 selectedComics.splice(index,1);
 updateSelectedButton();
+updateExportButton();
+updateSelectionActions();
 }
 loadLibrary();
 };
