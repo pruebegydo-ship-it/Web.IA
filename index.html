@@ -737,36 +737,25 @@ const content=document.getElementById('modalContent');
 content.innerHTML='';
 currentEditingComicId=comicId;
 failedImages=[];
-let currentLoadIndex=0;
-const loadNextImage=()=>{
-if(currentLoadIndex>=pages.length)return;
-const index=currentLoadIndex;
-const url=pages[index];
+pages.forEach((url,index)=>{
 const container=document.createElement('div');
 container.className='modal-image-container';
 const img=document.createElement('img');
 img.className='modal-image';
+img.src=getProxyUrl(url);
 img.alt=`Página ${index+1}`;
-img.onload=()=>{
-currentLoadIndex++;
-loadNextImage();
-};
 img.onerror=function(){
 this.classList.add('error');
 failedImages.push({index,url,comicId:comicId});
 updateErrorButton();
-currentLoadIndex++;
-loadNextImage();
 };
-img.src=getProxyUrl(url);
 const numberBadge=document.createElement('div');
 numberBadge.className='image-number';
 numberBadge.textContent=index+1;
 container.appendChild(img);
 container.appendChild(numberBadge);
 content.appendChild(container);
-};
-loadNextImage();
+});
 modal.classList.add('active');
 document.body.style.overflow='hidden';
 updateErrorButton();
