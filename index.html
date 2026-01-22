@@ -92,7 +92,7 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 .url-edit-modal.active{display:block;}
 .url-edit-box{background:white;border-radius:15px;padding:30px;max-width:800px;margin:0 auto;box-shadow:0 10px 40px rgba(0,0,0,0.5);}
 .url-edit-box h3{color:#333;margin-bottom:20px;font-size:22px;text-align:center;}
-.failed-url-item{background:#f8f9fa;padding:15px;border-radius:10px;margin-bottom:15px;border:2px solid #e0e0e0;position:relative;padding-left:100px;padding-right:50px;}
+.failed-url-item{background:#f8f9fa;padding:15px;border-radius:10px;margin-bottom:15px;border:2px solid #e0e0e0;position:relative;padding-left:100px;padding-right:50px;padding-bottom:45px;}
 .failed-url-item label{display:block;color:#666;font-size:12px;font-weight:600;margin-bottom:8px;}
 .failed-url-item input{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:monospace;}
 .failed-url-item input:focus{outline:none;border-color:#667eea;}
@@ -123,6 +123,15 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 .select-all-container.show{display:flex;}
 .select-all-label{color:#667eea;font-weight:bold;font-size:15px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;}
 .select-all-checkbox{width:22px;height:22px;cursor:pointer;accent-color:#11998e;}
+.checkbox-switch{width:20px;height:20px;cursor:pointer;accent-color:#11998e;margin:0;}
+.url-edit-actions{display:flex;gap:10px;margin-bottom:15px;justify-content:flex-end;}
+.url-edit-actions button{padding:8px 16px;font-size:13px;width:auto;}
+.select-all-urls-btn{background:#667eea;color:white;}
+.delete-selected-urls-btn{background:#dc3545;color:white;}
+.url-item-checkbox{position:absolute;left:15px;bottom:15px;width:20px;height:20px;cursor:pointer;accent-color:#11998e;}
+.failed-url-item.selected{border-color:#11998e;background:#e8f5e9;}
+.scroll-top-btn{background:rgba(255,193,7,0.9);color:white;border:none;padding:8px 12px;border-radius:8px;font-size:20px;cursor:pointer;transition:all 0.3s;width:auto;min-width:40px;}
+.scroll-top-btn:hover{background:rgba(255,193,7,1);transform:translateY(-2px);}
 .pagination{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:20px;padding:10px;flex-wrap:wrap;}
 .pagination-row-1{display:contents;}
 .pagination-row-2{display:contents;}
@@ -211,6 +220,12 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 </label>
 </label>
 </div>
+<div class="setting-item">
+<label class="setting-label">
+<span>📊 Río Secuencial</span>
+<input type="checkbox" id="sequentialLoadToggle" class="checkbox-switch">
+</label>
+</div>
 </div>
 </div>
 <div class="tabs">
@@ -277,7 +292,15 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 </div>
 <div class="url-edit-modal" id="urlEditModal">
 <div class="url-edit-box">
-<h3>🔧 Editar URLs del Comic</h3>
+<h3>🔧 Editar Comic</h3>
+<div class="input-group" style="margin-bottom:15px;">
+<label style="display:block;color:#666;font-size:13px;font-weight:600;margin-bottom:8px;">📝 Título del Comic:</label>
+<input type="text" id="editComicTitle" placeholder="Nuevo título del comic" style="width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;">
+</div>
+<div class="url-edit-actions">
+<button class="select-all-urls-btn" onclick="selectAllUrls()">✓ Seleccionar Todo</button>
+<button class="delete-selected-urls-btn" onclick="deleteSelectedUrls()">🗑️ Eliminar Seleccionadas</button>
+</div>
 <div class="url-edit-buttons" style="margin-bottom:20px;margin-top:0;">
 <button class="url-save-btn" onclick="saveAllEditedUrls()">💾 Guardar</button>
 <button class="url-cancel-btn" onclick="closeUrlEdit()">❌ Cancelar</button>
@@ -327,6 +350,10 @@ let touchStartX=0;
 let touchEndX=0;
 let touchStartY=0;
 let touchEndY=0;
+let loadedImageContainers=[];
+let currentLoadingComicId=null;
+let imageCache=new Map();
+let isLoadingRio=false;
 
 function initDB(){
 const request=indexedDB.open('ComicsDB',1);
@@ -346,13 +373,8 @@ store.createIndex('date','date',{unique:false});
 }
 
 function onProxyToggle(){
-const coverImages=document.querySelectorAll('.comic-cover-img');
-coverImages.forEach(img=>{
-const originalSrc=img.getAttribute('data-original-url');
-if(originalSrc){
-img.src=getProxyUrl(originalSrc);
-}
-});
+imageCache.clear();
+loadLibrary();
 }
 
 function exportSelectedComics(){
@@ -447,17 +469,8 @@ document.getElementById('addSection').classList.add('active');
 
 function toggleDeleteMode(){
 const deleteMode=document.getElementById('deleteToggle').checked;
-const selectMode=document.getElementById('selectToggle').checked;
 const deleteButtons=document.querySelectorAll('.delete-btn');
 const downloadButtons=document.querySelectorAll('.download-btn');
-const selectionActions=document.getElementById('selectionActions');
-if(deleteMode){
-if(!selectMode){
-document.getElementById('selectToggle').checked=true;
-toggleSelectMode();
-}
-selectionActions.classList.add('show');
-}
 deleteButtons.forEach(btn=>{
 btn.style.display=deleteMode?'block':'none';
 });
@@ -472,33 +485,45 @@ const cards=document.querySelectorAll('.comic-card');
 const exportBtn=document.getElementById('exportSelectedBtn');
 const selectionActions=document.getElementById('selectionActions');
 const selectAllContainer=document.getElementById('selectAllContainer');
+const viewSelectedBtn=document.getElementById('viewSelectedBtn');
 if(!selectMode){
-selectedComics=[];
-updateSelectedButton();
 exportBtn.classList.remove('show');
 selectionActions.classList.remove('show');
 selectAllContainer.classList.remove('show');
-document.getElementById('selectAllCheckbox').checked=false;
+viewSelectedBtn.classList.remove('show');
+cards.forEach(card=>{
+card.classList.remove('selecting','selected');
+const orderBadge=card.querySelector('.selection-order');
+if(orderBadge)orderBadge.style.display='none';
+});
 }else{
 if(selectedComics.length>0){
 exportBtn.classList.add('show');
 if(selectedComics.length>=2){
 selectionActions.classList.add('show');
+viewSelectedBtn.classList.add('show');
 }
 if(selectedComics.length>=3){
 selectAllContainer.classList.add('show');
 }
 }
-}
 cards.forEach(card=>{
-if(selectMode){
 card.classList.add('selecting');
-}else{
-card.classList.remove('selecting','selected');
+const comicIdMatch=card.querySelector('.select-checkbox')?.onclick?.toString().match(/\d+/);
+const comicId=comicIdMatch?parseInt(comicIdMatch[0]):null;
+if(comicId&&selectedComics.includes(comicId)){
+card.classList.add('selected');
+const checkbox=card.querySelector('.select-checkbox');
+if(checkbox)checkbox.checked=true;
 const orderBadge=card.querySelector('.selection-order');
-if(orderBadge)orderBadge.style.display='none';
+if(orderBadge){
+const order=selectedComics.indexOf(comicId)+1;
+orderBadge.textContent=order;
+orderBadge.style.display='flex';
+}
 }
 });
+}
 }
 
 function toggleComicSelection(comicId,event){
@@ -514,7 +539,35 @@ selectedComics.push(comicId);
 updateSelectedButton();
 updateExportButton();
 updateSelectionActions();
-loadLibrary();
+const card=document.querySelector(`.comic-card[onclick*="${comicId}"]`)||event.target.closest('.comic-card');
+if(card){
+const checkbox=card.querySelector('.select-checkbox');
+const orderBadge=card.querySelector('.selection-order');
+const isSelected=selectedComics.indexOf(comicId)>-1;
+if(isSelected){
+card.classList.add('selected');
+const order=selectedComics.indexOf(comicId)+1;
+if(orderBadge){
+orderBadge.textContent=order;
+orderBadge.style.display='flex';
+}
+if(checkbox)checkbox.checked=true;
+}else{
+card.classList.remove('selected');
+if(orderBadge)orderBadge.style.display='none';
+if(checkbox)checkbox.checked=false;
+}
+document.querySelectorAll('.comic-card.selected').forEach(selectedCard=>{
+const selectedId=parseInt(selectedCard.querySelector('.select-checkbox')?.onclick?.toString().match(/\d+/)?.[0]);
+if(selectedId&&selectedComics.includes(selectedId)){
+const selectedOrder=selectedComics.indexOf(selectedId)+1;
+const selectedOrderBadge=selectedCard.querySelector('.selection-order');
+if(selectedOrderBadge){
+selectedOrderBadge.textContent=selectedOrder;
+}
+}
+});
+}
 }
 
 function updateExportButton(){
@@ -574,7 +627,23 @@ selectedComics=comics.map(comic=>comic.id);
 updateSelectedButton();
 updateExportButton();
 updateSelectionActions();
-loadLibrary();
+document.querySelectorAll('.comic-card').forEach(card=>{
+card.classList.add('selected');
+const checkbox=card.querySelector('.select-checkbox');
+if(checkbox)checkbox.checked=true;
+});
+let order=1;
+selectedComics.forEach(comicId=>{
+const card=document.querySelector(`.comic-card [onclick*="${comicId}"]`)?.closest('.comic-card');
+if(card){
+const orderBadge=card.querySelector('.selection-order');
+if(orderBadge){
+orderBadge.textContent=order;
+orderBadge.style.display='flex';
+}
+order++;
+}
+});
 };
 }
 
@@ -583,7 +652,13 @@ selectedComics=[];
 updateSelectedButton();
 updateExportButton();
 updateSelectionActions();
-loadLibrary();
+document.querySelectorAll('.comic-card').forEach(card=>{
+card.classList.remove('selected');
+const checkbox=card.querySelector('.select-checkbox');
+if(checkbox)checkbox.checked=false;
+const orderBadge=card.querySelector('.selection-order');
+if(orderBadge)orderBadge.style.display='none';
+});
 }
 
 function openMergeModal(){
@@ -671,6 +746,7 @@ allUrlsForEdit=comic.pages.map((url,index)=>({index,url}));
 const list=document.getElementById('failedUrlsList');
 list.innerHTML='';
 document.getElementById('bulkFormatChange').value='';
+document.getElementById('editComicTitle').value=comic.title;
 allUrlsForEdit.forEach((item,idx)=>{
 const div=document.createElement('div');
 div.className='failed-url-item';
@@ -678,6 +754,7 @@ div.innerHTML=`
 <div class="failed-url-thumbnail" id="thumb${idx}">
 <img src="${getProxyUrl(item.url)}" onerror="this.parentElement.classList.add('error');this.style.display='none';this.parentElement.innerHTML+='❌';">
 </div>
+<input type="checkbox" class="url-item-checkbox" onchange="this.closest('.failed-url-item').classList.toggle('selected',this.checked)">
 <label><span class="failed-url-number">Página ${item.index+1}</span>URL:</label>
 <input type="text" id="editUrl${idx}" value="${item.url}" data-index="${idx}">
 <button class="delete-url-btn" onclick="deleteUrlFromEdit(${idx})">🗑️</button>
@@ -732,33 +809,115 @@ openComicPages(allPages,null);
 }
 
 function openComicPages(pages,comicId){
+if(isLoadingRio){
+return;
+}
+if(currentLoadingComicId!==comicId){
+loadedImageContainers.forEach(container=>{
+if(container&&container.parentNode){
+container.parentNode.removeChild(container);
+}
+});
+loadedImageContainers=[];
+}
+currentLoadingComicId=comicId;
+isLoadingRio=true;
 const modal=document.getElementById('modal');
 const content=document.getElementById('modalContent');
 content.innerHTML='';
 currentEditingComicId=comicId;
 failedImages=[];
-pages.forEach((url,index)=>{
+const sequentialMode=document.getElementById('sequentialLoadToggle').checked;
+if(sequentialMode){
+loadImagesSequentialComplete(pages,comicId,content);
+}else{
+loadImagesProgressively(pages,comicId,content);
+}
+modal.classList.add('active');
+document.body.style.overflow='hidden';
+updateErrorButton();
+}
+
+async function loadImagesSequentialComplete(pages,comicId,content){
+for(let index=0;index<pages.length;index++){
+if(currentLoadingComicId!==comicId){
+isLoadingRio=false;
+return;
+}
+const url=pages[index];
 const container=document.createElement('div');
 container.className='modal-image-container';
 const img=document.createElement('img');
 img.className='modal-image';
-img.src=getProxyUrl(url);
-img.alt=`Página ${index+1}`;
-img.onerror=function(){
-this.classList.add('error');
-failedImages.push({index,url,comicId:comicId});
-updateErrorButton();
-};
 const numberBadge=document.createElement('div');
 numberBadge.className='image-number';
 numberBadge.textContent=index+1;
 container.appendChild(img);
 container.appendChild(numberBadge);
 content.appendChild(container);
-});
-modal.classList.add('active');
-document.body.style.overflow='hidden';
+loadedImageContainers.push(container);
+const loadedUrl=await tryLoadImageWithRetries(url,3);
+if(currentLoadingComicId!==comicId){
+isLoadingRio=false;
+return;
+}
+if(loadedUrl){
+img.src=loadedUrl;
+img.alt=`Página ${index+1}`;
+}else{
+img.classList.add('error');
+img.alt=`Error cargando imagen ${index+1}`;
+failedImages.push({index,url,comicId:comicId});
 updateErrorButton();
+}
+}
+isLoadingRio=false;
+}
+
+async function loadImagesProgressively(pages,comicId,content){
+for(let index=0;index<pages.length;index++){
+const container=document.createElement('div');
+container.className='modal-image-container';
+const img=document.createElement('img');
+img.className='modal-image';
+const numberBadge=document.createElement('div');
+numberBadge.className='image-number';
+numberBadge.textContent=index+1;
+container.appendChild(img);
+container.appendChild(numberBadge);
+content.appendChild(container);
+loadedImageContainers.push(container);
+}
+isLoadingRio=false;
+for(let index=0;index<pages.length;index++){
+if(currentLoadingComicId!==comicId)return;
+const url=pages[index];
+const container=loadedImageContainers[index];
+const img=container.querySelector('img');
+loadImageProgressive(url,img,index,comicId);
+await new Promise(resolve=>setTimeout(resolve,30));
+}
+}
+
+function loadImageProgressive(url,imgElement,index,comicId){
+tryLoadImageWithRetries(url,3).then(loadedUrl=>{
+if(currentLoadingComicId!==comicId)return;
+if(loadedUrl){
+imgElement.src=loadedUrl;
+imgElement.alt=`Página ${index+1}`;
+}else{
+imgElement.classList.add('error');
+imgElement.alt=`Error cargando imagen ${index+1}`;
+failedImages.push({index,url,comicId:comicId});
+updateErrorButton();
+}
+}).catch(err=>{
+if(currentLoadingComicId!==comicId)return;
+imgElement.classList.add('error');
+imgElement.alt=`Error cargando imagen ${index+1}`;
+failedImages.push({index,url,comicId:comicId});
+updateErrorButton();
+});
 }
 
 function updateErrorButton(){
@@ -819,6 +978,43 @@ alert('ℹ️ No se realizaron cambios');
 }
 }
 
+function selectAllUrls(){
+const checkboxes=document.querySelectorAll('.url-item-checkbox');
+const allChecked=Array.from(checkboxes).every(cb=>cb.checked);
+checkboxes.forEach(cb=>{
+cb.checked=!allChecked;
+const item=cb.closest('.failed-url-item');
+if(cb.checked){
+item.classList.add('selected');
+}else{
+item.classList.remove('selected');
+}
+});
+}
+
+function deleteSelectedUrls(){
+const checkboxes=document.querySelectorAll('.url-item-checkbox:checked');
+if(checkboxes.length===0){
+alert('No hay URLs seleccionadas');
+return;
+}
+if(!confirm(`¿Eliminar ${checkboxes.length} URL(s) seleccionada(s)?`))return;
+checkboxes.forEach(cb=>{
+const item=cb.closest('.failed-url-item');
+const idx=parseInt(item.querySelector('input[type="text"]').dataset.index);
+allUrlsForEdit.splice(idx,1);
+item.remove();
+});
+const remaining=document.querySelectorAll('.failed-url-item');
+remaining.forEach((item,newIdx)=>{
+const input=item.querySelector('input[type="text"]');
+input.dataset.index=newIdx;
+input.id=`editUrl${newIdx}`;
+const label=item.querySelector('label');
+label.innerHTML=`<span class="failed-url-number">Página ${newIdx+1}</span>URL:`;
+});
+}
+
 function closeUrlEdit(){
 document.getElementById('urlEditModal').classList.remove('active');
 allUrlsForEdit=[];
@@ -837,6 +1033,11 @@ request.onsuccess=(e)=>{
 const comic=e.target.result;
 if(comic){
 let updated=false;
+const newTitle=document.getElementById('editComicTitle').value.trim();
+if(newTitle&&newTitle!==comic.title){
+comic.title=newTitle;
+updated=true;
+}
 if(allUrlsForEdit.length>0){
 const newPages=[];
 allUrlsForEdit.forEach((item,idx)=>{
@@ -870,7 +1071,7 @@ updateRequest.onsuccess=()=>{
 closeUrlEdit();
 closeModal();
 loadLibrary();
-alert('✅ URLs actualizadas correctamente');
+alert('✅ Comic actualizado correctamente');
 };
 }else{
 alert('ℹ️ No se realizaron cambios');
@@ -882,7 +1083,8 @@ closeUrlEdit();
 
 function getProxyUrl(url){
 const useProxy=document.getElementById('proxyToggle').checked;
-return useProxy?PROXY_URL+encodeURIComponent(url):url;
+if(!useProxy)return url;
+return PROXY_URL+encodeURIComponent(url);
 }
 
 function loadFromFile(){
@@ -1005,6 +1207,86 @@ setTimeout(()=>resolve(false),5000);
 });
 }
 
+async function tryLoadImageWithRetries(url,maxAttempts=2){
+const cacheKey=`${currentLoadingComicId}_${url}`;
+if(imageCache.has(cacheKey)){
+return imageCache.get(cacheKey);
+}
+for(let attempt=1;attempt<=maxAttempts;attempt++){
+try{
+const img=new Image();
+const loaded=await new Promise((resolve,reject)=>{
+img.onload=()=>resolve(true);
+img.onerror=()=>resolve(false);
+img.src=url;
+setTimeout(()=>resolve(false),2500);
+});
+if(loaded){
+imageCache.set(cacheKey,url);
+return url;
+}
+}catch(e){
+console.log(`Intento directo ${attempt} falló`);
+}
+if(attempt<maxAttempts){
+await new Promise(resolve=>setTimeout(resolve,200));
+}
+}
+const useProxy=document.getElementById('proxyToggle')?document.getElementById('proxyToggle').checked:false;
+if(useProxy){
+try{
+const proxyUrl=getProxyUrl(url);
+const response=await fetch(proxyUrl);
+if(response.ok){
+const blob=await response.blob();
+const blobUrl=URL.createObjectURL(blob);
+imageCache.set(cacheKey,blobUrl);
+return blobUrl;
+}
+}catch(proxyError){
+console.error('Error con proxy:',proxyError);
+}
+}
+return null;
+}
+
+async function loadCoverWithBlob(coverUrl,comicId){
+const img=document.querySelector(`.comic-cover-img[data-comic-id="${comicId}"]`);
+if(!img)return;
+for(let attempt=1;attempt<=2;attempt++){
+const testImg=new Image();
+const directLoaded=await new Promise((resolve)=>{
+testImg.onload=()=>resolve(true);
+testImg.onerror=()=>resolve(false);
+testImg.src=coverUrl;
+setTimeout(()=>resolve(false),2500);
+});
+if(directLoaded){
+img.src=coverUrl;
+return;
+}
+if(attempt<2){
+await new Promise(resolve=>setTimeout(resolve,200));
+}
+}
+const useProxy=document.getElementById('proxyToggle').checked;
+if(useProxy){
+try{
+const proxyUrl=getProxyUrl(coverUrl);
+const proxyResponse=await fetch(proxyUrl);
+if(proxyResponse.ok){
+const blob=await proxyResponse.blob();
+const blobUrl=URL.createObjectURL(blob);
+img.src=blobUrl;
+return;
+}
+}catch(proxyErr){
+console.error('Error con proxy en portada:',proxyErr);
+}
+}
+img.src=coverUrl;
+}
+
 function loadLibrary(){
 if(!db)return;
 const transaction=db.transaction(['comics'],'readonly');
@@ -1051,7 +1333,7 @@ openComic(comic);
 };
 card.innerHTML=`
 <div class="comic-cover-container">
-<img src="${getProxyUrl(comic.cover)}" class="comic-cover-img" data-original-url="${comic.cover}">
+<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='150'%3E%3Crect fill='%23f0f0f0' width='100' height='150'/%3E%3C/svg%3E" class="comic-cover-img" data-original-url="${comic.cover}" data-comic-id="${comic.id}">
 <div class="download-overlay" id="downloadOverlay${comic.id}"></div>
 <div class="download-progress" id="downloadProgress${comic.id}"></div>
 <div class="download-text" id="downloadText${comic.id}">0%</div>
@@ -1068,6 +1350,7 @@ card.innerHTML=`
 </div>
 `;
 library.appendChild(card);
+loadCoverWithBlob(comic.cover,comic.id);
 });
 if(totalPages>1){
 pagination.style.display='flex';
@@ -1075,6 +1358,12 @@ const infoTotal=document.createElement('span');
 infoTotal.className='pagination-info';
 infoTotal.textContent=`Total: ${totalComics}`;
 pagination.appendChild(infoTotal);
+const goToFirstBtn=document.createElement('button');
+goToFirstBtn.className='scroll-top-btn';
+goToFirstBtn.textContent='⬆️';
+goToFirstBtn.title='Ir a página 1';
+goToFirstBtn.onclick=()=>{currentPage=1;loadLibrary();window.scrollTo({top:0,behavior:'smooth'});};
+pagination.appendChild(goToFirstBtn);
 const prevBtn=document.createElement('button');
 prevBtn.className='pagination-btn pagination-arrow';
 prevBtn.textContent='Atrás';
@@ -1125,6 +1414,16 @@ openComicPages(comic.pages,comic.id);
 }
 
 function closeModal(){
+isLoadingRio=false;
+if(currentLoadingComicId!==null){
+loadedImageContainers.forEach(container=>{
+if(container&&container.parentNode){
+container.parentNode.removeChild(container);
+}
+});
+loadedImageContainers=[];
+currentLoadingComicId=null;
+}
 const modal=document.getElementById('modal');
 modal.classList.remove('active');
 document.body.style.overflow='auto';
