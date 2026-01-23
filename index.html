@@ -81,7 +81,7 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 .modal.active{display:block;}
 .modal-close{position:fixed;top:15px;right:15px;background:rgba(255,255,255,0.2);color:white;border:none;padding:12px 20px;border-radius:10px;font-size:18px;cursor:pointer;z-index:1001;width:auto;}
 .modal-content{display:flex;flex-direction:column;gap:0;padding:60px 0 20px 0;}
-.modal-image-container{position:relative;width:100%;display:block;}
+.modal-image-container{position:relative;width:100%;display:block;background:#f0f0f0;}
 .modal-image{width:100%;display:block;}
 .modal-image.error{filter:grayscale(100%) brightness(0.5);min-height:200px;background:#333;}
 .image-number{position:absolute;bottom:10px;right:10px;color:rgba(0,0,0,0.6);font-size:28px;font-weight:900;font-family:'Segoe UI',sans-serif;text-shadow:1px 1px 3px rgba(255,255,255,0.8),-1px -1px 3px rgba(255,255,255,0.8),1px -1px 3px rgba(255,255,255,0.8),-1px 1px 3px rgba(255,255,255,0.8);}
@@ -849,6 +849,20 @@ const container=document.createElement('div');
 container.className='modal-image-container';
 const img=document.createElement('img');
 img.className='modal-image';
+img.src=url;
+img.alt=`Página ${index+1}`;
+img.loading='lazy';
+img.dataset.originalUrl=url;
+img.onerror=function(){
+const proxyEnabled=document.getElementById('proxyToggle').checked;
+if(proxyEnabled&&!this.src.includes(PROXY_URL)){
+this.src=PROXY_URL+encodeURIComponent(this.dataset.originalUrl);
+}else{
+this.classList.add('error');
+failedImages.push({index,url,comicId:comicId});
+updateErrorButton();
+}
+};
 const numberBadge=document.createElement('div');
 numberBadge.className='image-number';
 numberBadge.textContent=index+1;
@@ -856,20 +870,6 @@ container.appendChild(img);
 container.appendChild(numberBadge);
 content.appendChild(container);
 loadedImageContainers.push(container);
-const loadedUrl=await tryLoadImageWithRetries(url,3);
-if(currentLoadingComicId!==comicId){
-isLoadingRio=false;
-return;
-}
-if(loadedUrl){
-img.src=loadedUrl;
-img.alt=`Página ${index+1}`;
-}else{
-img.classList.add('error');
-img.alt=`Error cargando imagen ${index+1}`;
-failedImages.push({index,url,comicId:comicId});
-updateErrorButton();
-}
 }
 isLoadingRio=false;
 }
@@ -880,6 +880,20 @@ const container=document.createElement('div');
 container.className='modal-image-container';
 const img=document.createElement('img');
 img.className='modal-image';
+img.src=pages[index];
+img.alt=`Página ${index+1}`;
+img.loading='lazy';
+img.dataset.originalUrl=pages[index];
+img.onerror=function(){
+const proxyEnabled=document.getElementById('proxyToggle').checked;
+if(proxyEnabled&&!this.src.includes(PROXY_URL)){
+this.src=PROXY_URL+encodeURIComponent(this.dataset.originalUrl);
+}else{
+this.classList.add('error');
+failedImages.push({index,url:pages[index],comicId:comicId});
+updateErrorButton();
+}
+};
 const numberBadge=document.createElement('div');
 numberBadge.className='image-number';
 numberBadge.textContent=index+1;
@@ -889,35 +903,9 @@ content.appendChild(container);
 loadedImageContainers.push(container);
 }
 isLoadingRio=false;
-for(let index=0;index<pages.length;index++){
-if(currentLoadingComicId!==comicId)return;
-const url=pages[index];
-const container=loadedImageContainers[index];
-const img=container.querySelector('img');
-loadImageProgressive(url,img,index,comicId);
-await new Promise(resolve=>setTimeout(resolve,30));
-}
 }
 
 function loadImageProgressive(url,imgElement,index,comicId){
-tryLoadImageWithRetries(url,3).then(loadedUrl=>{
-if(currentLoadingComicId!==comicId)return;
-if(loadedUrl){
-imgElement.src=loadedUrl;
-imgElement.alt=`Página ${index+1}`;
-}else{
-imgElement.classList.add('error');
-imgElement.alt=`Error cargando imagen ${index+1}`;
-failedImages.push({index,url,comicId:comicId});
-updateErrorButton();
-}
-}).catch(err=>{
-if(currentLoadingComicId!==comicId)return;
-imgElement.classList.add('error');
-imgElement.alt=`Error cargando imagen ${index+1}`;
-failedImages.push({index,url,comicId:comicId});
-updateErrorButton();
-});
 }
 
 function updateErrorButton(){
@@ -1161,16 +1149,27 @@ alert(`⚠️ Se encontraron ${duplicates.length} URLs duplicadas en este comic.
 }
 let validUrls=[];
 if(shouldValidate){
-status.innerHTML='<span class="loading">Validando imágenes</span>';
-for(let i=0;i<urls.length;i++){
+status.innerHTML='<span class="loading">Validando muestra de imágenes</span>';
+const samplesToCheck=Math.min(5,urls.length);
+let validSamples=0;
+for(let i=0;i<samplesToCheck;i++){
 const valid=await checkImageExists(urls[i]);
-if(valid)validUrls.push(urls[i]);
-status.innerHTML=`<span class="loading">Validando ${i+1}/${urls.length}</span>`;
+if(valid)validSamples++;
+status.innerHTML=`<span class="loading">Validando ${i+1}/${samplesToCheck}</span>`;
 }
-if(validUrls.length===0){
-status.textContent='❌ No se pudo cargar ninguna imagen';
+if(validSamples===0){
+status.textContent='❌ No se detectaron imágenes válidas en la muestra';
 return;
 }
+if(validSamples<samplesToCheck){
+status.textContent=`⚠️ Solo ${validSamples}/${samplesToCheck} imágenes válidas detectadas. ¿Continuar?`;
+if(!confirm(`Solo ${validSamples} de ${samplesToCheck} imágenes de muestra son válidas. ¿Desea continuar?`)){
+status.textContent='';
+return;
+}
+}
+validUrls=urls;
+status.innerHTML='<span class="loading">Guardando comic</span>';
 }else{
 validUrls=urls;
 status.innerHTML='<span class="loading">Guardando sin validar</span>';
@@ -1200,10 +1199,23 @@ status.textContent='❌ Error al guardar';
 async function checkImageExists(url){
 return new Promise((resolve)=>{
 const img=new Image();
-img.onload=()=>resolve(true);
-img.onerror=()=>resolve(false);
+const timeout=setTimeout(()=>{
+img.src='';
+resolve(false);
+},8000);
+img.onload=()=>{
+clearTimeout(timeout);
+if(img.width>0&&img.height>0){
+resolve(true);
+}else{
+resolve(false);
+}
+};
+img.onerror=()=>{
+clearTimeout(timeout);
+resolve(false);
+};
 img.src=getProxyUrl(url);
-setTimeout(()=>resolve(false),5000);
 });
 }
 
@@ -1214,77 +1226,60 @@ return imageCache.get(cacheKey);
 }
 for(let attempt=1;attempt<=maxAttempts;attempt++){
 try{
+const result=await new Promise((resolve,reject)=>{
 const img=new Image();
-const loaded=await new Promise((resolve,reject)=>{
-img.onload=()=>resolve(true);
-img.onerror=()=>resolve(false);
+const timeout=setTimeout(()=>{
+img.src='';
+resolve(null);
+},10000);
+img.onload=()=>{
+clearTimeout(timeout);
+if(img.width>0&&img.height>0){
+resolve(url);
+}else{
+resolve(null);
+}
+};
+img.onerror=()=>{
+clearTimeout(timeout);
+resolve(null);
+};
 img.src=url;
-setTimeout(()=>resolve(false),2500);
 });
-if(loaded){
-imageCache.set(cacheKey,url);
-return url;
+if(result){
+imageCache.set(cacheKey,result);
+return result;
 }
 }catch(e){
-console.log(`Intento directo ${attempt} falló`);
+console.log(`Intento directo ${attempt} falló:`,e);
 }
 if(attempt<maxAttempts){
-await new Promise(resolve=>setTimeout(resolve,200));
+await new Promise(resolve=>setTimeout(resolve,100));
 }
 }
 const useProxy=document.getElementById('proxyToggle')?document.getElementById('proxyToggle').checked:false;
 if(useProxy){
 try{
 const proxyUrl=getProxyUrl(url);
-const response=await fetch(proxyUrl);
+const controller=new AbortController();
+const timeoutId=setTimeout(()=>controller.abort(),10000);
+const response=await fetch(proxyUrl,{signal:controller.signal});
+clearTimeout(timeoutId);
 if(response.ok){
 const blob=await response.blob();
+if(blob.size>0&&blob.type.startsWith('image/')){
 const blobUrl=URL.createObjectURL(blob);
 imageCache.set(cacheKey,blobUrl);
 return blobUrl;
 }
+}
 }catch(proxyError){
+if(proxyError.name!=='AbortError'){
 console.error('Error con proxy:',proxyError);
 }
 }
+}
 return null;
-}
-
-async function loadCoverWithBlob(coverUrl,comicId){
-const img=document.querySelector(`.comic-cover-img[data-comic-id="${comicId}"]`);
-if(!img)return;
-for(let attempt=1;attempt<=2;attempt++){
-const testImg=new Image();
-const directLoaded=await new Promise((resolve)=>{
-testImg.onload=()=>resolve(true);
-testImg.onerror=()=>resolve(false);
-testImg.src=coverUrl;
-setTimeout(()=>resolve(false),2500);
-});
-if(directLoaded){
-img.src=coverUrl;
-return;
-}
-if(attempt<2){
-await new Promise(resolve=>setTimeout(resolve,200));
-}
-}
-const useProxy=document.getElementById('proxyToggle').checked;
-if(useProxy){
-try{
-const proxyUrl=getProxyUrl(coverUrl);
-const proxyResponse=await fetch(proxyUrl);
-if(proxyResponse.ok){
-const blob=await proxyResponse.blob();
-const blobUrl=URL.createObjectURL(blob);
-img.src=blobUrl;
-return;
-}
-}catch(proxyErr){
-console.error('Error con proxy en portada:',proxyErr);
-}
-}
-img.src=coverUrl;
 }
 
 function loadLibrary(){
@@ -1333,7 +1328,7 @@ openComic(comic);
 };
 card.innerHTML=`
 <div class="comic-cover-container">
-<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='150'%3E%3Crect fill='%23f0f0f0' width='100' height='150'/%3E%3C/svg%3E" class="comic-cover-img" data-original-url="${comic.cover}" data-comic-id="${comic.id}">
+<img src="${comic.cover}" class="comic-cover-img" data-original-url="${comic.cover}" data-comic-id="${comic.id}" loading="lazy">
 <div class="download-overlay" id="downloadOverlay${comic.id}"></div>
 <div class="download-progress" id="downloadProgress${comic.id}"></div>
 <div class="download-text" id="downloadText${comic.id}">0%</div>
@@ -1350,7 +1345,13 @@ card.innerHTML=`
 </div>
 `;
 library.appendChild(card);
-loadCoverWithBlob(comic.cover,comic.id);
+const coverImg=card.querySelector('.comic-cover-img');
+coverImg.onerror=function(){
+const proxyEnabled=document.getElementById('proxyToggle').checked;
+if(proxyEnabled&&!this.src.includes(PROXY_URL)){
+this.src=PROXY_URL+encodeURIComponent(this.dataset.originalUrl);
+}
+};
 });
 if(totalPages>1){
 pagination.style.display='flex';
@@ -1409,7 +1410,6 @@ pagination.style.display='none';
 }
 
 function openComic(comic){
-currentEditingComicId=comic.id;
 openComicPages(comic.pages,comic.id);
 }
 
@@ -1425,6 +1425,11 @@ loadedImageContainers=[];
 currentLoadingComicId=null;
 }
 const modal=document.getElementById('modal');
+const modalContent=document.getElementById('modalContent');
+if(modalContent){
+modalContent.innerHTML='';
+}
+imageCache.clear();
 modal.classList.remove('active');
 document.body.style.overflow='auto';
 failedImages=[];
