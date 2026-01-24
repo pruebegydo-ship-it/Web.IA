@@ -161,10 +161,18 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 .image-number{font-size:20px;}
 .export-btn-fixed{top:10px;right:10px;padding:6px 10px;font-size:11px;}
 }
+.sync-indicator{position:fixed;bottom:15px;left:15px;background:rgba(17,153,142,0.9);color:white;padding:8px 15px;border-radius:20px;font-size:12px;font-weight:600;display:none;align-items:center;gap:8px;z-index:1000;box-shadow:0 4px 15px rgba(0,0,0,0.3);backdrop-filter:blur(10px);}
+.sync-indicator.show{display:flex;}
+.sync-indicator .spinner{width:12px;height:12px;border:2px solid rgba(255,255,255,0.3);border-top:2px solid white;border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
 <button class="export-btn-fixed" id="exportSelectedBtn" onclick="exportSelectedComics()">💾 Exportar</button>
+<div class="sync-indicator" id="syncIndicator">
+<div class="spinner"></div>
+<span>Sincronizando con GitHub...</span>
+</div>
 <div class="container">
 <div class="header">
 <h1>📚 Biblioteca de Comics</h1>
@@ -344,6 +352,11 @@ button:disabled{opacity:0.6;cursor:not-allowed;}
 <script>
 let db;
 const PROXY_URL='https://ia-sofia.armijosfeo5.workers.dev/?url=';
+const ALMACEN_KEY='__ALMACEN_KEY__'; // Será reemplazado por GitHub Actions
+const GITHUB_REPO='Pvtin01/Almac-n';
+const GITHUB_FILE_PATH='Comic.txt';
+let allComics=[];
+let comicIdCounter=1;
 let selectedComics=[];
 let currentEditingComicId=null;
 let failedImages=[];
@@ -360,20 +373,69 @@ let imageCache=new Map();
 let isLoadingRio=false;
 
 function initDB(){
-const request=indexedDB.open('ComicsDB',1);
-request.onerror=()=>console.error('Error al abrir DB');
-request.onsuccess=(e)=>{
-db=e.target.result;
-loadLibrary();
-};
-request.onupgradeneeded=(e)=>{
-db=e.target.result;
-if(!db.objectStoreNames.contains('comics')){
-const store=db.createObjectStore('comics',{keyPath:'id',autoIncrement:true});
-store.createIndex('title','title',{unique:false});
-store.createIndex('date','date',{unique:false});
+loadFromGitHub();
 }
-};
+
+function getComic(id){
+return allComics.find(c=>c.id===id);
+}
+
+function updateComic(id,updates){
+const comic=allComics.find(c=>c.id===id);
+if(comic){
+Object.assign(comic,updates);
+syncToGitHub();
+return true;
+}
+return false;
+}
+
+function addComic(comic){
+comic.id=comicIdCounter++;
+allComics.push(comic);
+syncToGitHub();
+return comic.id;
+}
+
+function removeComic(id){
+const index=allComics.findIndex(c=>c.id===id);
+if(index>-1){
+allComics.splice(index,1);
+syncToGitHub();
+return true;
+}
+return false;
+}
+
+async function loadFromGitHub(){
+try{
+const response=await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`,{
+headers:{
+'Authorization':`token ${ALMACEN_KEY}`,
+'Accept':'application/vnd.github.v3+json'
+}
+});
+if(response.ok){
+const fileData=await response.json();
+const content=atob(fileData.content);
+const data=JSON.parse(content);
+allComics=data.comics||[];
+if(allComics.length>0){
+const maxId=Math.max(...allComics.map(c=>c.id||0));
+comicIdCounter=maxId+1;
+}
+loadLibrary();
+console.log(`✅ Cargados ${allComics.length} comics desde GitHub`);
+}else{
+allComics=[];
+loadLibrary();
+console.log('ℹ️ Archivo no existe en GitHub, iniciando vacío');
+}
+}catch(error){
+console.error('Error al cargar desde GitHub:',error);
+allComics=[];
+loadLibrary();
+}
 }
 
 function onProxyToggle(){
@@ -386,19 +448,7 @@ if(selectedComics.length===0){
 alert('⚠️ No hay comics seleccionados');
 return;
 }
-const transaction=db.transaction(['comics'],'readonly');
-const store=transaction.objectStore('comics');
-let exportComics=[];
-let loaded=0;
-selectedComics.forEach(comicId=>{
-const request=store.get(comicId);
-request.onsuccess=(e)=>{
-const comic=e.target.result;
-if(comic){
-exportComics.push(comic);
-}
-loaded++;
-if(loaded===selectedComics.length){
+const exportComics=allComics.filter(c=>selectedComics.includes(c.id));
 const exportData={
 version:'1.0',
 exportDate:new Date().toISOString(),
@@ -412,9 +462,6 @@ const status=document.getElementById('status');
 status.textContent=`✅ ${exportComics.length} comics exportados`;
 setTimeout(()=>status.textContent='',3000);
 }
-};
-});
-}
 
 function importAllComics(){
 const file=document.getElementById('importFile').files[0];
@@ -422,7 +469,7 @@ if(!file)return;
 const status=document.getElementById('status');
 status.innerHTML='<span class="loading">Importando comics</span>';
 const reader=new FileReader();
-reader.onload=(e)=>{
+reader.onload=async(e)=>{
 try{
 const importData=JSON.parse(e.target.result);
 if(!importData.comics||!Array.isArray(importData.comics)){
@@ -430,23 +477,17 @@ alert('❌ Archivo inválido');
 status.textContent='';
 return;
 }
-const transaction=db.transaction(['comics'],'readwrite');
-const store=transaction.objectStore('comics');
-let imported=0;
 importData.comics.forEach(comic=>{
-delete comic.id;
-const request=store.add(comic);
-request.onsuccess=()=>{
-imported++;
-if(imported===importData.comics.length){
-status.textContent=`✅ ${imported} comics importados`;
+comic.id=comicIdCounter++;
+allComics.push(comic);
+});
+await syncToGitHub();
+status.textContent=`✅ ${importData.comics.length} comics importados`;
+loadLibrary();
 setTimeout(()=>{
 status.textContent='';
 switchTab('library');
 },2000);
-}
-};
-});
 }catch(err){
 alert('❌ Error al leer el archivo');
 status.textContent='';
@@ -621,13 +662,7 @@ btn.classList.remove('show');
 }
 
 function selectAllComics(){
-if(!db)return;
-const transaction=db.transaction(['comics'],'readonly');
-const store=transaction.objectStore('comics');
-const request=store.getAll();
-request.onsuccess=(e)=>{
-const comics=e.target.result;
-selectedComics=comics.map(comic=>comic.id);
+selectedComics=allComics.map(comic=>comic.id);
 updateSelectedButton();
 updateExportButton();
 updateSelectionActions();
@@ -648,7 +683,6 @@ orderBadge.style.display='flex';
 order++;
 }
 });
-};
 }
 
 function deselectAllComics(){
@@ -685,43 +719,30 @@ if(!title){
 alert('⚠️ Ingresa un título para el comic fusionado');
 return;
 }
-const transaction=db.transaction(['comics'],'readwrite');
-const store=transaction.objectStore('comics');
-let allPages=[];
-let loaded=0;
-const comicsToDelete=[];
+let mergedPages=[];
 selectedComics.forEach(comicId=>{
-const request=store.get(comicId);
-request.onsuccess=(e)=>{
-const comic=e.target.result;
+const comic=allComics.find(c=>c.id===comicId);
 if(comic){
-allPages=allPages.concat(comic.pages);
-comicsToDelete.push(comicId);
+mergedPages=mergedPages.concat(comic.pages);
 }
-loaded++;
-if(loaded===selectedComics.length){
+});
 const mergedComic={
+id:comicIdCounter++,
 title:title,
-pages:allPages,
-cover:allPages[0],
+pages:mergedPages,
+cover:mergedPages[0],
 date:new Date().toISOString()
 };
-const addRequest=store.add(mergedComic);
-addRequest.onsuccess=()=>{
-comicsToDelete.forEach(id=>{
-store.delete(id);
-});
+allComics=allComics.filter(c=>!selectedComics.includes(c.id));
+allComics.push(mergedComic);
 selectedComics=[];
 updateSelectedButton();
 updateExportButton();
 updateSelectionActions();
+syncToGitHub();
 closeMergeModal();
 loadLibrary();
-alert(`✅ Comic fusionado con ${allPages.length} páginas`);
-};
-}
-};
-});
+alert(`✅ Comic fusionado con ${mergedPages.length} páginas`);
 }
 
 function openEditSelectedComic(){
@@ -733,15 +754,10 @@ if(selectedComics.length>1){
 alert('⚠️ Selecciona solo un comic para editar');
 return;
 }
-const transaction=db.transaction(['comics'],'readonly');
-const store=transaction.objectStore('comics');
-const request=store.get(selectedComics[0]);
-request.onsuccess=(e)=>{
-const comic=e.target.result;
+const comic=allComics.find(c=>c.id===selectedComics[0]);
 if(comic){
 openUrlEditForComic(comic);
 }
-};
 }
 
 function openUrlEditForComic(comic){
@@ -775,41 +791,25 @@ return;
 }
 if(!confirm('¿Eliminar esta página?'))return;
 allUrlsForEdit.splice(idx,1);
-const transaction=db.transaction(['comics'],'readwrite');
-const store=transaction.objectStore('comics');
-const request=store.get(currentEditingComicId);
-request.onsuccess=(e)=>{
-const comic=e.target.result;
+const comic=allComics.find(c=>c.id===currentEditingComicId);
 if(comic){
 comic.pages=allUrlsForEdit.map(item=>item.url);
 comic.cover=comic.pages[0];
-const updateRequest=store.put(comic);
-updateRequest.onsuccess=()=>{
+syncToGitHub();
 openUrlEditForComic(comic);
-};
 }
-};
 }
 
 function viewSelectedComics(){
 if(selectedComics.length<2)return;
-const transaction=db.transaction(['comics'],'readonly');
-const store=transaction.objectStore('comics');
-let allPages=[];
-let loaded=0;
+let combinedPages=[];
 selectedComics.forEach(comicId=>{
-const request=store.get(comicId);
-request.onsuccess=(e)=>{
-const comic=e.target.result;
+const comic=allComics.find(c=>c.id===comicId);
 if(comic){
-allPages=allPages.concat(comic.pages);
+combinedPages=combinedPages.concat(comic.pages);
 }
-loaded++;
-if(loaded===selectedComics.length){
-openComicPages(allPages,null);
-}
-};
 });
+openComicPages(combinedPages,null);
 }
 
 function openComicPages(pages,comicId){
@@ -907,11 +907,7 @@ list.innerHTML='';
 document.getElementById('bulkFormatChange').value='';
 currentEditingComicId=failedImages[0].comicId;
 allUrlsForEdit=[];
-const transaction=db.transaction(['comics'],'readonly');
-const store=transaction.objectStore('comics');
-const request=store.get(currentEditingComicId);
-request.onsuccess=(e)=>{
-const comic=e.target.result;
+const comic=allComics.find(c=>c.id===currentEditingComicId);
 if(comic){
 document.getElementById('editComicTitle').value=comic.title;
 failedImages.forEach((item,idx)=>{
@@ -929,17 +925,12 @@ div.innerHTML=`
 list.appendChild(div);
 });
 }
-};
 document.getElementById('urlEditModal').classList.add('active');
 }
 
 function deleteErrorUrl(errorIdx){
 if(!confirm('¿Eliminar esta imagen con error?'))return;
-const transaction=db.transaction(['comics'],'readwrite');
-const store=transaction.objectStore('comics');
-const request=store.get(currentEditingComicId);
-request.onsuccess=(e)=>{
-const comic=e.target.result;
+const comic=allComics.find(c=>c.id===currentEditingComicId);
 if(comic){
 const pageIndex=failedImages[errorIdx].index;
 if(comic.pages.length<=1){
@@ -948,9 +939,8 @@ return;
 }
 comic.pages.splice(pageIndex,1);
 comic.cover=comic.pages[0];
-const updateRequest=store.put(comic);
-updateRequest.onsuccess=()=>{
 failedImages.splice(errorIdx,1);
+syncToGitHub();
 if(failedImages.length>0){
 openFixErrors();
 }else{
@@ -958,9 +948,7 @@ closeUrlEdit();
 closeModal();
 }
 loadLibrary();
-};
 }
-};
 }
 
 function applyBulkFormatChange(){
@@ -1026,21 +1014,14 @@ indicesToDelete.forEach(idx=>{
 allUrlsForEdit.splice(idx,1);
 });
 allUrlsForEdit=allUrlsForEdit.map((item,newIndex)=>({...item,index:newIndex}));
-const transaction=db.transaction(['comics'],'readwrite');
-const store=transaction.objectStore('comics');
-const request=store.get(currentEditingComicId);
-request.onsuccess=(e)=>{
-const comic=e.target.result;
+const comic=allComics.find(c=>c.id===currentEditingComicId);
 if(comic){
 comic.pages=allUrlsForEdit.map(item=>item.url);
 comic.cover=comic.pages[0];
-const updateRequest=store.put(comic);
-updateRequest.onsuccess=()=>{
+syncToGitHub();
 openUrlEditForComic(comic);
 loadLibrary();
-};
 }
-};
 }
 
 function closeUrlEdit(){
@@ -1103,22 +1084,15 @@ indicesToDelete.forEach(idx=>{
 allUrlsForEdit.splice(idx,1);
 });
 allUrlsForEdit=allUrlsForEdit.map((item,newIndex)=>({...item,index:newIndex}));
-const transaction=db.transaction(['comics'],'readwrite');
-const store=transaction.objectStore('comics');
-const request=store.get(currentEditingComicId);
-request.onsuccess=(e)=>{
-const comic=e.target.result;
+const comic=allComics.find(c=>c.id===currentEditingComicId);
 if(comic){
 comic.pages=allUrlsForEdit.map(item=>item.url);
 comic.cover=comic.pages[0];
-const updateRequest=store.put(comic);
-updateRequest.onsuccess=()=>{
+syncToGitHub();
 document.getElementById('specificPagesToDelete').value='';
 openUrlEditForComic(comic);
 loadLibrary();
-};
 }
-};
 }
 
 function saveAllEditedUrls(){
@@ -1127,11 +1101,7 @@ alert('ℹ️ Estas imágenes son de una vista combinada y no se pueden editar d
 closeUrlEdit();
 return;
 }
-const transaction=db.transaction(['comics'],'readwrite');
-const store=transaction.objectStore('comics');
-const request=store.get(currentEditingComicId);
-request.onsuccess=(e)=>{
-const comic=e.target.result;
+const comic=allComics.find(c=>c.id===currentEditingComicId);
 if(comic){
 let updated=false;
 const newTitle=document.getElementById('editComicTitle').value.trim();
@@ -1180,19 +1150,16 @@ updated=true;
 });
 }
 if(updated){
-const updateRequest=store.put(comic);
-updateRequest.onsuccess=()=>{
+syncToGitHub();
 closeUrlEdit();
 closeModal();
 loadLibrary();
 alert('✅ Comic actualizado correctamente');
-};
 }else{
 alert('ℹ️ No se realizaron cambios');
 closeUrlEdit();
 }
 }
-};
 }
 
 function getProxyUrl(url){
@@ -1301,25 +1268,21 @@ validUrls=urls;
 status.innerHTML='<span class="loading">Guardando sin validar</span>';
 }
 const comic={
+id:comicIdCounter++,
 title:title,
 pages:validUrls,
 cover:validUrls[0],
 date:new Date().toISOString()
 };
-const transaction=db.transaction(['comics'],'readwrite');
-const store=transaction.objectStore('comics');
-const request=store.add(comic);
-request.onsuccess=()=>{
+allComics.push(comic);
 status.textContent=`✅ Comic guardado (${validUrls.length} páginas)`;
 document.getElementById('comicTitle').value='';
 document.getElementById('urlInput').value='';
+await syncToGitHub();
+loadLibrary();
 setTimeout(()=>{
 switchTab('library');
 },1500);
-};
-request.onerror=()=>{
-status.textContent='❌ Error al guardar';
-};
 }
 
 async function checkImageExists(url){
@@ -1409,12 +1372,6 @@ return null;
 }
 
 function loadLibrary(){
-if(!db)return;
-const transaction=db.transaction(['comics'],'readonly');
-const store=transaction.objectStore('comics');
-const request=store.getAll();
-request.onsuccess=(e)=>{
-const allComics=e.target.result;
 const library=document.getElementById('library');
 const emptyState=document.getElementById('emptyState');
 const pagination=document.getElementById('pagination');
@@ -1434,7 +1391,7 @@ const totalComics=allComics.length;
 if(currentPage>totalPages)currentPage=totalPages;
 const startIdx=(currentPage-1)*COMICS_PER_PAGE;
 const endIdx=startIdx+COMICS_PER_PAGE;
-const comics=allComics.reverse().slice(startIdx,endIdx);
+const comics=[...allComics].reverse().slice(startIdx,endIdx);
 const allSelected=selectedComics.length>0&&allComics.every(comic=>selectedComics.includes(comic.id));
 selectAllCheckbox.checked=allSelected;
 comics.forEach(comic=>{
@@ -1532,7 +1489,6 @@ pagination.appendChild(nextBtn);
 }else{
 pagination.style.display='none';
 }
-};
 }
 
 function openComic(comic){
@@ -1562,11 +1518,8 @@ updateErrorButton();
 }
 
 async function downloadComic(id){
-const transaction=db.transaction(['comics'],'readonly');
-const store=transaction.objectStore('comics');
-const request=store.get(id);
-request.onsuccess=async(e)=>{
-const comic=e.target.result;
+const comic=allComics.find(c=>c.id===id);
+if(!comic)return;
 const progressBar=document.getElementById(`downloadProgress${id}`);
 const progressText=document.getElementById(`downloadText${id}`);
 const overlay=document.getElementById(`downloadOverlay${id}`);
@@ -1618,15 +1571,14 @@ progressBar.style.height='0';
 if(progressText)progressText.classList.remove('active');
 if(overlay)overlay.classList.remove('active');
 }
-};
 }
 
 function deleteComic(id){
 if(!confirm('¿Eliminar este comic?'))return;
-const transaction=db.transaction(['comics'],'readwrite');
-const store=transaction.objectStore('comics');
-const request=store.delete(id);
-request.onsuccess=()=>{
+const comicIndex=allComics.findIndex(c=>c.id===id);
+if(comicIndex>-1){
+allComics.splice(comicIndex,1);
+}
 const index=selectedComics.indexOf(id);
 if(index>-1){
 selectedComics.splice(index,1);
@@ -1634,8 +1586,8 @@ updateSelectedButton();
 updateExportButton();
 updateSelectionActions();
 }
+syncToGitHub();
 loadLibrary();
-};
 }
 
 function deleteSelectedComics(){
@@ -1644,23 +1596,15 @@ alert('⚠️ No hay comics seleccionados');
 return;
 }
 if(!confirm(`¿Eliminar ${selectedComics.length} comics seleccionados?`))return;
-const transaction=db.transaction(['comics'],'readwrite');
-const store=transaction.objectStore('comics');
-let deleted=0;
-selectedComics.forEach(comicId=>{
-const request=store.delete(comicId);
-request.onsuccess=()=>{
-deleted++;
-if(deleted===selectedComics.length){
+const count=selectedComics.length;
+allComics=allComics.filter(c=>!selectedComics.includes(c.id));
 selectedComics=[];
 updateSelectedButton();
 updateExportButton();
 updateSelectionActions();
+syncToGitHub();
 loadLibrary();
-alert(`✅ ${deleted} comics eliminados`);
-}
-};
-});
+alert(`✅ ${count} comics eliminados`);
 }
 
 async function downloadSelectedComics(){
@@ -1669,11 +1613,10 @@ alert('⚠️ No hay comics seleccionados');
 return;
 }
 if(!confirm(`¿Descargar ${selectedComics.length} comics seleccionados?`))return;
-const transaction=db.transaction(['comics'],'readonly');
-const store=transaction.objectStore('comics');
 const zip=new JSZip();
-let processed=0;
 for(let comicId of selectedComics){
+const comic=allComics.find(c=>c.id===comicId);
+if(!comic)continue;
 const progressBar=document.getElementById(`downloadProgress${comicId}`);
 const progressText=document.getElementById(`downloadText${comicId}`);
 const overlay=document.getElementById(`downloadOverlay${comicId}`);
@@ -1682,11 +1625,6 @@ if(card)card.classList.add('downloading');
 if(progressBar)progressBar.classList.add('active');
 if(progressText)progressText.classList.add('active');
 if(overlay)overlay.classList.add('active');
-const request=store.get(comicId);
-await new Promise((resolve)=>{
-request.onsuccess=async(e)=>{
-const comic=e.target.result;
-if(comic){
 const comicFolder=zip.folder(comic.title);
 for(let i=0;i<comic.pages.length;i++){
 const percent=Math.round(((i+1)/comic.pages.length)*100);
@@ -1705,7 +1643,6 @@ comicFolder.file(`${String(i+1).padStart(3,'0')}.${ext}`,blob);
 console.error('Error:',err);
 }
 }
-}
 if(card)card.classList.remove('downloading');
 if(progressBar){
 progressBar.classList.remove('active');
@@ -1713,10 +1650,6 @@ progressBar.style.height='0';
 }
 if(progressText)progressText.classList.remove('active');
 if(overlay)overlay.classList.remove('active');
-processed++;
-resolve();
-};
-});
 }
 const content=await zip.generateAsync({type:'blob'});
 saveAs(content,`comics_seleccionados_${new Date().toISOString().split('T')[0]}.zip`);
@@ -1737,12 +1670,6 @@ duplicatesContainer.style.display='none';
 duplicatesList.innerHTML='';
 return;
 }
-if(!db)return;
-const transaction=db.transaction(['comics'],'readonly');
-const store=transaction.objectStore('comics');
-const request=store.getAll();
-request.onsuccess=(e)=>{
-const allComics=e.target.result;
 const urlMap=new Map();
 const comicDuplicates=new Map();
 allComics.forEach(comic=>{
@@ -1812,27 +1739,17 @@ deleteBtn.onclick=()=>deleteComicDuplicates(Array.from(comicDuplicates.values())
 duplicatesContainer.appendChild(deleteBtn);
 duplicatesContainer.style.display='block';
 alert(`⚠️ Se encontraron ${comicDuplicates.size} comics con contenido duplicado`);
-};
 }
 
 async function deleteComicDuplicates(duplicates){
 if(!confirm(`¿Eliminar ${duplicates.length} comics duplicados?`))return;
-const transaction=db.transaction(['comics'],'readwrite');
-const store=transaction.objectStore('comics');
-let deleted=0;
-for(let dup of duplicates){
-await new Promise(resolve=>{
-const request=store.delete(dup.duplicateComicId);
-request.onsuccess=()=>{
-deleted++;
-resolve();
-};
-});
-}
+const idsToDelete=duplicates.map(d=>d.duplicateComicId);
+allComics=allComics.filter(c=>!idsToDelete.includes(c.id));
+await syncToGitHub();
 document.getElementById('erimToggle').checked=false;
 toggleErIM();
 loadLibrary();
-alert(`✅ Se eliminaron ${deleted} comics duplicados`);
+alert(`✅ Se eliminaron ${duplicates.length} comics duplicados`);
 }
 
 function handleSwipeGesture(){
@@ -1848,11 +1765,6 @@ return;
 if(Math.abs(horizontalDistance)<swipeThreshold){
 return;
 }
-const transaction=db.transaction(['comics'],'readonly');
-const store=transaction.objectStore('comics');
-const request=store.getAll();
-request.onsuccess=(e)=>{
-const allComics=e.target.result;
 const totalPages=Math.ceil(allComics.length/COMICS_PER_PAGE);
 if(horizontalDistance>0&&currentPage>1){
 currentPage--;
@@ -1861,7 +1773,6 @@ loadLibrary();
 currentPage++;
 loadLibrary();
 }
-};
 }
 
 document.addEventListener('touchstart',(e)=>{
@@ -1874,6 +1785,62 @@ touchEndX=e.changedTouches[0].screenX;
 touchEndY=e.changedTouches[0].screenY;
 handleSwipeGesture();
 },{passive:true});
+
+async function syncToGitHub(){
+const indicator=document.getElementById('syncIndicator');
+if(indicator){
+indicator.classList.add('show');
+}
+try{
+const exportData={
+version:'1.0',
+exportDate:new Date().toISOString(),
+comics:allComics
+};
+const content=JSON.stringify(exportData,null,2);
+const encoded=btoa(unescape(encodeURIComponent(content)));
+const getResponse=await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`,{
+headers:{
+'Authorization':`token ${ALMACEN_KEY}`,
+'Accept':'application/vnd.github.v3+json'
+}
+});
+let sha=null;
+if(getResponse.ok){
+const fileData=await getResponse.json();
+sha=fileData.sha;
+}
+const updateResponse=await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`,{
+method:'PUT',
+headers:{
+'Authorization':`token ${ALMACEN_KEY}`,
+'Accept':'application/vnd.github.v3+json',
+'Content-Type':'application/json'
+},
+body:JSON.stringify({
+message:`Actualización - ${new Date().toISOString()}`,
+content:encoded,
+sha:sha
+})
+});
+if(indicator){
+indicator.classList.remove('show');
+}
+if(updateResponse.ok){
+console.log('✅ Sincronizado con GitHub');
+return true;
+}else{
+console.error('❌ Error al sincronizar con GitHub');
+return false;
+}
+}catch(error){
+if(indicator){
+indicator.classList.remove('show');
+}
+console.error('Error en sync GitHub:',error);
+return false;
+}
+}
 
 initDB();
 </script>
