@@ -411,7 +411,7 @@ return false;
 async function loadFromGitHub(){
 try{
 console.log('🚀 Cargando desde raw.githubusercontent.com...');
-const response=await fetch(RAW_GITHUB_URL,{
+const response=await fetch(RAW_GITHUB_URL+'?t='+Date.now(),{
 method:'GET',
 cache:'no-cache',
 headers:{
